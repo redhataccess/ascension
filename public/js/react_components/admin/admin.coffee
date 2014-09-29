@@ -1,4 +1,4 @@
-React     = require 'react/react-with-addons'
+React     = require 'react'
 
 {div, img, h1, ul, li} = React.DOM
 

@@ -109,6 +109,7 @@ module.exports = (grunt) ->
       extensions: ['', '.js']
       #root: path.join(__dirname, "node_modules")
       modulesDirectories: ['./node_modules', './public/js/bower_components']
+      #modulesDirectories: [path.join(__dirname, "node_modules"), path.join(__dirname, 'public/js/bower_components')]
 
       alias:
 #        # Bind version of jquery

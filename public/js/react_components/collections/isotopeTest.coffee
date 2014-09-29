@@ -1,4 +1,4 @@
-React       = require 'react/react-with-addons'
+React       = require 'react'
 jQuery      = require 'jquery'
 Isotope     = require 'isotope/js/isotope'
 #Isotope     = require 'isotope/dist/isotope.pkgd'
