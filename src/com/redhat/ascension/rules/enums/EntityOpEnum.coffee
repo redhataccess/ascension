@@ -14,37 +14,37 @@ _.defaults EntityOp,
 
 EntityOp.OWN =
   name: 'takeOwnership'
-  display: 'Take ownership of case'
+  display: 'Take ownership of this case'
 _.defaults EntityOp,
   'takeOwnership': EntityOp.TAKE_FTS
 
 EntityOp.COLLABORATE =
   name: 'collaborate'
-  display: 'Collaborate on case'
+  display: 'Collaborate on this case'
 _.defaults EntityOp,
   'collaborate': EntityOp.COLLABORATE
 
 EntityOp.CONTRIBUTE =
   name: 'contribute'
-  display: 'Contribute on case'
+  display: 'Contribute on this case'
 _.defaults EntityOp,
   'contribute': EntityOp.CONTRIBUTE
 
 EntityOp.UPDATE =
   name: 'update'
-  display: 'Update the case'
+  display: 'Update this case'
 _.defaults EntityOp,
   'update': EntityOp.UPDATE
 
 EntityOp.SET_SBRS =
   name: 'setSbrs'
-  display: 'Set SBRs on case'
+  display: 'Set SBRs on this case'
 _.defaults EntityOp,
   'setSbrs': EntityOp.SET_SBRS
 
 EntityOp.SET_TAGS =
   name: 'setTags'
-  display: 'Set tags on case'
+  display: 'Set tags on this case'
 _.defaults EntityOp,
   'setTags': EntityOp.SET_TAGS
 

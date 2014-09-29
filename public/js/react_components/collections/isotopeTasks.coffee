@@ -118,20 +118,17 @@ Component = React.createClass
 
   changeLayout: (layoutMode) ->
     event.preventDefault()
-    console.debug "Changing layout to: #{layoutMode}"
     @iso.arrange
       layoutMode: layoutMode
 
   changeSort: (sortByName) ->
     event.preventDefault()
-    console.debug "Changing sort to: #{sortByName}"
     @iso.arrange
       sortBy: sortByName
 
   filterBySbr: (sbr) ->
     self = @
     event.preventDefault()
-    console.debug "Changing filter to: #{sbr}"
     @iso.arrange
       filter: (itemElem) ->
         _id = $(itemElem).attr('id')
@@ -196,7 +193,6 @@ Component = React.createClass
   # filtering.  This is because the hidden and show styles of hiding and showing elements by isotope uses the opacity
   # to do it's magic
   opacify: () ->
-    console.log "Opacifying"
     $('.task').each (idx, itemElem) =>
       _id = $(itemElem).attr('id')
       task = @state['tasks'][_id]
@@ -241,7 +237,6 @@ Component = React.createClass
             task['case']['SBT__c']
       @iso.on 'layoutComplete', () =>
         # Whenever the layout completes, re-opacity the tasks
-        console.debug 'layoutComplete'
         @opacify()
 
   componentDidMount: ->
@@ -259,7 +254,6 @@ Component = React.createClass
         'minScore': min
         'maxScore': max
       #$elems = @genTaskElementsDom(tasks)
-      console.debug "discovered: #{tasks.length} tasks"
       ##$(@refs['tasksContainer'].getDOMNode()).append($elems)
       #$('#tasksContainer').append($elems)
       #@iso.appended($elems)

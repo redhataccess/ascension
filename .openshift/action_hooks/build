@@ -5,8 +5,14 @@ HOME=$OPENSHIFT_REPO_DIR
 cd $OPENSHIFT_REPO_DIR
 
 mkdir -p "$OPENSHIFT_DATA_DIR"node_modules
+mkdir -p "$OPENSHIFT_DATA_DIR"bower_components
 
 ln -s "$OPENSHIFT_DATA_DIR"node_modules node_modules
+ln -s "$OPENSHIFT_DATA_DIR"bower_components public/js/bower_components
 
+bower install -q
 npm install --loglevel error
+
+grunt prod
+
 

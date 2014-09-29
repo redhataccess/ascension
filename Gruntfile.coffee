@@ -189,6 +189,16 @@ module.exports = (grunt) ->
         #    new webpack.optimize.DedupePlugin(),
         #    new webpack.optimize.UglifyJsPlugin()
         #)
+      "build-prod":
+        devtool: "sourcemap"
+        debug: true
+        plugins: webpackConfig.plugins.concat(
+            new webpack.DefinePlugin
+              "process.env":
+                "NODE_ENV": JSON.stringify("production")
+            new webpack.optimize.DedupePlugin(),
+            new webpack.optimize.UglifyJsPlugin()
+        )
 
     less:
       dist:
@@ -260,7 +270,8 @@ module.exports = (grunt) ->
 
   #grunt.registerTask "default", ["less",  "coffee"]
   #grunt.registerTask "prod", ["less", "coffee"]
-  grunt.registerTask "dev", ['less', 'coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "watch"]
-  grunt.registerTask "prod", ["less"]
+  #grunt.registerTask "dev", ['less', 'coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "watch"]
+  grunt.registerTask "dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "watch"]
+  grunt.registerTask "prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "webpack:build-prod"]
   grunt.registerTask "default", ["prod"]
   grunt.registerTask "test", ["mochaTest"]

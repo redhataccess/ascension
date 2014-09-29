@@ -18,3 +18,5 @@
   module.exports = CaseUtils;
 
 }).call(this);
+
+//# sourceMappingURL=caseUtils.js.map

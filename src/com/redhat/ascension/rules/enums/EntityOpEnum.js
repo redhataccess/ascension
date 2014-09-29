@@ -16,7 +16,7 @@
 
   EntityOp.OWN = {
     name: 'takeOwnership',
-    display: 'Take ownership of case'
+    display: 'Take ownership of this case'
   };
 
   _.defaults(EntityOp, {
@@ -25,7 +25,7 @@
 
   EntityOp.COLLABORATE = {
     name: 'collaborate',
-    display: 'Collaborate on case'
+    display: 'Collaborate on this case'
   };
 
   _.defaults(EntityOp, {
@@ -34,7 +34,7 @@
 
   EntityOp.CONTRIBUTE = {
     name: 'contribute',
-    display: 'Contribute on case'
+    display: 'Contribute on this case'
   };
 
   _.defaults(EntityOp, {
@@ -43,7 +43,7 @@
 
   EntityOp.UPDATE = {
     name: 'update',
-    display: 'Update the case'
+    display: 'Update this case'
   };
 
   _.defaults(EntityOp, {
@@ -52,7 +52,7 @@
 
   EntityOp.SET_SBRS = {
     name: 'setSbrs',
-    display: 'Set SBRs on case'
+    display: 'Set SBRs on this case'
   };
 
   _.defaults(EntityOp, {
@@ -61,7 +61,7 @@
 
   EntityOp.SET_TAGS = {
     name: 'setTags',
-    display: 'Set tags on case'
+    display: 'Set tags on this case'
   };
 
   _.defaults(EntityOp, {

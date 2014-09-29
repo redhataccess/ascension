@@ -55,7 +55,6 @@ CaseRules.fetchCases = () ->
   soql = @soql.replace /#andStatusCondition#/, " AND Status = 'Waiting on Red Hat'"
   Q.nfcall(salesforce.querySf, {'soql': soql})
 
-
 #CaseRules.unassignedCase = (c) -> c['Internal_Status__c '] is 'Unassigned'
 CaseRules.intStatus = (c, intStatus) -> c['Internal_Status__c'] is intStatus
 

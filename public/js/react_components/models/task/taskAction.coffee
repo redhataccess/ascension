@@ -17,10 +17,7 @@ Component = React.createClass
       return null
 
 #    taskOp = TaskOpEnum[@props.task?.taskOp?.toUpperCase()]
-    console.debug "entityOp on task: #{JSON.stringify(@props.task?.entityOp, null, ' ')}"
-    console.debug JSON.stringify(EntityOpEnum, null, ' ')
     entityOp = EntityOpEnum[@props.task?.entityOp]
-    console.log JSON.stringify entityOp
     (div {}, [
       (h4 {}, [
         (Label {bsStyle: 'primary', key: 'role'}, [entityOp.display])
