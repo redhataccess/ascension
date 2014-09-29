@@ -82,6 +82,13 @@
     });
   });
 
+  app.get("/", function(req, res) {
+    return res.render('index.jade', {
+      env: env,
+      uid: serverStartTime
+    });
+  });
+
   app.get("/tasks", function(req, res) {
     var opts;
     opts = {};

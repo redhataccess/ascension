@@ -83,8 +83,8 @@ app.use (err, req, res, next) ->
     message: err.message
     error: {}
 
-#app.get "/", (req, res) ->
-#  res.render('index.jade', {env: env, uid: serverStartTime})
+app.get "/", (req, res) ->
+  res.render('index.jade', {env: env, uid: serverStartTime})
 
 app.get "/tasks", (req, res) ->
   opts = {}
