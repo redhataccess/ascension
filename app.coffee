@@ -14,6 +14,7 @@ settings        = require './src/com/redhat/ascension/settings/settings'
 mongoose        = require 'mongoose'
 MongoOps        = require './src/com/redhat/ascension/db/MongoOperations'
 TaskLogic       = require './src/com/redhat/ascension/rest/taskLogic'
+CaseRules       = require './src/com/redhat/ascension/rules/case/caseRules'
 
 # view engine setup
 #app.set "views", path.join(__dirname, "views")
@@ -86,6 +87,13 @@ app.use (err, req, res, next) ->
 app.get "/", (req, res) ->
   res.render('index.jade', {env: env, uid: serverStartTime})
 
+app.get "/maketasks", (req, res) ->
+  opts = {}
+  CaseRules.reset().then((data) ->
+    res.send(data)
+  , (err) ->
+    res.send(err)
+  )
 app.get "/tasks", (req, res) ->
   opts = {}
   TaskLogic.fetchTasks(opts).then((data) ->

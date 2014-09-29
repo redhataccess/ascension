@@ -198,6 +198,31 @@ CaseRules.match = (opts) ->
   deferred.resolve promises
   deferred.promise
 
+CaseRules.reset = () ->
+  deferred = Q.defer()
+
+  MongoOperations.reset()
+  .then(->
+    CaseRules.fetchCases()
+  )
+  .then((cases) ->
+    CaseRules.match({cases: cases})
+  )
+  .then((promises) ->
+    Q.allSettled(promises)
+  )
+  .then((results) ->
+    logger.debug "Completed manipulating #{results.length} tasks"
+  )
+  .catch((err) ->
+    logger.error err.stack
+    deferred.reject err
+  )
+  .done(->
+    deferred.resolve()
+  )
+  deferred.promise
+
 module.exports = CaseRules
 
 if require.main is module

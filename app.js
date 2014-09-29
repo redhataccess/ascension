@@ -1,5 +1,5 @@
 (function() {
-  var MongoOps, TaskLogic, app, bodyParser, compression, cookieParser, db, env, express, favicon, http, ipAddress, logger, mongoose, morgan, oneDay, path, port, request, server, serverStartTime, settings;
+  var CaseRules, MongoOps, TaskLogic, app, bodyParser, compression, cookieParser, db, env, express, favicon, http, ipAddress, logger, mongoose, morgan, oneDay, path, port, request, server, serverStartTime, settings;
 
   express = require('express');
 
@@ -30,6 +30,8 @@
   MongoOps = require('./src/com/redhat/ascension/db/MongoOperations');
 
   TaskLogic = require('./src/com/redhat/ascension/rest/taskLogic');
+
+  CaseRules = require('./src/com/redhat/ascension/rules/case/caseRules');
 
   env = 'development';
 
@@ -90,6 +92,16 @@
     return res.render('index.jade', {
       env: env,
       uid: serverStartTime
+    });
+  });
+
+  app.get("/maketasks", function(req, res) {
+    var opts;
+    opts = {};
+    return CaseRules.reset().then(function(data) {
+      return res.send(data);
+    }, function(err) {
+      return res.send(err);
     });
   });
 

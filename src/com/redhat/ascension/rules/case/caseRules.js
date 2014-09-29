@@ -164,6 +164,28 @@
     return deferred.promise;
   };
 
+  CaseRules.reset = function() {
+    var deferred;
+    deferred = Q.defer();
+    MongoOperations.reset().then(function() {
+      return CaseRules.fetchCases();
+    }).then(function(cases) {
+      return CaseRules.match({
+        cases: cases
+      });
+    }).then(function(promises) {
+      return Q.allSettled(promises);
+    }).then(function(results) {
+      return logger.debug("Completed manipulating " + results.length + " tasks");
+    })["catch"](function(err) {
+      logger.error(err.stack);
+      return deferred.reject(err);
+    }).done(function() {
+      return deferred.resolve();
+    });
+    return deferred.promise;
+  };
+
   module.exports = CaseRules;
 
   if (require.main === module) {
