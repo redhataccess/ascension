@@ -4,28 +4,9 @@
 HOME=$OPENSHIFT_REPO_DIR
 cd $OPENSHIFT_REPO_DIR
 
-# install sass
-if [ `gem list sass -i` == "false" ]; then
-    echo "Installing sass"
-      gem install sass --no-ri --no-rdoc
-      else
-          echo "Sass is already installed"
-          fi
+mkdir -p "$OPENSHIFT_DATA_DIR"node_modules
 
-          mkdir -p "$OPENSHIFT_DATA_DIR"node_modules
-          mkdir -p "$OPENSHIFT_DATA_DIR"bower_components
+ln -s "$OPENSHIFT_DATA_DIR"node_modules node_modules
 
-          ln -s "$OPENSHIFT_DATA_DIR"node_modules node_modules
-          ln -s "$OPENSHIFT_DATA_DIR"bower_components client/
+npm install --loglevel error
 
-          npm install --loglevel error
-
-# Prune some unecessary files from node_modules
-find node_modules/* -type f -iname "*.md" -o -type d -name "test*" -o -type d -name "example*" | xargs rm -rf
-
-bower install -q
-grunt build
-
-ls -1 | grep -E -v 'dist|node_modules' | xargs rm -rf
-mv dist/* .
-rm -rf dist
