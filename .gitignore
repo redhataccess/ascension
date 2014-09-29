@@ -22,9 +22,12 @@ public/index.html
 public/js/lib/ascension/**/*.map
 # Let's allow the js files so the workers can be loaded in prod
 test/*.js
-test/*.map
-src/**/*.map
-src/**/*.js
+# But in reality, really don't need the mapping files in prod for the backend
+#test/*.map
+
+# Don't exclude these otherwise the server wont' start
+#src/**/*.map
+#src/**/*.js
 
 # OS generated files #
 # ######################
