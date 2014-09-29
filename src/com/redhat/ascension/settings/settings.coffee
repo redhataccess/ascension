@@ -20,9 +20,18 @@ else
 
 exports.resolveEnvVar = (envVar) ->
   if envVar is undefined then return undefined
-  # See if th starting starts with a $, ie an environment variable
+  # See if the starting starts with a $, ie an environment variable
+
   if /^\$/i.test(envVar)
-    return process.env[envVar.slice 1, envVar.length]
+    val = process.env[envVar.slice 1, envVar.length]
+    if val isnt '' and val isnt null
+      logger.debug "resolved #{envVar} to #{val}"
+      return val
+    else
+      logger.debug "resolved #{envVar} to undefined"
+      return undefined
+
+  logger.debug "resolved #{envVar} to #{envVar}"
   return envVar
 
 ########################################################################################################################

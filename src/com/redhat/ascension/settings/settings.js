@@ -26,12 +26,21 @@
   }
 
   exports.resolveEnvVar = function(envVar) {
+    var val;
     if (envVar === void 0) {
       return void 0;
     }
     if (/^\$/i.test(envVar)) {
-      return process.env[envVar.slice(1, envVar.length)];
+      val = process.env[envVar.slice(1, envVar.length)];
+      if (val !== '' && val !== null) {
+        logger.debug("resolved " + envVar + " to " + val);
+        return val;
+      } else {
+        logger.debug("resolved " + envVar + " to undefined");
+        return void 0;
+      }
     }
+    logger.debug("resolved " + envVar + " to " + envVar);
     return envVar;
   };
 

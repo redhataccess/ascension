@@ -1,5 +1,5 @@
 (function() {
-  var MongoOps, TaskLogic, app, bodyParser, compression, cookieParser, db, env, express, favicon, http, ipAddress, logger, mongoose, morgan, oneDay, path, port, request, server, serverStartTime, settings;
+  var MongoOps, TaskLogic, app, bodyParser, compression, cookieParser, db, env, express, favicon, getEnvVar, http, ipAddress, logger, mongoose, morgan, oneDay, path, port, request, server, serverStartTime, settings;
 
   express = require('express');
 
@@ -31,6 +31,16 @@
 
   TaskLogic = require('./src/com/redhat/ascension/rest/taskLogic');
 
+  getEnvVar = function(env) {
+    if (process.env[env] !== '' && process.env[env] !== null) {
+      logger.debug("resolved " + env + " to " + process.env[env]);
+      return process.env[env];
+    } else {
+      logger.debug("resolved " + env + " to undefined");
+      return void 0;
+    }
+  };
+
   env = 'development';
 
   if (process.env['OPENSHIFT_DATA_DIR'] != null) {
@@ -40,9 +50,9 @@
 
   serverStartTime = (new Date()).getTime();
 
-  port = process.env['OPENSHIFT_INTERNAL_PORT'] || process.env['OPENSHIFT_NODEDIY_PORT'] || process.env['OPENSHIFT_NODEJS_PORT'] || 3000;
+  port = getEnvVar('OPENSHIFT_INTERNAL_PORT') || getEnvVar('OPENSHIFT_NODEDIY_PORT') || getEnvVar('OPENSHIFT_NODEJS_PORT') || 3000;
 
-  ipAddress = process.env['OPENSHIFT_NODEJS_IP'] || process.env['OPENSHIFT_NODEDIY_IP'] || '127.0.0.1';
+  ipAddress = getEnvVar('OPENSHIFT_NODEJS_IP') || getEnvVar('OPENSHIFT_NODEDIY_IP') || '127.0.0.1';
 
   app = express();
 
