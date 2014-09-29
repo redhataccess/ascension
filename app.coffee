@@ -47,8 +47,8 @@ app = express()
 oneDay = 86400000
 #server = http.Server(app)
 
-#app.set('views', path.join(__dirname, 'public'));
-#app.set('view engine', 'jade');
+app.set('views', path.join(__dirname, 'public'));
+app.set('view engine', 'jade');
 
 app.set('ipAddress', ipAddress)
 app.set('port', port)

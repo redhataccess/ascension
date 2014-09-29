@@ -48,6 +48,10 @@
 
   oneDay = 86400000;
 
+  app.set('views', path.join(__dirname, 'public'));
+
+  app.set('view engine', 'jade');
+
   app.set('ipAddress', ipAddress);
 
   app.set('port', port);
