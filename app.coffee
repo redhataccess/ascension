@@ -31,25 +31,18 @@ TaskLogic       = require './src/com/redhat/ascension/rest/taskLogic'
 #app.use "/", routes
 ##app.use "/users", users
 
-getEnvVar = (env) ->
-  if process.env[env] isnt '' and process.env[env] isnt null
-    logger.debug "resolved #{env} to #{process.env[env]}"
-    return process.env[env]
-  else
-    logger.debug "resolved #{env} to undefined"
-    return undefined
 
 ##########################################################
 # Handle configuration
 ##########################################################
 # Load the config file either locally or in openshift if the OPENSHIFT_DATA_DIR variable exists
 env = 'development'
-if process.env['OPENSHIFT_DATA_DIR']?
-  logger.info "Env is Openshift/production, ip: #{process.env['OPENSHIFT_NODEJS_IP']} port: #{process.env['OPENSHIFT_NODEJS_PORT']}"
-  env = 'production'
 serverStartTime = (new Date()).getTime()
-port = getEnvVar('OPENSHIFT_INTERNAL_PORT') || getEnvVar('OPENSHIFT_NODEDIY_PORT') || getEnvVar('OPENSHIFT_NODEJS_PORT') || 3000
-ipAddress =  getEnvVar('OPENSHIFT_NODEJS_IP') ||   getEnvVar('OPENSHIFT_NODEDIY_IP')  || '127.0.0.1'
+port = settings.getEnvVar('OPENSHIFT_INTERNAL_PORT') || settings.getEnvVar('OPENSHIFT_NODEDIY_PORT') || settings.getEnvVar('OPENSHIFT_NODEJS_PORT') || 3000
+ipAddress = settings.getEnvVar('OPENSHIFT_NODEJS_IP') || settings.getEnvVar('OPENSHIFT_NODEDIY_IP')  || '127.0.0.1'
+if process.env['OPENSHIFT_DATA_DIR']?
+  logger.info "Env is Openshift/production, ip: #{ipAddress} port: #{port}"
+  env = 'production'
 app = express()
 oneDay = 86400000
 #server = http.Server(app)

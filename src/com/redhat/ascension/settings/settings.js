@@ -44,6 +44,16 @@
     return envVar;
   };
 
+  exports.getEnvVar = function(env) {
+    if (process.env[env] !== '' && process.env[env] !== null) {
+      logger.debug("resolved " + env + " to " + process.env[env]);
+      return process.env[env];
+    } else {
+      logger.debug("resolved " + env + " to undefined");
+      return void 0;
+    }
+  };
+
   exports.AUTH_URL = "https://access.redhat.com/services/user/status";
 
   exports.SF_URL = "https://na7.salesforce.com";

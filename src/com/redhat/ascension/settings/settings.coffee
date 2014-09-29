@@ -34,6 +34,14 @@ exports.resolveEnvVar = (envVar) ->
   logger.debug "resolved #{envVar} to #{envVar}"
   return envVar
 
+exports.getEnvVar = (env) ->
+  if process.env[env] isnt '' and process.env[env] isnt null
+    logger.debug "resolved #{env} to #{process.env[env]}"
+    return process.env[env]
+  else
+    logger.debug "resolved #{env} to undefined"
+    return undefined
+
 ########################################################################################################################
 # Export the KCS urls
 ########################################################################################################################

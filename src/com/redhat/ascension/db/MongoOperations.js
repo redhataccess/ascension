@@ -30,19 +30,22 @@
 
   MongoOps.generateMongoUrl = function(db) {
     var mongourl, o;
-    o = {};
-    o.host = settings.resolveEnvVar(settings.config.mongoHost) || '127.0.0.1';
-    o.port = settings.resolveEnvVar(settings.config.mongoPort) || 27017;
-    o.db = db || settings.resolveEnvVar(settings.config.mongoDb) || 'test';
-    o.user = settings.resolveEnvVar(settings.config.mongoUser) || void 0;
-    o.pass = settings.resolveEnvVar(settings.config.mongoPass) || void 0;
-    mongourl = void 0;
-    if (((o.user != null) && o.user !== '') && ((o.pass != null) && o.pass !== '')) {
-      mongourl = "mongodb://" + o.user + ":" + o.pass + "@" + o.host + ":" + o.port + "/" + o.db + "?auto_reconnect=true";
+    if (settings.getEnvVar('OPENSHIFT_MONGODB_DB_URL')) {
+      return settings.getEnvVar('OPENSHIFT_MONGODB_DB_URL');
     } else {
-      mongourl = "mongodb://" + o.host + ":" + o.port + "/" + o.db + "?auto_reconnect=true";
+      o = {};
+      o.host = settings.getEnvVar('OPENSHIFT_MONGODB_DB_HOST') || '127.0.0.1';
+      o.port = settings.getEnvVar('OPENSHIFT_MONGODB_DB_PORT') || 27017;
+      o.db = db || 'ascension';
+      o.user = settings.getEnvVar('OPENSHIFT_MONGODB_DB_USERNAME') || void 0;
+      o.pass = settings.getEnvVar('OPENSHIFT_MONGODB_DB_PASSWORD') || void 0;
+      if (((o.user != null) && o.user !== '') && ((o.pass != null) && o.pass !== '')) {
+        mongourl = "mongodb://" + o.user + ":" + o.pass + "@" + o.host + ":" + o.port + "/" + o.db + "?auto_reconnect=true";
+      } else {
+        mongourl = "mongodb://" + o.host + ":" + o.port + "/" + o.db + "?auto_reconnect=true";
+      }
+      return mongourl;
     }
-    return mongourl;
   };
 
   MongoOps.init = function(test) {

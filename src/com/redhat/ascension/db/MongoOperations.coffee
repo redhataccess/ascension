@@ -15,21 +15,24 @@ MongoOps =
     'task': undefined
 
 MongoOps.generateMongoUrl = (db) ->
-  o = {}
-  o.host = settings.resolveEnvVar(settings.config.mongoHost) || '127.0.0.1'
-  o.port = settings.resolveEnvVar(settings.config.mongoPort) || 27017
-  # Since db is a param, attempt to resolve again it first instead of the config
-  o.db = db || settings.resolveEnvVar(settings.config.mongoDb) || 'test'
-  o.user = settings.resolveEnvVar(settings.config.mongoUser) || undefined
-  o.pass = settings.resolveEnvVar(settings.config.mongoPass) || undefined
 
-  mongourl = undefined
-  if (o.user? and o.user isnt '') and (o.pass? and o.pass isnt '')
-    mongourl = "mongodb://#{o.user}:#{o.pass}@#{o.host}:#{o.port}/#{o.db}?auto_reconnect=true" #"?auto_reconnect=true"
+  if settings.getEnvVar('OPENSHIFT_MONGODB_DB_URL')
+    return settings.getEnvVar('OPENSHIFT_MONGODB_DB_URL')
   else
-    mongourl = "mongodb://#{o.host}:#{o.port}/#{o.db}?auto_reconnect=true" #"?auto_reconnect=true"
-  #logger.debug "Finished generating mongo url: #{mongourl}"
-  mongourl
+    o = {}
+    o.host = settings.getEnvVar('OPENSHIFT_MONGODB_DB_HOST') || '127.0.0.1'
+    o.port = settings.getEnvVar('OPENSHIFT_MONGODB_DB_PORT') || 27017
+    # Since db is a param, attempt to resolve again it first instead of the config
+    o.db = db || 'ascension'
+    o.user = settings.getEnvVar('OPENSHIFT_MONGODB_DB_USERNAME') || undefined
+    o.pass = settings.getEnvVar('OPENSHIFT_MONGODB_DB_PASSWORD') || undefined
+
+    if (o.user? and o.user isnt '') and (o.pass? and o.pass isnt '')
+      mongourl = "mongodb://#{o.user}:#{o.pass}@#{o.host}:#{o.port}/#{o.db}?auto_reconnect=true" #"?auto_reconnect=true"
+    else
+      mongourl = "mongodb://#{o.host}:#{o.port}/#{o.db}?auto_reconnect=true" #"?auto_reconnect=true"
+    #logger.debug "Finished generating mongo url: #{mongourl}"
+    return mongourl
 
 MongoOps.init = (test=false) ->
   opts =
