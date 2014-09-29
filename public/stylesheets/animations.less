@@ -1,0 +1,21 @@
+/* 2D TRANSITIONS */
+/* Grow */
+.task-grow {
+  display: inline-block;
+  -webkit-transition-duration: 0.2s;
+  transition-duration: 0.2s;
+  -webkit-transition-property: transform;
+  transition-property: transform;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+}
+.task-grow:hover, .task-grow:focus, .task-grow:active {
+  -webkit-transform: scale(1.025);
+  transform: scale(1.025);
+}
+
+// Consider radial menus
+// http://codepen.io/CreativePunch/pen/lAHiu
+// http://codepen.io/julianocandido/pen/rDiwf
+// http://dabblet.com/gist/3979221/cb69c5e8ccf0745fff2c94b47b27b108931f1a15

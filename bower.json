@@ -1,0 +1,35 @@
+{
+  "name": "ascension",
+  "version": "0.0.1",
+  "authors": [
+    "smendenh@redhat.com"
+  ],
+  "description": "Next Gen Workflow",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/js/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.1",
+    "react-bootstrap": "~0.12.0",
+    "react": "~0.11.2",
+    "moment": "~2.8.3",
+    "bootstrap": "~3.2.0",
+    "bootswatch": "~3.2.0+4",
+    "react-router": "~0.7.0",
+    "isotope": "~2.0.1",
+    "jsUri": "~1.2.2",
+    "animo.js": "*",
+    "Hover": "~1.0.8",
+    "d3": "~3.4.11",
+    "less-elements": "*",
+    "q": "~2.0.2",
+    "font-awesome": "~4.2.0"
+  }
+}

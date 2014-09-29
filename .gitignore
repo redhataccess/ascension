@@ -1,0 +1,42 @@
+# Include your project-specific ignores in this file
+public/js/bower_components/
+public/js/bower_components
+public/js/bower_components/*
+public/js/bower_components/**/*
+
+# Ignore Jetbrains
+.idea/workspace.xml
+.idea
+*.iml
+
+# Ignore node_modules which will be rebuilt in openshift
+node_modules/*
+npm-debug.log
+
+# Ignore the public/dist dir as it will contain combined/minified code
+public/dist/
+
+# Ignore all js and map files in the src dir since in prod the files are minified regardless
+app.js.map
+public/index.html
+public/js/lib/ascension/**/*.map
+# Let's allow the js files so the workers can be loaded in prod
+test/*.js
+test/*.map
+src/**/*.map
+src/**/*.js
+
+# OS generated files #
+# ######################
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Thumbnails
+._*
+
+# # Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
