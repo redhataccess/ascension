@@ -40,9 +40,9 @@
 
   serverStartTime = (new Date()).getTime();
 
-  port = process.env['OPENSHIFT_INTERNAL_PORT'] || process.env['OPENSHIFT_NODEJS_PORT'] || 3000;
+  port = process.env['OPENSHIFT_INTERNAL_PORT'] || process.env['OPENSHIFT_NODEDIY_PORT'] || process.env['OPENSHIFT_NODEJS_PORT'] || 3000;
 
-  ipAddress = process.env['OPENSHIFT_NODEJS_IP'] || '127.0.0.1';
+  ipAddress = process.env['OPENSHIFT_NODEJS_IP'] || process.env['OPENSHIFT_NODEDIY_IP'] || '127.0.0.1';
 
   app = express();
 

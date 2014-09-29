@@ -39,8 +39,8 @@ if process.env['OPENSHIFT_DATA_DIR']?
   logger.info "Env is Openshift/production, ip: #{process.env['OPENSHIFT_NODEJS_IP']} port: #{process.env['OPENSHIFT_NODEJS_PORT']}"
   env = 'production'
 serverStartTime = (new Date()).getTime()
-port = process.env['OPENSHIFT_INTERNAL_PORT'] || process.env['OPENSHIFT_NODEJS_PORT'] || 3000
-ipAddress = process.env['OPENSHIFT_NODEJS_IP'] || '127.0.0.1'
+port = process.env['OPENSHIFT_INTERNAL_PORT'] || process.env['OPENSHIFT_NODEDIY_PORT'] || process.env['OPENSHIFT_NODEJS_PORT'] || 3000
+ipAddress = process.env['OPENSHIFT_NODEJS_IP'] || process.env['OPENSHIFT_NODEDIY_IP']  || '127.0.0.1'
 app = express()
 oneDay = 86400000
 #server = http.Server(app)
