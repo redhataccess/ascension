@@ -13,6 +13,9 @@ ln -s "$OPENSHIFT_DATA_DIR"bower_components public/js/bower_components
 bower install -q
 npm install --loglevel error
 
+# Prune some unecessary files from node_modules
+find node_modules/* -type f -iname "*.md" -o -type d -name "test*" -o -type d -name "example*" | xargs rm -rf
+
 grunt prod
 
 
