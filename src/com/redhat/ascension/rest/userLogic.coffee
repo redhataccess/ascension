@@ -9,7 +9,7 @@ Q                 = require 'q'
 MongoOps          = require '../db/MongoOperations'
 mongoose          = require 'mongoose'
 mongooseQ         = require('mongoose-q')(mongoose)
-TaskActionsEnum   = require './enums/taskActionsEnum.coffee'
+TaskActionsEnum   = require './enums/taskActionsEnum'
 request           = require 'request'
 
 UserLogic = {}

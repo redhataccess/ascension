@@ -8,12 +8,12 @@ Q                 = require 'q'
 MongoOps          = require '../db/MongoOperations'
 mongoose          = require 'mongoose'
 mongooseQ         = require('mongoose-q')(mongoose)
-TaskActionsEnum   = require './enums/taskActionsEnum.coffee'
-TaskStateEnum     = require '../rules/enums/TaskStateEnum.coffee'
+TaskActionsEnum   = require './enums/taskActionsEnum'
+TaskStateEnum     = require '../rules/enums/TaskStateEnum'
 request           = require 'request'
 ObjectId          = mongoose.Types.ObjectId
 
-UserLogic         = require './userLogic.coffee'
+UserLogic         = require './userLogic'
 
 TaskLogic = {}
 
