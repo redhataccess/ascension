@@ -18,10 +18,6 @@ Component = React.createClass
 
 #    taskOp = TaskOpEnum[@props.task?.taskOp?.toUpperCase()]
     entityOp = EntityOpEnum[@props.task?.entityOp]
-    (div {}, [
-      (h4 {}, [
-        (Label {bsStyle: 'primary', key: 'role'}, [entityOp.display])
-      ])
-    ])
+    (Label {className: 'task-meta-data', bsStyle: 'primary', key: 'role'}, [entityOp.display])
 
 module.exports = Component

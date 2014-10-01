@@ -1,8 +1,17 @@
 (function() {
   module.exports = {
-    ASSIGN: 'assign',
-    UPDATE: 'update',
-    DELETE: 'delete'
+    ASSIGN: {
+      name: 'assign'
+    },
+    UNASSIGN: {
+      name: 'unassign'
+    },
+    UPDATE: {
+      name: 'update'
+    },
+    DELETE: {
+      name: 'delete'
+    }
   };
 
 }).call(this);

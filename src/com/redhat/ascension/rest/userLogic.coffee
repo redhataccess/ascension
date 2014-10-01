@@ -11,10 +11,22 @@ mongoose          = require 'mongoose'
 mongooseQ         = require('mongoose-q')(mongoose)
 TaskActionsEnum   = require './enums/taskActionsEnum'
 request           = require 'request'
+Uri               = require 'jsuri'
 
 UserLogic = {}
 
+UserLogic.normalizeUserResponse = (body) ->
+  u = undefined
+  if body?['resource']?
+    id = body['externalModelId']
+    u = _.clone(body['resource'])
+    u.id = id
+    u.email = u.email[0]?.address
+    u.sso = u.sso[0]
+  u
+
 UserLogic.fetchUser = (opts) ->
+  self = UserLogic
   deferred = Q.defer()
 
   opts =
@@ -23,7 +35,7 @@ UserLogic.fetchUser = (opts) ->
 
   # Lookup user based on given sso username
   request opts, (err, response, body) ->
-    user = body['resource']
+    user = self.normalizeUserResponse(body)
 
     if err
       deferred.reject err
@@ -33,10 +45,39 @@ UserLogic.fetchUser = (opts) ->
       deferred.reject "Could not find user with input: #{opts.userInput}"
       return
 
-    # Now transform the UDS user
-    user.email = user.email[0]?.address
-    user.sso = user.sso[0]
-    user.id = body['externalModelId']
+    deferred.resolve user
+
+  deferred.promise
+
+
+UserLogic.fetchUserUql = (opts) ->
+  self = UserLogic
+  deferred = Q.defer()
+
+  uri = new Uri(settings.UDS_URL).setPath('/user').setQuery('where=' + opts.where)
+  opts =
+    url: uri.toString()
+    json: true
+
+  # Lookup user based on given sso username
+  request opts, (err, response, body) ->
+    user = undefined
+
+    if _.isArray(body)
+      user = self.normalizeUserResponse(body[0])
+    else
+      user = self.normalizeUserResponse(body)
+
+    if err
+      deferred.reject err
+      return
+
+    if not user?
+      deferred.reject "Could not find user with input: #{opts.userInput}"
+      return
+
+
+    logger.debug "Discovered user: #{prettyjson.render user}"
 
     deferred.resolve user
 

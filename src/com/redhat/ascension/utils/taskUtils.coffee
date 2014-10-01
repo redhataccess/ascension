@@ -10,25 +10,17 @@ TaskUtils = {}
 
 TaskUtils.generateMockTask = (overrides) ->
   c =
-    AccountId: '001A000000K6SyqIAF'
-    Account_Number__c: '1301972'
-    CaseNumber: '00024904'
-    Collaboration_Score__c: 2334
-    Comment_Count__c: 5
-    CreatedDate: new Date(2014, 5, 5)
-    Created_By__c: 'Yann Albou'
-    FTS_Role__c: null
-    FTS__c: false
-    Last_Breach__c: null
-    PrivateCommentCount__c: 2
-    PublicCommentCount__c: 3
-    SBT__c: 1000
-    SBR_Group__c: ['JBoss Base AS', 'Webservers']
-    Severity__c: '3 (Normal)'
-    Status: 'Waiting on Red Hat'
-    Internal_Status__c: 'Unassigned'
-    Strategic__c: 'Yes'
-    Tags__c: ['httpd']
+    accountNumber: '1301972'
+    caseNumber: '00024904'
+    collaborationScore: 2334
+    created: new Date(2014, 5, 5)
+    sbt: 1000
+    sbrs: ['JBoss Base AS', 'Webservers']
+    severity: '3 (Normal)'
+    status: 'Waiting on Red Hat'
+    internalStatus: 'Unassigned'
+    strategic: 'Yes'
+    tags: ['httpd']
 
   if overrides?.case?
     _.assign c, overrides['case']

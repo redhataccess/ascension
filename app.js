@@ -1,5 +1,5 @@
 (function() {
-  var CaseRules, MongoOps, TaskLogic, app, bodyParser, compression, cookieParser, db, env, express, favicon, http, ipAddress, logger, mongoose, morgan, oneDay, path, port, request, server, serverStartTime, settings;
+  var CaseRules, MongoOps, TaskLogic, Uri, app, bodyParser, compression, cookieParser, db, env, express, favicon, http, ipAddress, logger, mongoose, morgan, oneDay, path, port, request, server, serverStartTime, settings;
 
   express = require('express');
 
@@ -24,6 +24,8 @@
   request = require('request');
 
   settings = require('./src/com/redhat/ascension/settings/settings');
+
+  Uri = require('jsuri');
 
   mongoose = require('mongoose');
 
@@ -107,7 +109,9 @@
 
   app.get("/tasks", function(req, res) {
     var opts;
-    opts = {};
+    opts = !((req.query['ssoUsername'] == null) || req.query['ssoUsername'] === '') ? {
+      ssoUsername: req.query['ssoUsername']
+    } : void 0;
     return TaskLogic.fetchTasks(opts).then(function(data) {
       return res.send(data);
     }, function(err) {
@@ -143,7 +147,15 @@
   });
 
   app.get("/user/:input", function(req, res) {
+    logger.debug("piping from /user/:input");
     return req.pipe(request("" + settings.UDS_URL + "/user/" + req.params.input)).pipe(res);
+  });
+
+  app.get("/user", function(req, res) {
+    var uql, uri;
+    uql = decodeURIComponent(req.query.where);
+    uri = new Uri(settings.UDS_URL).setPath('/user').setQuery('where=' + uql);
+    return req.pipe(request(uri.toString())).pipe(res);
   });
 
   process.on('SIGTERM', function() {

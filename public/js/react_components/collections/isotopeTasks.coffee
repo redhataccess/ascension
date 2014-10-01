@@ -1,6 +1,5 @@
 React       = require 'react'
 Router      = require 'react-router/dist/react-router'
-jQuery      = require 'jquery'
 Isotope     = require 'isotope/js/isotope'
 #Isotope     = require 'isotope/dist/isotope.pkgd'
 AjaxMixin   = require '../mixins/ajaxMixin.coffee'
@@ -8,10 +7,10 @@ cx          = React.addons.classSet
 d3          = require 'd3/d3'
 _           = require 'lodash'
 
-
 TaskIconMapping   = require '../utils/taskIconMapping.coffee'
 TaskTypeEnum      = require '../../../../src/com/redhat/ascension/rules/enums/TaskTypeEnum.coffee'
 TaskStateEnum     = require '../../../../src/com/redhat/ascension/rules/enums/TaskStateEnum.coffee'
+Auth              = require '../auth/auth.coffee'
 
 {div, button, img, h1, h2, ul, li, span, br, p, i} = React.DOM
 nbsp = "\u00A0"
@@ -30,11 +29,15 @@ Component = React.createClass
     'maxScore': 0
     'layoutMode': @props.layoutMode || 'masonry'
     'sortBy': @props.sortBy || 'score'
+    'query': @props.query
 
   genTaskClass: (t) ->
+#    console.debug "owner.id: #{t['owner']?['id']} authed user id: #{Auth.get()?['resource']?['id']}"
+#    console.debug "owner.id is authed id: #{t['owner']?['id'] is Auth.get()?['resource']?['id']}"
     classSet =
       'task': true
       'task100': true
+      'task-own': Auth.get()? and (t['owner']?['id'] is Auth.get()?['externalModelId'])
 #      'task100': @scoreScale(t['score']) is 100
 #      'task200': @scoreScale(t['score']) is 200
 #      'task300': @scoreScale(t['score']) is 300
@@ -52,15 +55,23 @@ Component = React.createClass
       #width: @scoreScale(t.score)
       #height: @scoreScale(t.score)
 
-  taskClick: (t) ->
+  taskClick: (t, event) ->
     event.preventDefault()
-    Router.transitionTo("/task/#{t['_id']}")
+    params =
+      _id: t['_id']
+    queryParams =
+      ssoUsername: @props.query.ssoUsername
+#    queryParams = {}
+#    if @props.query.ssoUsername? and @props.query.ssoUsername isnt ''
+#      queryParams['ssoUsername'] = @props.query.ssoUsername
+#    Router.transitionTo("/task/#{t['_id']}")
+    Router.transitionTo("task", params, queryParams)
 
   # Handles the meta data icon for the underlying entity.  So a case with WoRH has a specific icon
   genTaskIconClass: (t) ->
     tmp = undefined
     if t['type'] is TaskTypeEnum.CASE.name
-      tmp = TaskIconMapping[t['case']['Internal_Status__c']]?.icon || tmp
+      tmp = TaskIconMapping[t['case']['internalStatus']]?.icon || tmp
     tmp || 'fa-medkit'
 
   # Generates the task name based on the underlying entity
@@ -90,15 +101,13 @@ Component = React.createClass
         key: t['_id']
         onClick: @taskClick.bind(@, t)
       , [
-#            (span {}, [t['bid'] + " - " + t['score']])
-#            (span {className: "task-name"}, [@genTaskName(t)])
-            (i {className: "task-state fa #{@genTaskStateIcon(t)}"}, [])
-            (p {className: "task-symbol"}, [@genTaskSymbol(t)])
-            (span {className: "task-icon"}, [
-              (i {className: "fa #{@genTaskIconClass(t)}"}, [])
-              nbsp
-              (span {}, [@genTaskName(t)])
-            ])
+        (i {className: "task-state fa #{@genTaskStateIcon(t)}"}, [])
+        (p {className: "task-symbol"}, [@genTaskSymbol(t)])
+        (span {className: "task-icon"}, [
+          (i {className: "fa #{@genTaskIconClass(t)}"}, [])
+          nbsp
+          (span {}, [@genTaskName(t)])
+        ])
       ])
     tasks
 
@@ -116,17 +125,17 @@ Component = React.createClass
 #        $elems = $elems.add(@makeDiv(t))
 #    $elems
 
-  changeLayout: (layoutMode) ->
+  changeLayout: (layoutMode, event) ->
     event.preventDefault()
     @iso.arrange
       layoutMode: layoutMode
 
-  changeSort: (sortByName) ->
+  changeSort: (sortByName, event) ->
     event.preventDefault()
     @iso.arrange
       sortBy: sortByName
 
-  filterBySbr: (sbr) ->
+  filterBySbr: (sbr, event) ->
     self = @
     event.preventDefault()
     @iso.arrange
@@ -135,11 +144,10 @@ Component = React.createClass
         task = self.state['tasks'][_id]
         #task = self.tasksById[_id]
         _.contains(task['sbrs'], sbr)
-  clearFilter: () ->
+  clearFilter: (event) ->
     event.preventDefault()
     @iso.arrange
-      filter: (itemElem) ->
-        true
+      filter: (itemElem) -> true
 
   genBtnGroupClass: (opts) ->
     classSet =
@@ -193,6 +201,7 @@ Component = React.createClass
   # filtering.  This is because the hidden and show styles of hiding and showing elements by isotope uses the opacity
   # to do it's magic
   opacify: () ->
+    #console.debug "Opacifying"
     $('.task').each (idx, itemElem) =>
       _id = $(itemElem).attr('id')
       task = @state['tasks'][_id]
@@ -202,6 +211,15 @@ Component = React.createClass
         '-moz-transition': 'opacity 0.5s ease-in-out'
         '-o-transition': 'opacity 0.5s ease-in-out'
         'transition': 'opacity 0.5s ease-in-out'
+
+  # Given a list of _ids from tasks, remove the orphans, aka, the xor between the old tasks and the new tasks from
+  # an ajax call
+  removeOrphans: (_ids) ->
+    $('.task').each (idx, itemElem) =>
+      _id = $(itemElem).attr('id')
+      # If the new old _id isn't in the new _ids, remove it from isotope
+      if not _.contains(_ids, _id)
+        @iso.remove itemElem
 
   setScoreScale: (min, max) ->
     @scoreScale = d3.scale.quantize().domain([min, max]).range([100, 200, 300])
@@ -234,22 +252,42 @@ Component = React.createClass
             _id = $(itemElem).attr('id')
             task = self.state['tasks'][_id]
             #task = self.tasksById[_id]
-            task['case']['SBT__c']
+            sbt = task['case']?['sbt'] || -999999
+            #if not task['case']?['sbt']?
+            #  console.error JSON.stringify(task)
+            sbt
+
       @iso.on 'layoutComplete', () =>
         # Whenever the layout completes, re-opacity the tasks
+        #console.debug 'layoutComplete'
         @opacify()
+#      @iso.on 'removeComplete', () =>
+#        # Whenever the layout completes, re-opacity the tasks
+#        console.debug 'removeComplete'
+#      @iso.on 'transitionEnd', () =>
+#        # Whenever the layout completes, re-opacity the tasks
+#        console.debug 'transitionEnd'
 
-  componentDidMount: ->
-    self = @
-    @createIsotopeContainer()
-    @get({path: '/tasks'})
+  queryTasks: (props) ->
+    # Build a query if there is a ssoUsername or if the user is smendenh, pull all limit 100
+    opts =
+      path: '/tasks'
+      queryParams: [
+        {
+          name: 'ssoUsername'
+          value: props.query['ssoUsername']
+        }
+      ]
+
+    @get(opts)
     .then((tasks) =>
       @tasksById = _.object(_.map(tasks, (t) -> [t['_id'], t]))
       min = _.chain(tasks).pluck('score').min().value()
       max = _.chain(tasks).pluck('score').max().value()
+      #console.debug "Min score: #{min}, max score: #{max}"
       @setScoreScale(min, max)
       @setState
-        # Hash the tasks by _id so they can be quickly looked up elsewhere
+      # Hash the tasks by _id so they can be quickly looked up elsewhere
         'tasks': _.object(_.map(tasks, (t) -> [t['_id'], t]))
         'minScore': min
         'maxScore': max
@@ -260,22 +298,43 @@ Component = React.createClass
       #@iso.arrange
       #  layoutMode: 'masonry'
 
-      @iso?.reloadItems()
-      @iso.layout()
-      @iso?.arrange()
+
 
     )
     .catch((err) ->
       console.error "Could not load tasks: #{err.stack}"
     ).done()
 
+  componentDidMount: ->
+    self = @
+    @createIsotopeContainer()
+    @queryTasks(@props)
 
-  shouldComponentUpdate: (nextProps, nextState) ->
-    # TODO -- do this more intelligently in the future
-    if @state['tasks'].length isnt nextState['tasks'].length
-      return true
-    else
-      return false
+#  shouldComponentUpdate: (nextProps, nextState) ->
+#    # TODO -- do this more intelligently in the future
+#    #if (@state['tasks'].length isnt nextState['tasks'].length) or (@props.query.ssoUsername isnt nextProps.query.ssoUsername)
+#    #console.debug "state: #{@state.query.ssoUsername} nextState: #{nextState.query.ssoUsername}"
+#    if ((@state['tasks'].length isnt nextState['tasks'].length) or (@state.query.ssoUsername isnt nextState.query.ssoUsername))
+#      console.debug "componentShouldUpdate: true"
+#      return true
+#    else
+#      console.debug "componentShouldUpdate: false"
+#      return false
+
+  componentDidUpdate: ->
+    # _ids represented in these new tasks
+    _ids = _.chain(@state.tasks).pluck('_id').value()
+    @removeOrphans(_ids)
+    @iso?.reloadItems()
+    @iso.layout()
+    @iso?.arrange()
+
+  componentWillReceiveProps: (nextProps) ->
+    #console.debug "componentWillReceiveProps: #{JSON.stringify(nextProps.query)}"
+    @setState
+      query: nextProps.query
+    console.debug "Querying tasks"
+    @queryTasks(nextProps)
 
 #  componentDidUpdate: ->
 #    if @iso?

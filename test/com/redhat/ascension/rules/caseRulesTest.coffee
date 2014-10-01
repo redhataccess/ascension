@@ -57,8 +57,8 @@ describe "Case rules", ->
 
       x = TaskUtils.generateMockTask
         'case':
-          'Status': 'Waiting on Red Hat'
-          'Internal_Status__c': 'Unassigned'
+          'status': 'Waiting on Red Hat'
+          'internalStatus': 'Unassigned'
         'task':
           'type': TaskTypeEnum.CASE.name
           'taskOp': TaskOpEnum.NOOP.name
@@ -81,8 +81,8 @@ describe "Case rules", ->
 
       x = TaskUtils.generateMockTask
         'case':
-          'Status': 'Waiting on Red Hat'
-          'Internal_Status__c': 'Waiting on Collaboration'
+          'status': 'Waiting on Red Hat'
+          'internalStatus': 'Waiting on Collaboration'
         'task':
           'type': TaskTypeEnum.CASE.name
           'taskOp': TaskOpEnum.NOOP.name
@@ -106,9 +106,9 @@ describe "Case rules", ->
 
       x = TaskUtils.generateMockTask
         'case':
-          'Status': 'Waiting on Red Hat'
-          'Internal_Status__c': 'Waiting on Collaboration'
-          'Collaboration_Score__c': 99
+          'status': 'Waiting on Red Hat'
+          'internalStatus': 'Waiting on Collaboration'
+          'collaborationScore': 99
         'task':
           'type': TaskTypeEnum.CASE.name
           'taskOp': TaskOpEnum.NOOP.name
@@ -141,9 +141,9 @@ describe "Case rules", ->
       # Create the same/duplicate task but with an increased score, let's verify that the score is updated in the database
       x1 = TaskUtils.generateMockTask
         'case':
-          'Status': 'Waiting on Red Hat'
-          'Internal_Status__c': 'Waiting on Collaboration'
-          'Collaboration_Score__c': 100
+          'status': 'Waiting on Red Hat'
+          'internalStatus': 'Waiting on Collaboration'
+          'collaborationScore': 100
         'task':
           'type': TaskTypeEnum.CASE.name
           'taskOp': TaskOpEnum.NOOP.name

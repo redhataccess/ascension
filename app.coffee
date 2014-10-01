@@ -10,11 +10,13 @@ bodyParser      = require 'body-parser'
 compression     = require 'compression'
 request         = require 'request'
 settings        = require './src/com/redhat/ascension/settings/settings'
+Uri             = require 'jsuri'
 
 mongoose        = require 'mongoose'
 MongoOps        = require './src/com/redhat/ascension/db/MongoOperations'
 TaskLogic       = require './src/com/redhat/ascension/rest/taskLogic'
 CaseRules       = require './src/com/redhat/ascension/rules/case/caseRules'
+
 
 # view engine setup
 #app.set "views", path.join(__dirname, "views")
@@ -95,7 +97,11 @@ app.get "/maketasks", (req, res) ->
     res.send(err)
   )
 app.get "/tasks", (req, res) ->
-  opts = {}
+  opts =
+    # Opt param, fetches tasks based on this user [sbrs, ect.]
+    ssoUsername: req.query['ssoUsername'] unless (not req.query['ssoUsername']? or req.query['ssoUsername'] is '')
+
+
   TaskLogic.fetchTasks(opts).then((data) ->
     res.send(data)
   , (err) ->
@@ -125,9 +131,14 @@ app.post "/task/:_id", (req, res) ->
 ##########################################################
 # Proxy UDS requests
 ##########################################################
+#  http://unified-ds.gsslab.rdu2.redhat.com:9100/user?where=SSO is "rhn-support-smendenh" and (isActive is true and isInGSS is true)
 app.get "/user/:input", (req, res) ->
+  logger.debug "piping from /user/:input"
   req.pipe(request("#{settings.UDS_URL}/user/#{req.params.input}")).pipe(res)
-
+app.get "/user", (req, res) ->
+  uql = decodeURIComponent(req.query.where)
+  uri = new Uri(settings.UDS_URL).setPath('/user').setQuery('where=' + uql)
+  req.pipe(request(uri.toString())).pipe(res)
 
 ##########################################################
 # Handle general HTTP opens/closes/listens

@@ -1,18 +1,18 @@
-nools             = require 'nools'
-logger            = require('tracer').colorConsole()
-prettyjson        = require 'prettyjson'
-salesforce        = require '../db/salesforce'
-Q                 = require 'q'
+nools = require 'nools'
+logger = require('tracer').colorConsole()
+prettyjson = require 'prettyjson'
+salesforce = require '../db/salesforce'
+Q = require 'q'
 #DbOperations    = require '../db/dbOperations'
-MongoOperations   = require '../db/MongoOperations'
-TaskStateEnum     = require './enums/TaskStateEnum'
-TaskTypeEnum      = require './enums/TaskTypeEnum'
-TaskOpEnum        = require './enums/TaskOpEnum'
-EntityOpEnum        = require './enums/EntityOpEnum'
-_                 = require 'lodash'
-moment            = require 'moment'
-mongoose          = require 'mongoose'
-mongooseQ         = require('mongoose-q')(mongoose)
+MongoOperations = require '../db/MongoOperations'
+TaskStateEnum = require './enums/TaskStateEnum'
+TaskTypeEnum = require './enums/TaskTypeEnum'
+TaskOpEnum = require './enums/TaskOpEnum'
+EntityOpEnum = require './enums/EntityOpEnum'
+_ = require 'lodash'
+moment = require 'moment'
+mongoose = require 'mongoose'
+mongooseQ = require('mongoose-q')(mongoose)
 #MongoClient   = require('mongodb').MongoClient
 #Server        = require('mongodb').Server
 
@@ -224,14 +224,13 @@ rule "noop task/default" {
   }
 }
 
-"""
+""";
 
 # Constructs a Mongo Task from a Rule Task and returns a promise
 # INFO -- Must construct a new instance of the task first then assign data, don't pass the obj hash to the new Task
 # That presents problems with the default assignments in mongoose.
 TaskRules.saveRuleTask = (t) ->
   #logger.debug "saveRuleTask: Creating task [p]"
-
   x = new MongoOperations['models']['task']();
   _.keys(t).forEach (key) -> x[key] = t[key] unless key is 'toString'
   _.keys(t['case']).forEach (key) -> x['case'][key] = t['case'][key] unless key is 'toString'
@@ -265,7 +264,8 @@ TaskRules.getExistingTasks = () ->
 
 # Make Mongoose Schema Tasks out of regular js objects
 TaskRules.getTasks = (tasks) ->
-  _.map tasks, (t) -> new MongoOperations['models']['task'](t)
+  _.map tasks, (t) ->
+    new MongoOperations['models']['task'](t)
 
 TaskRules.saveTasks = (tasks) ->
   deferred = Q.defer()
@@ -279,18 +279,28 @@ TaskRules.saveTasks = (tasks) ->
 
 TaskRules.makeTaskFromCase = (c) ->
   _id: null
-  bid: c['CaseNumber']
-  score: c['Collaboration_Score__c'] || 0
+  bid: c['caseNumber'] || c['CaseNumber']
+  score: c['collaborationScore'] || c['Collaboration_Score__c'] || 0
   timeout: -1
-  sbrs: @parseSfArray(c['SBR_Group__c'])
-  tags: @parseSfArray(c['Tags__c'])
+  #sbrs: @parseSfArray(c['SBR_Group__c'])
+  #tags: @parseSfArray(c['Tags__c'])
+  sbrs: c['sbrs'] || @parseSfArray(c['SBR_Group__c'])
+  tags: c['tags'] || @parseSfArray(c['Tags__c'])
   owner: null
   completed: null # Date or null
   type: TaskTypeEnum.CASE.name
   taskOp: TaskOpEnum.NOOP.name
   entityOp: TaskOpEnum.NOOP.name
   state: TaskStateEnum.UNASSIGNED.name
-  'case': c
+  'case':
+    status: c['status'] || c['Status']
+    internalStatus: c['internalStatus'] || c['Internal_Status__c']
+    severity: c['severity'] || c['Severity__c']
+    sbrs: c['sbrs'] || @parseSfArray(c['SBR_Group__c'])
+    tags: c['tags'] || @parseSfArray(c['Tags__c'])
+    sbt: c['sbt'] || c['SBT__c']
+    created: c['created'] || c['CreatedDate']
+    score: c['collaborationScore'] || c['Collaboration_Score__c']
 
 TaskRules.makeTaskFromRule = (t) ->
   _id: t['_id']
@@ -309,9 +319,11 @@ TaskRules.makeTaskFromRule = (t) ->
 
 # Returns an update hash to be pushed to mongo to just update these fields that overlap
 TaskRules.taskFromCaseUpdateHash = (t, c) ->
-  'score': c['Collaboration_Score__c'] || 0
-  'sbrs': @parseSfArray(c['SBR_Group__c'])
-  'tags': @parseSfArray(c['Tags__c'])
+  'score': c['collaborationScore'] || 0
+  #'sbrs': @parseSfArray(c['SBR_Group__c'])
+  #'tags': @parseSfArray(c['Tags__c'])
+  'sbrs': c['sbrs']
+  'tags': c['tags']
   'lastUpdated': new Date()
   'case': c
 
@@ -319,7 +331,7 @@ TaskRules.taskFromCaseUpdateHash = (t, c) ->
 TaskRules.updateTaskFromCase = (t, c) ->
   MongoOperations['models']['task'].where()
   .setOptions({multi: true})
-  .update({'bid': c['CaseNumber']}, @taskFromCaseUpdateHash(t, c))
+  .update({'bid': c['caseNumber']}, @taskFromCaseUpdateHash(t, c))
   .exec()
 
 # A simple update to Mongo with the case meta data.  The input is the noop task which will have the very latest
@@ -343,7 +355,8 @@ TaskRules.divineTasks = (cases) ->
 
   # Output hash will contain the case and task
   #outputHash = _.object(_.map(cases, (x) -> [x['CaseNumber'], {'case': x, 'task': undefined}]))
-  outputHash = _.object(_.map(cases, (x) -> [x['CaseNumber'], {'case': x, 'task': undefined}]))
+  outputHash = _.object(_.map(cases, (x) ->
+    [x['CaseNumber'], {'case': x, 'task': undefined}]))
 
   # grab a list of existing tasks in the db based on the fetched case numbers
   caseNumbers = _.chain(cases).pluck('CaseNumber').value()
@@ -362,14 +375,17 @@ TaskRules.divineTasks = (cases) ->
     existingCaseNumbers = _.chain(tasks).pluck('bid').unique().value()
 
     # Find all new cases that are not tasks by rejecting all the cases that overlap with existing tasks
-    newCases = _.chain(cases).reject((c) -> _.contains(existingCaseNumbers, c['CaseNumber'])).value()
+    newCases = _.chain(cases).reject((c) ->
+      _.contains(existingCaseNumbers, c['CaseNumber'])).value()
 
     # Make new tasks
-    newTasks = _.map(newCases, (c) -> TaskRules.makeTaskFromCase(c))
+    newTasks = _.map(newCases, (c) ->
+      TaskRules.makeTaskFromCase(c))
     logger.debug "Discovered #{newTasks.length} new tasks"
 
     # Existing tasks
-    existingTasks = _.chain(tasks).filter((t) -> _.contains(existingCaseNumbers, t['bid'])).value()
+    existingTasks = _.chain(tasks).filter((t) ->
+      _.contains(existingCaseNumbers, t['bid'])).value()
     logger.debug "Discovered #{existingTasks.length} existing tasks"
 
     # Update existing Tasks, the updates are only to case meta data at this point, nothing else
@@ -381,7 +397,7 @@ TaskRules.divineTasks = (cases) ->
       _.assign t, updateHash
 
       # TODO -- should also specify task state != closed/completed/abandoned
-#      taskPromises.push MongoOperations['models']['task'].where().setOptions({multi: true}).update({'bid': c['CaseNumber']}, updateHash).exec()
+      #      taskPromises.push MongoOperations['models']['task'].where().setOptions({multi: true}).update({'bid': c['CaseNumber']}, updateHash).exec()
       # TODO -- make this change and haven't retested the rules yet
       taskPromises.push TaskRules.updateTaskFromCase(t, c)
 
@@ -392,7 +408,7 @@ TaskRules.divineTasks = (cases) ->
     # the existing tasks for now
 
     # The taskPromises will be comprised of all task updates and task inserts
-#    taskPromises = _.chain([taskPromises, TaskRules.generateSaveTasksPromises(newTasks)]).flatten().value()
+    #    taskPromises = _.chain([taskPromises, TaskRules.generateSaveTasksPromises(newTasks)]).flatten().value()
     taskPromises = _.chain(taskPromises).value()
 
     # In the chain the noopTasks are undefined, gotta figure out what's up
@@ -416,7 +432,8 @@ TaskRules.divineTasks = (cases) ->
       logger.debug "Resolving the main deferred with a total of #{results.length} existing tasks, and #{noopTasks.length} noop tasks"
       deferred.resolve output
     )
-    .fail((err) -> logger.error err.stack)
+    .fail((err) ->
+      logger.error err.stack)
     .done()
 
   , (err) ->
@@ -425,9 +442,7 @@ TaskRules.divineTasks = (cases) ->
   deferred.promise
 
 
-
 TaskRules.initFlow = () ->
-
   @beginFire = 0
   @endFire = 0
 
@@ -439,7 +454,7 @@ TaskRules.initFlow = () ->
       EntityOpEnum: EntityOpEnum
       saveRuleTask: TaskRules.saveRuleTask
       saveRuleTaskCb: TaskRules.saveRuleTaskCb
-      #updateTasksWithCaseMetadata: TaskRules.updateTasksWithCaseMetadata
+    #updateTasksWithCaseMetadata: TaskRules.updateTasksWithCaseMetadata
       prettyjson: prettyjson
 
   @assertCalls = 0
@@ -451,7 +466,7 @@ TaskRules.printSimple = (op, fact) ->
     taskOp: fact['taskOp']
     entityOp: fact['entityOp']
 
-TaskRules.initSession = (debug=false) ->
+TaskRules.initSession = (debug = false) ->
   @session = @flow.getSession()
   @session.on "assert", (fact) ->
     TaskRules.assertCalls += 1
@@ -478,7 +493,6 @@ TaskRules.executeTest = () ->
     TaskRules.divineTasks(cases)
   )
   .then((tasks) ->
-
     logger.debug "Completed persisting the tasks"
 
     #_.each obj['cases'], (x) ->
@@ -520,4 +534,4 @@ if require.main is module
     , (err) ->
       logger.error err.stack
     )
-    #TaskRules.executeTest()
+#TaskRules.executeTest()

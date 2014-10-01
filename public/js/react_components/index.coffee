@@ -38,10 +38,23 @@ imageURL = '../../images/yeoman.png'
 #    (h1 {}, ['About'])
 
 Dashboard = React.createClass
+  getInitialState: ->
+    query: @props.query
+
+  # This is required to properly pass the query properties to the sub components
+  # https://github.com/rackt/react-router/blob/master/docs/api/components/Route.md
+  componentWillReceiveProps: (nextProps) ->
+    @setState
+      query: nextProps.query
+
   render: ->
     (div {key: 'mainDashboard'}, [
       #(h1 {key: 'header'}, ['Dashboard'])
-      (IsotopeTasks {id: 'tasksContainer', key: 'isotopeTasks'}, [])
+      (IsotopeTasks
+        id: 'tasksContainer'
+        key: 'isotopeTasks'
+        query: @state.query
+      , [])
 #      (IsotopeTest {id: 'tasksContainer', key: 'isotopeTasks'}, [])
     ])
 
@@ -67,10 +80,15 @@ App = React.createClass
   componentDidMount: ->
     self = @
     ssoUsername = @getRhUserCookie()
-    userPromise = @getAuthenticatedUser(@props.query['userOverride'] || ssoUsername)
+    #userPromise = @getAuthenticatedUser(@props.query['ssoUsername'] || ssoUsername)
+    userPromise = @getAuthenticatedUser(ssoUsername)
     userPromise?.done((user) ->
+      if _.isArray(user) then user = user[0]
+
       if user?['externalModelId']?
-        Auth.authedUser = user
+
+        console.debug "Setting authed user to: #{JSON.stringify(user, null, ' ')}"
+        Auth.set(user)
         self.setState {'authedUser': Auth.authedUser}
       else
         console.error "User: #{JSON.stringify(user, null, ' ')} has no id"
@@ -102,7 +120,11 @@ App = React.createClass
 #              (li {className: "active"}, [
             (li {key: 'dashboard'}, [
               #(a {href: "#"}, ['Admin'])
-              (Link {to: 'dashboard', key: 'linkDashboard'}, ['Dashboard'])
+              (Link
+                to: 'dashboard'
+                key: 'linkDashboard'
+                query: @props.query
+              , ['Dashboard'])
             ])
             (li {key: 'admin'}, [
               #(a {href: "#"}, ['Tasks'])
@@ -131,10 +153,12 @@ App = React.createClass
       #])
     ])
 
+
 routes = (
   (Routes {location: 'hash'}, [
-    (Route {key: 'app', name: 'app', path: '/', params: '{userOverride: true}', handler: App}, [
-      (Route {key: 'dashboard', name: 'dashboard', handler: Dashboard}, [])
+    #params: '{ssoUsername: true, admin: true}',
+    (Route {key: 'app', name: 'app', path: '/', handler: App}, [
+      (Route {key: 'dashboard', name: 'dashboard', handler: Dashboard, addHandlerKey: true}, [])
       (Route {key: 'admin', name: 'admin', handler: Admin}, [])
       (Route {key: 'task', name: 'task', path: 'task/:_id', handler: Task}, [])
       (NotFoundRoute {key: 'notFound', handler: Dashboard}, [])

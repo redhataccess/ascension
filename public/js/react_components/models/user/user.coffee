@@ -42,7 +42,8 @@ Component = React.createClass
       ])
 
       (OverlayTrigger {trigger: 'hover', placement: 'bottom', overlay: popover},
-        (Button {bsStyle: 'default', bsSize: 'small'}, [user.fullName])
+        (Label {className: 'task-meta-data', bsStyle: 'default', key: 'userLabel'}, [user.fullName])
+        #(Button {bsStyle: 'default', bsSize: 'small'}, [user.fullName])
         # (BSplitButton {bsStyle: 'default', bsSize: 'small', title: user.fullName}, [
         # (BMenuItem {key: user.email, href: "mailto:#{user.email}"}, ['Send E-Mail'])
         # ])

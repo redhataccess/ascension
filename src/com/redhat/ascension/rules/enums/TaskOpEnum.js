@@ -8,9 +8,9 @@
       name: 'takeTaskOwnership',
       display: 'Take Ownership of Task'
     },
-    REFER_TO_ENTITY_OP: {
-      name: 'referToEntityOp',
-      display: ''
+    COMPLETE_TASK: {
+      name: 'completeTask',
+      display: 'Complete task'
     }
   };
 

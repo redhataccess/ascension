@@ -45,7 +45,8 @@ WebUtilsMixin.getAuthenticatedUser = (ssoUsername) ->
 
   if ssoUsername? and ssoUsername isnt ''
 
-    url = "/user/#{ssoUsername}"
+    #url = "/user/#{ssoUsername}"
+    url = "/user?where=SSO is \"#{ssoUsername}\" and (isActive is true)"
 
     config =
       url: url

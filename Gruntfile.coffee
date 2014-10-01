@@ -272,8 +272,9 @@ module.exports = (grunt) ->
   #grunt.registerTask "default", ["less",  "coffee"]
   #grunt.registerTask "prod", ["less", "coffee"]
   #grunt.registerTask "dev", ['less', 'coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "watch"]
-  grunt.registerTask "dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "watch"]
+  #grunt.registerTask "dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "watch"]
+  grunt.registerTask "dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', "watch"]
   # For now let's go with webpack:build-dev because build-prod takes forever
-  grunt.registerTask "prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "webpack:build-dev"]
+  grunt.registerTask "prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', "webpack:build-dev"]
   grunt.registerTask "default", ["prod"]
   grunt.registerTask "test", ["mochaTest"]

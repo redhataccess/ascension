@@ -61,8 +61,8 @@ describe "Task Logic", ->
 
       x = TaskUtils.generateMockTask
         'case':
-          'Status': 'Waiting on Red Hat'
-          'Internal_Status__c': 'Unassigned'
+          'status': 'Waiting on Red Hat'
+          'internalStatus': 'Unassigned'
         'task':
           'type': TaskTypeEnum.CASE.name
           'taskOp': TaskOpEnum.NOOP.name

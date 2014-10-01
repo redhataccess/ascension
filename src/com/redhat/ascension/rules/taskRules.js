@@ -101,18 +101,27 @@
   TaskRules.makeTaskFromCase = function(c) {
     return {
       _id: null,
-      bid: c['CaseNumber'],
-      score: c['Collaboration_Score__c'] || 0,
+      bid: c['caseNumber'] || c['CaseNumber'],
+      score: c['collaborationScore'] || c['Collaboration_Score__c'] || 0,
       timeout: -1,
-      sbrs: this.parseSfArray(c['SBR_Group__c']),
-      tags: this.parseSfArray(c['Tags__c']),
+      sbrs: c['sbrs'] || this.parseSfArray(c['SBR_Group__c']),
+      tags: c['tags'] || this.parseSfArray(c['Tags__c']),
       owner: null,
       completed: null,
       type: TaskTypeEnum.CASE.name,
       taskOp: TaskOpEnum.NOOP.name,
       entityOp: TaskOpEnum.NOOP.name,
       state: TaskStateEnum.UNASSIGNED.name,
-      'case': c
+      'case': {
+        status: c['status'] || c['Status'],
+        internalStatus: c['internalStatus'] || c['Internal_Status__c'],
+        severity: c['severity'] || c['Severity__c'],
+        sbrs: c['sbrs'] || this.parseSfArray(c['SBR_Group__c']),
+        tags: c['tags'] || this.parseSfArray(c['Tags__c']),
+        sbt: c['sbt'] || c['SBT__c'],
+        created: c['created'] || c['CreatedDate'],
+        score: c['collaborationScore'] || c['Collaboration_Score__c']
+      }
     };
   };
 
@@ -136,9 +145,9 @@
 
   TaskRules.taskFromCaseUpdateHash = function(t, c) {
     return {
-      'score': c['Collaboration_Score__c'] || 0,
-      'sbrs': this.parseSfArray(c['SBR_Group__c']),
-      'tags': this.parseSfArray(c['Tags__c']),
+      'score': c['collaborationScore'] || 0,
+      'sbrs': c['sbrs'],
+      'tags': c['tags'],
       'lastUpdated': new Date(),
       'case': c
     };
@@ -148,7 +157,7 @@
     return MongoOperations['models']['task'].where().setOptions({
       multi: true
     }).update({
-      'bid': c['CaseNumber']
+      'bid': c['caseNumber']
     }, this.taskFromCaseUpdateHash(t, c)).exec();
   };
 

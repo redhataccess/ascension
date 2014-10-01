@@ -198,8 +198,8 @@
         }
       }
     });
-    grunt.registerTask("dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "watch"]);
-    grunt.registerTask("prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "webpack:build-dev"]);
+    grunt.registerTask("dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', "watch"]);
+    grunt.registerTask("prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', "webpack:build-dev"]);
     grunt.registerTask("default", ["prod"]);
     return grunt.registerTask("test", ["mochaTest"]);
   };

@@ -1,5 +1,5 @@
 (function() {
-  var MongoOps, ObjectId, Q, TaskActionsEnum, TaskLogic, TaskStateEnum, UserLogic, fs, logger, moment, mongoose, mongooseQ, prettyjson, request, settings, _;
+  var MongoOps, ObjectId, Q, TaskActionsEnum, TaskLogic, TaskOpEnum, TaskStateEnum, UserLogic, fs, logger, moment, mongoose, mongooseQ, prettyjson, request, settings, _;
 
   fs = require('fs');
 
@@ -25,6 +25,8 @@
 
   TaskStateEnum = require('../rules/enums/TaskStateEnum');
 
+  TaskOpEnum = require('../rules/enums/TaskOpEnum');
+
   request = require('request');
 
   ObjectId = mongoose.Types.ObjectId;
@@ -34,7 +36,37 @@
   TaskLogic = {};
 
   TaskLogic.fetchTasks = function(opts) {
-    return MongoOps['models']['task'].find().where().limit(100).execQ();
+    var deferred, uql;
+    if ((opts != null ? opts.ssoUsername : void 0) != null) {
+      deferred = Q.defer();
+      uql = {
+        where: "SSO is \"" + opts.ssoUsername + "\""
+      };
+      UserLogic.fetchUserUql(uql).then(function(user) {
+        var findClause;
+        findClause = {
+          '$or': [
+            {
+              'sbrs': {
+                '$in': user.sbrs
+              }
+            }, {
+              'owner.id': user.id
+            }
+          ]
+        };
+        logger.debug("Searching mongo with: " + (JSON.stringify(findClause)));
+        return MongoOps['models']['task'].find().where(findClause).limit(100).execQ();
+      }).then(function(tasks) {
+        logger.debug("Discovered: " + tasks.length + " tasks");
+        return deferred.resolve(tasks);
+      })["catch"](function(err) {
+        return deferred.reject(err);
+      }).done();
+      return deferred.promise;
+    } else {
+      return MongoOps['models']['task'].find().where().limit(100).execQ();
+    }
   };
 
   TaskLogic.fetchTask = function(opts) {
@@ -42,14 +74,15 @@
   };
 
   TaskLogic.updateTask = function(opts) {
-    var deferred;
+    var $set, deferred;
     deferred = Q.defer();
-    if (opts.action === TaskActionsEnum.ASSIGN && (opts.userInput != null)) {
+    if (opts.action === TaskActionsEnum.ASSIGN.name && (opts.userInput != null)) {
       UserLogic.fetchUser(opts).then(function(user) {
         var $set;
         $set = {
           $set: {
             state: TaskStateEnum.ASSIGNED.name,
+            taskOp: TaskOpEnum.COMPLETE_TASK.name,
             owner: user
           }
         };
@@ -57,6 +90,21 @@
           _id: new ObjectId(opts['_id'])
         }, $set).execQ();
       }).then(function() {
+        return deferred.resolve();
+      })["catch"](function(err) {
+        return deferred.reject(err);
+      }).done();
+    } else if (opts.action === TaskActionsEnum.UNASSIGN.name) {
+      $set = {
+        $set: {
+          state: TaskStateEnum.UNASSIGNED.name,
+          taskOp: TaskOpEnum.OWN_TASK.name,
+          owner: null
+        }
+      };
+      MongoOps['models']['task'].findOneAndUpdate({
+        _id: new ObjectId(opts['_id'])
+      }, $set).execQ().then(function() {
         return deferred.resolve();
       })["catch"](function(err) {
         return deferred.reject(err);

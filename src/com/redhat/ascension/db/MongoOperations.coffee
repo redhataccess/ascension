@@ -40,7 +40,7 @@ MongoOps.init = (test=false) ->
     server:
       socketOptions:
         keepAlive: 1
-  #mongoose.set 'debug', true
+  mongoose.set 'debug', true
   db = if test then 'ascension-test' else 'ascension'
   mongoose.connect MongoOps.generateMongoUrl(db), opts
 
@@ -130,25 +130,18 @@ MongoOps.defineCollections = () ->
       default: TaskStateEnum.UNASSIGNED.name
 
     case:
-      AccountId: String
-      Account_Number__c: String
-      CaseNumber: String
-      Collaboration_Score__c: Number
-      Comment_Count__c: Number
-      CreatedDate: Date
-      Created_By__c: String
-      FTS_Role__c: String
-      FTS__c: Boolean
-      Last_Breach__c: Date
-      PrivateCommentCount__c: Number
-      PublicCommentCount__c: Number
-      SBT__c: Number
-      SBR_Group__c: Array
-      Severity__c: String
-      Status: String
-      Strategic__c: Boolean
-      Internal_Status__c: String
-      Tags__c: Array
+      accountNumber: String
+      caseNumber: String
+      collaborationScore: Number
+      created: Date
+      fts: Boolean
+      sbt: Number
+      sbrs: Array
+      tags: Array
+      severity: String
+      status: String
+      strategic: Boolean
+      internalStatus: String
 
   MongoOps['models']['task'] = mongoose.model 'Task', MongoOps['schemas']['task']
 

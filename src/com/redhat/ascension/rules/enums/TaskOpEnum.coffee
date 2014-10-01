@@ -8,7 +8,6 @@ module.exports =
     name: 'takeTaskOwnership'
     display: 'Take Ownership of Task'
 
-  # When in this state, refer to the EntityOperationEnum for a list of actions
-  REFER_TO_ENTITY_OP:
-    name: 'referToEntityOp'
-    display: ''
+  COMPLETE_TASK:
+    name: 'completeTask'
+    display: 'Complete task'
