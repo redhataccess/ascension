@@ -96,8 +96,8 @@ MongoOps.defineCollections = () ->
       lastModified: Date
       outOfOffice: Boolean
 
-    # Date the task was completed
-    completed: Date
+    # Date the task was closed
+    closed: Date
 
     created:
       type: Date

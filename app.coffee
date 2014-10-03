@@ -132,8 +132,11 @@ app.post "/task/:_id", (req, res) ->
 # Proxy UDS requests
 ##########################################################
 #  http://unified-ds.gsslab.rdu2.redhat.com:9100/user?where=SSO is "rhn-support-smendenh" and (isActive is true and isInGSS is true)
+app.get "/case/:caseNumber/comments", (req, res) ->
+  req.pipe(request("#{settings.UDS_URL}/case/#{req.params.caseNumber}/comments")).pipe(res)
+app.get "/case/:caseNumber", (req, res) ->
+  req.pipe(request("#{settings.UDS_URL}/case/#{req.params.caseNumber}")).pipe(res)
 app.get "/user/:input", (req, res) ->
-  logger.debug "piping from /user/:input"
   req.pipe(request("#{settings.UDS_URL}/user/#{req.params.input}")).pipe(res)
 app.get "/user", (req, res) ->
   uql = decodeURIComponent(req.query.where)

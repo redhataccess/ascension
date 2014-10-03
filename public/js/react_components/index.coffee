@@ -86,21 +86,22 @@ App = React.createClass
       if _.isArray(user) then user = user[0]
 
       if user?['externalModelId']?
-
-        console.debug "Setting authed user to: #{JSON.stringify(user, null, ' ')}"
+        #console.debug "Setting authed user to: #{JSON.stringify(user, null, ' ')}"
         Auth.set(user)
         self.setState {'authedUser': Auth.authedUser}
       else
+        Auth.set(undefined)
+        self.setState {'authedUser': Auth.authedUser}
         console.error "User: #{JSON.stringify(user, null, ' ')} has no id"
     , (err) ->
       console.error err
     )
 
   generateAuthenticationElement: () ->
-    if @state['authedUser']?
-      return (p {className: 'navbar-text', key: 'navbar-right'}, ["Logged in as #{@state['authedUser']['resource']['firstName']} #{@state['authedUser']['resource']['lastName']}"])
+    if Auth.get()?
+      return (p {className: 'navbar-text', key: 'navbar-right'}, ["Logged in as #{Auth.get()['resource']['firstName']} #{Auth.get()['resource']['lastName']}"])
     else
-    return (a {target: '_blank', href: 'https://gss.my.salesforce.com', key: 'sso'}, ['https://gss.my.salesforce.com'])
+      return (a {target: '_blank', href: 'https://gss.my.salesforce.com', key: 'sso'}, ['https://gss.my.salesforce.com'])
 
   render: ->
     (div {}, [

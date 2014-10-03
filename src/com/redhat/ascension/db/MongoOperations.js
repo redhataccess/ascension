@@ -110,7 +110,7 @@
         lastModified: Date,
         outOfOffice: Boolean
       },
-      completed: Date,
+      closed: Date,
       created: {
         type: Date,
         "default": Date.now

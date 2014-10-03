@@ -4,6 +4,8 @@ module.exports =
     name: 'assign'
   UNASSIGN:
     name: 'unassign'
+  CLOSE:
+    name: 'close'
   UPDATE:
     name: 'update'
   DELETE:

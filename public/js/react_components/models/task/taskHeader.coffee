@@ -14,7 +14,9 @@ Component = React.createClass
 
     taskType = TaskTypeEnum[@props.task?.type?.toUpperCase()]
     (h1 {}, [
-      (span {className: "#{taskType.name}-text-color", key: 'task-header'}, [taskType.display])
+      (span {className: "#{taskType.name}-text-color", key: 'task-header'}, [
+        #taskType.display
+      ])
       nbsp
       'Task'
     ])

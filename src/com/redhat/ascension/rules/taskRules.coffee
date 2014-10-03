@@ -107,7 +107,7 @@ define Task {
   sbrs: [],
   tags: [],
   owner: null,
-  completed: null,
+  closed: null,
   type: null,
   taskOp: null,
   entityOp: null,
@@ -287,7 +287,8 @@ TaskRules.makeTaskFromCase = (c) ->
   sbrs: c['sbrs'] || @parseSfArray(c['SBR_Group__c'])
   tags: c['tags'] || @parseSfArray(c['Tags__c'])
   owner: null
-  completed: null # Date or null
+  created: new Date()
+  closed: null # Date or null
   type: TaskTypeEnum.CASE.name
   taskOp: TaskOpEnum.NOOP.name
   entityOp: TaskOpEnum.NOOP.name
@@ -302,20 +303,20 @@ TaskRules.makeTaskFromCase = (c) ->
     created: c['created'] || c['CreatedDate']
     score: c['collaborationScore'] || c['Collaboration_Score__c']
 
-TaskRules.makeTaskFromRule = (t) ->
-  _id: t['_id']
-  bid: t['bid']
-  score: t['score']
-  timeout: t['score']
-  sbrs: t['score']
-  tags: t['score']
-  owner: t['score']
-  completed: t['score']
-  type: t['score']
-  taskOp: t['score']
-  entityOp: t['score']
-  state: t['score']
-  'case': t['case']
+#TaskRules.makeTaskFromRule = (t) ->
+#  _id: t['_id']
+#  bid: t['bid']
+#  score: t['score']
+#  timeout: t['score']
+#  sbrs: t['score']
+#  tags: t['score']
+#  owner: t['score']
+#  completed: t['score']
+#  type: t['score']
+#  taskOp: t['score']
+#  entityOp: t['score']
+#  state: t['score']
+#  'case': t['case']
 
 # Returns an update hash to be pushed to mongo to just update these fields that overlap
 TaskRules.taskFromCaseUpdateHash = (t, c) ->

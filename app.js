@@ -146,8 +146,15 @@
     }).done();
   });
 
+  app.get("/case/:caseNumber/comments", function(req, res) {
+    return req.pipe(request("" + settings.UDS_URL + "/case/" + req.params.caseNumber + "/comments")).pipe(res);
+  });
+
+  app.get("/case/:caseNumber", function(req, res) {
+    return req.pipe(request("" + settings.UDS_URL + "/case/" + req.params.caseNumber)).pipe(res);
+  });
+
   app.get("/user/:input", function(req, res) {
-    logger.debug("piping from /user/:input");
     return req.pipe(request("" + settings.UDS_URL + "/user/" + req.params.input)).pipe(res);
   });
 

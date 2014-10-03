@@ -84,6 +84,19 @@ TaskLogic.updateTask = (opts) ->
     ).catch((err) ->
       deferred.reject err
     ).done()
+  else if opts.action is TaskActionsEnum.CLOSE.name
+    $set =
+      $set:
+        state: TaskStateEnum.CLOSED.name
+        taskOp: TaskOpEnum.NOOP.name
+        closed: new Date()
+
+    MongoOps['models']['task'].findOneAndUpdate({_id: new ObjectId(opts['_id'])}, $set).execQ()
+    .then(->
+      deferred.resolve()
+    ).catch((err) ->
+      deferred.reject err
+    ).done()
   else
     deferred.reject "#{opts.action} is not a known action"
 
