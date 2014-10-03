@@ -9,8 +9,9 @@ _           = require 'lodash'
 moment      = require 'moment'
 
 # Custom components
-Auth        = require '../../auth/auth.coffee'
-Comment     = require '../comment/comment.coffee'
+Auth          = require '../../auth/auth.coffee'
+Comment       = require '../comment/comment.coffee'
+SlaAttainment = require '../comment/slaAttainment.coffee'
 
 
 {div, button, img, h1, h2, ul, li, span, br, p, i} = React.DOM
@@ -237,6 +238,10 @@ Component = React.createClass
     #sbrs = _.chain(@state.comments).values().pluck('sbrs').flatten().unique().sort().value()
 
     (div {}, [
+      (SlaAttainment {
+        negative: _.filter(_.values(@state.comments), (comment) -> comment.resource.public and comment.resource.sbt? and comment.resource.sbt < 0).length,
+        all: _.filter(_.values(@state.comments), (comment) -> comment.resource.sbt? and comment.resource.public).length
+      })
 #      (div {className: "btn-group"}, @genBtnGroupLayout())
 #      (br {})
 #      (br {})

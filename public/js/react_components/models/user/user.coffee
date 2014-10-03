@@ -37,7 +37,9 @@ Component = React.createClass
         )
         nbsp = "\u00A0"
         _.map(user.roles, (role) ->
-          (Label {bsStyle: 'danger', key: 'role'}, role.resource.description)
+          (div {}, [
+            (Label {bsStyle: 'danger', key: 'role'}, role.resource.description)
+          ])
         )
       ])
 

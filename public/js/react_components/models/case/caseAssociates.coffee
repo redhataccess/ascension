@@ -53,8 +53,17 @@ Component = React.createClass
           )
         ])
       ])
+#    (Accordion {}, [
+#      (Panel
+#        key: 'caseSummary'
+#        header: 'Internal Summary'
+#        collapsable: true
+#        defaultExpanded: false
+#      , [summary])
+#    ])
     (Accordion {}, [
       (Panel
+        key: 'caseSupportAssociates'
         header: 'Support Associates'
         bsStyle: ownerStyle
         collapsable: true

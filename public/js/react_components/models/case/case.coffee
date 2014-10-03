@@ -26,7 +26,7 @@ CaseResourceLinks = require './caseResourceLinks.coffee'
 
 IsotopeComments   = require '../comment/isotopeComments.coffee'
 
-{div, a, img, h1, ul, li, i, span, h3} = React.DOM
+{div, a, img, h1, ul, li, i, span, h3, hr} = React.DOM
 nbsp = "\u00A0"
 
 Component = React.createClass
@@ -83,6 +83,7 @@ Component = React.createClass
 #          ])
 #        ]),
       ])
+      (hr {})
       (IsotopeComments {caseNumber: @state.case.resource.caseNumber, key: 'isotopeComments'}, [])
     ])
 
