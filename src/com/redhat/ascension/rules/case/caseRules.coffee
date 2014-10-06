@@ -253,10 +253,11 @@ CaseRules.reset = () ->
     CaseRules.fetchCases()
   )
   .then((cases) ->
-    CaseRules.match({cases: cases})
+    [CaseRules.match({cases: cases}), KcsRules.match({cases: cases})]
   )
-  .then((promises) ->
-    Q.allSettled(promises)
+  .spread((casePromises, kcsPromises) ->
+    logger.debug "Received #{casePromises.length} caseResults and #{kcsPromises} kcs results"
+    Q.allSettled(_.flatten([casePromises, kcsPromises]))
   )
   .then((results) ->
     logger.debug "Completed manipulating #{results.length} tasks"
@@ -289,22 +290,10 @@ if require.main is module
     CaseRules.fetchCases()
   )
   .then((cases) ->
-#    ps = Q.defer()
-#    # Flatten doesn't finish, that is because this is just two promises whereas I really need the resolved values
-#    # TODO I probably need a Q.all and Q.spread or soemthing, not sure
-#    _.flatten([CaseRules.match({cases: cases}), KcsRules.match({cases: cases})])
-#
-#
-#    # Non-flattened does, let's we have to examine the diff then
-##    CaseRules.match({cases: cases})
-#    ps.promise
-
-    #Q.all([CaseRules.match({cases: cases}), KcsRules.match({cases: cases})])
     [CaseRules.match({cases: cases}), KcsRules.match({cases: cases})]
   )
   .spread((casePromises, kcsPromises) ->
     logger.debug "Received #{casePromises.length} caseResults and #{kcsPromises} kcs results"
-    #Q.allSettled(promises)
     Q.allSettled(_.flatten([casePromises, kcsPromises]))
   )
   #.then((promises) ->

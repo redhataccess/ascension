@@ -193,11 +193,16 @@
     MongoOperations.reset().then(function() {
       return CaseRules.fetchCases();
     }).then(function(cases) {
-      return CaseRules.match({
-        cases: cases
-      });
-    }).then(function(promises) {
-      return Q.allSettled(promises);
+      return [
+        CaseRules.match({
+          cases: cases
+        }), KcsRules.match({
+          cases: cases
+        })
+      ];
+    }).spread(function(casePromises, kcsPromises) {
+      logger.debug("Received " + casePromises.length + " caseResults and " + kcsPromises + " kcs results");
+      return Q.allSettled(_.flatten([casePromises, kcsPromises]));
     }).then(function(results) {
       return logger.debug("Completed manipulating " + results.length + " tasks");
     })["catch"](function(err) {
