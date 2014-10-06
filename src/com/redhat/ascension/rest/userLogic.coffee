@@ -82,9 +82,6 @@ UserLogic.fetchUserUql = (opts) ->
       deferred.reject "Could not find user with input: #{opts.userInput}"
       return
 
-
-    logger.debug "Discovered user: #{prettyjson.render user}"
-
     deferred.resolve user
 
   deferred.promise

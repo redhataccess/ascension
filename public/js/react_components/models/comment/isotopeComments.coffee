@@ -225,11 +225,11 @@ Component = React.createClass
 #    @iso.layout()
 #    @iso?.arrange()
 
-  componentWillReceiveProps: (nextProps) ->
-    #console.debug "componentWillReceiveProps: #{JSON.stringify(nextProps.query)}"
-    @setState
-      query: nextProps.query
-    @queryComments(nextProps)
+#  componentWillReceiveProps: (nextProps) ->
+#    #console.debug "componentWillReceiveProps: #{JSON.stringify(nextProps.query)}"
+#    @setState
+#      query: nextProps.query
+#    @queryComments(nextProps)
 
 #  componentDidUpdate: ->
 #    if @iso?
