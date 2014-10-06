@@ -104,6 +104,15 @@
     'followUpWithSales': EntityOp.FOLLOW_UP_WITH_SALES
   });
 
+  EntityOp.CREATE_KCS = {
+    name: 'createKcsContent',
+    display: 'Create KCS Content'
+  };
+
+  _.defaults(EntityOp, {
+    'createKcsContent': EntityOp.CREATE_KCS
+  });
+
   EntityOp.getOpFromIntStatus = function(intStatus) {
     switch (intStatus) {
       case 'Closed':

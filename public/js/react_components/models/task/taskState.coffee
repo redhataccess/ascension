@@ -19,11 +19,15 @@ Component = React.createClass
     if @props.task.state is TaskStateEnum.UNASSIGNED.name
       return (DropdownButton {bsStyle: 'warning', bsSize: "small", title: 'Unassigned'}, [
         (MenuItem {key: "assign", onClick: @props.takeOwnership}, ['Take Ownership'])
-      ]);
+      ])
     else if @props.task.state is TaskStateEnum.ASSIGNED.name
       return (DropdownButton {bsStyle: 'primary', bsSize: "small", title: 'Assigned'}, [
         (MenuItem {key: "unassign", onClick: @props.removeOwnership}, ['Remove Ownership'])
         (MenuItem {key: "close", onClick: @props.close}, ['Close'])
+      ])
+    else if @props.task.state is TaskStateEnum.CLOSED.name
+      return (DropdownButton {bsStyle: 'success', bsSize: "small", title: 'Closed'}, [
+        (MenuItem {key: "assign", onClick: @props.takeOwnership}, ['Reopen and Take Ownership'])
       ]);
     else
       return null

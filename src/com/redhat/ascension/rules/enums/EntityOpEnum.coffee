@@ -6,6 +6,10 @@ _ = require 'lodash'
 # This all is primarily meta data driven by existing fields
 EntityOp = {}
 
+######################################################
+# Case related
+######################################################
+
 EntityOp.TAKE_FTS =
   name: 'fts'
   display: 'Take FTS Role'
@@ -71,6 +75,16 @@ EntityOp.FOLLOW_UP_WITH_SALES =
   display: 'Follow up with sales'
 _.defaults EntityOp,
   'followUpWithSales': EntityOp.FOLLOW_UP_WITH_SALES
+
+######################################################
+# KCS related
+######################################################
+
+EntityOp.CREATE_KCS =
+  name: 'createKcsContent'
+  display: 'Create KCS Content'
+_.defaults EntityOp,
+  'createKcsContent': EntityOp.CREATE_KCS
 
 # Map case internal status to entity operations
 EntityOp.getOpFromIntStatus = (intStatus) ->

@@ -19,6 +19,7 @@ request           = require 'request'
 #MongoClient   = require('mongodb').MongoClient
 #Server        = require('mongodb').Server
 
+KcsRules          = require './kcsRules'
 
 CaseRules = {}
 
@@ -42,7 +43,14 @@ SELECT
   Status,
   Internal_Status__c,
   Strategic__c,
-  Tags__c
+  Tags__c,
+  (SELECT
+    Id,
+    Linking_Mechanism__c,
+    Type__c,
+    Resource_Type__c
+  FROM
+    Case_Resource_Relationships__r)
 FROM
   Case
 WHERE
@@ -50,7 +58,7 @@ WHERE
   #andStatusCondition#
   AND Internal_Status__c != 'Waiting on Engineering'
   AND Internal_Status__c != 'Waiting on PM'
-LIMIT 2000
+LIMIT 1000
 """
 
 CaseRules.fetchCases = () ->
@@ -101,6 +109,14 @@ CaseRules.normalizeCase = (c) ->
   created: c['created'] || c['CreatedDate']
   collaborationScore: c['collaborationScore'] || c['Collaboration_Score__c']
   caseNumber: c['caseNumber'] || c['CaseNumber']
+  linkedSolutionCount: _.filter(c['Case_Resource_Relationships__r']?['records'] || [], (r) -> r['Resource_Type__c'] is 'Solution' and _.contains(['Link', 'Link;Pin'], r['Type__c']))
+  # TODO add linked solution count based on the resource Type__c is 'Link'
+  # Prob don't even need Resource_Type__c is 'Solution' just see if there are any 'Link's
+#10	001A000000K7A1OIAV	574448	00334568	1668.0
+#Id	Linking_Mechanism__c	Type__c	Resource_Type__c
+#1	a1eA00000046aHXIAY	Search	Link	Solution
+#2	a1eA00000046aHcIAI	Search	Link	Solution
+#3	a1eA00000046aHeIAI	Search
 
 CaseRules.match = (opts) ->
   self = CaseRules
@@ -136,7 +152,7 @@ CaseRules.match = (opts) ->
         promises.push self.updateTaskFromCase(c, existingTask)
       else
         t = TaskRules.makeTaskFromCase(c)
-        logger.warn("Discovered new Unassigned case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Unassigned case: #{t['bid']} setting the task to #{entityOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
         promises.push TaskRules.saveRuleTask(t)
@@ -153,7 +169,7 @@ CaseRules.match = (opts) ->
         promises.push self.updateTaskFromCase(c, existingTask)
       else
         t = TaskRules.makeTaskFromCase(c)
-        logger.warn("Discovered new Waiting on Owner case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Waiting on Owner case: #{t['bid']} setting the task to #{entityOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
         promises.push TaskRules.saveRuleTask(t)
@@ -170,7 +186,7 @@ CaseRules.match = (opts) ->
         promises.push self.updateTaskFromCase(c, existingTask)
       else
         t = TaskRules.makeTaskFromCase(c)
-        logger.warn("Discovered new Waiting on Contributor case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Waiting on Contributor case: #{t['bid']} setting the task to #{entityOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
         promises.push TaskRules.saveRuleTask(t)
@@ -187,7 +203,7 @@ CaseRules.match = (opts) ->
         promises.push self.updateTaskFromCase(c, existingTask)
       else
         t = TaskRules.makeTaskFromCase(c)
-        logger.warn("Discovered new Waiting on Collaboration case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Waiting on Collaboration case: #{t['bid']} setting the task to #{entityOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
         promises.push TaskRules.saveRuleTask(t)
@@ -201,7 +217,7 @@ CaseRules.match = (opts) ->
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
-        logger.warn("Discovered new Waiting on Engineering case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Waiting on Engineering case: #{t['bid']} setting the task to #{entityOp.display}.")
         t = TaskRules.makeTaskFromCase(c)
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
@@ -218,13 +234,14 @@ CaseRules.match = (opts) ->
         promises.push self.updateTaskFromCase(c, existingTask)
       else
         t = TaskRules.makeTaskFromCase(c)
-        logger.warn("Discovered new Waiting on Engineering case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Waiting on Engineering case: #{t['bid']} setting the task to #{entityOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
         promises.push TaskRules.saveRuleTask(t)
     else
-      logger.debug "Did not create task from case: #{prettyjson.render c}"
+      logger.warn "Did not create task from case: #{prettyjson.render c}"
 
+  logger.debug "CaseRules.match resolving #{promises.length} promises"
   deferred.resolve promises
   deferred.promise
 
@@ -272,11 +289,28 @@ if require.main is module
     CaseRules.fetchCases()
   )
   .then((cases) ->
-    CaseRules.match({cases: cases})
+#    ps = Q.defer()
+#    # Flatten doesn't finish, that is because this is just two promises whereas I really need the resolved values
+#    # TODO I probably need a Q.all and Q.spread or soemthing, not sure
+#    _.flatten([CaseRules.match({cases: cases}), KcsRules.match({cases: cases})])
+#
+#
+#    # Non-flattened does, let's we have to examine the diff then
+##    CaseRules.match({cases: cases})
+#    ps.promise
+
+    #Q.all([CaseRules.match({cases: cases}), KcsRules.match({cases: cases})])
+    [CaseRules.match({cases: cases}), KcsRules.match({cases: cases})]
   )
-  .then((promises) ->
-    Q.allSettled(promises)
+  .spread((casePromises, kcsPromises) ->
+    logger.debug "Received #{casePromises.length} caseResults and #{kcsPromises} kcs results"
+    #Q.allSettled(promises)
+    Q.allSettled(_.flatten([casePromises, kcsPromises]))
   )
+  #.then((promises) ->
+  #  logger.debug "Received #{promises.length} promises"
+  #  Q.allSettled(promises)
+  #)
   .then((results) ->
     logger.debug "Completed manipulating #{results.length} tasks"
   )

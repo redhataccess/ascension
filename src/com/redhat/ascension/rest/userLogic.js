@@ -34,9 +34,14 @@
   UserLogic.normalizeUserResponse = function(body) {
     var id, u, _ref;
     u = void 0;
-    if ((body != null ? body['resource'] : void 0) != null) {
-      id = body['externalModelId'];
-      u = _.clone(body['resource']);
+    if (_.isArray(body)) {
+      u = body[0];
+    } else {
+      u = body;
+    }
+    if (u != null) {
+      id = u['externalModelId'];
+      u = u['resource'];
       u.id = id;
       u.email = (_ref = u.email[0]) != null ? _ref.address : void 0;
       u.sso = u.sso[0];
@@ -52,6 +57,7 @@
       url: "" + settings.UDS_URL + "/user/" + opts.userInput,
       json: true
     };
+    logger.debug("UserLogic.fetchUser: " + opts.url);
     request(opts, function(err, response, body) {
       var user;
       user = self.normalizeUserResponse(body);

@@ -61,6 +61,7 @@ Component = React.createClass
       _id: t['_id']
     queryParams =
       ssoUsername: @props.query.ssoUsername
+      admin: @props.query.admin
 #    queryParams = {}
 #    if @props.query.ssoUsername? and @props.query.ssoUsername isnt ''
 #      queryParams['ssoUsername'] = @props.query.ssoUsername
@@ -277,6 +278,10 @@ Component = React.createClass
           name: 'ssoUsername'
           value: props.query['ssoUsername']
         }
+        {
+          name: 'admin'
+          value: props.query['admin']
+        }
       ]
 
     @get(opts)
@@ -344,24 +349,27 @@ Component = React.createClass
   componentWillUnmount: ->
     @iso?.destroy?()
 
-  render: ->
-    sbrs = _.chain(@state.tasks).values().pluck('sbrs').flatten().unique().sort().value()
+  # Adds layers of controls based on admin query param
+  genIsotopeControls: () ->
+    if (@state.query.admin is undefined) or (@state.query.admin is false)
+      return null
 
+    sbrs = _.chain(@state.tasks).values().pluck('sbrs').flatten().unique().sort().value()
+    (div {key: 'isotopeControls'}, [
+      (div {className: "btn-group", key: 'layout'}, @genBtnGroupLayout())
+      (br {})
+      (br {})
+      (div {className: "btn-group", key: 'sbr'}, @genBtnGroupSbrFilter(sbrs))
+      (br {})
+      (br {})
+      (div {className: "btn-group", key: 'sort'}, @genBtnGroupSort())
+      (br {})
+    ])
+
+  render: ->
     (div {}, [
-      #(h2 {}, ['Add'])
-      #(button {id: 'addItem', className: "button is-checked"}, ['add Item'])
-      #(br {})
-      (div {className: "btn-group"}, @genBtnGroupLayout())
-      (br {})
-      (br {})
-      (div {className: "btn-group"}, @genBtnGroupSbrFilter(sbrs))
-      (br {})
-      (br {})
-      (div {className: "btn-group"}, @genBtnGroupSort())
-      (br {})
-#      (div {id: @props.id, className: 'tasksContainer', key: 'tasksContainer', ref: 'tasksContainer'}, [])
+      @genIsotopeControls()
       (div {id: @props.id, className: 'tasksContainer', key: 'tasksContainer', ref: 'tasksContainer'}, @genTaskElements())
-#      (div {id: @props.id, className: 'tasksContainer', key: 'tasksContainer', ref: 'iso'})
     ])
 
 module.exports = Component

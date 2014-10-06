@@ -12,6 +12,7 @@
 @import "./animations";
 @import "./colors";
 @import "./cases";
+@import "./tasks";
 
 .container-ascension {
   margin-left: 20px;
@@ -21,88 +22,12 @@
 .pointer {
   cursor: pointer;
 }
-@case-color: hsl( 216, 100%, 50%);
-@kcs-color: hsl( 144, 100%, 50%);
-.case-text-color {
-  color: @case-color;
-}
-.kcs-text-color {
-  color: @kcs-color;
-}
 
-.task {
-  position: relative;
-  float: left;
-  margin: 5px;
-  padding: 10px;
-  width: 100px;
-  height: 100px;
-//  background: #888;
-  color: #262524;
-  .rounded(2px);
-//  .opacity(0.85);
-//  &:hover {
-//    .opacity(1);
-//  }
-  &:hover {
-    .scale(1.1);
-//    -webkit-transform: scale(1.1);
-//    -moz-transform: scale(1.1);
-//    -o-transform: scale(1.1);
-//    -ms-transform: scale(1.1);
-//    transform: scale(1.1);
-  }
-  .pointer;
-}
-.task > * {
-  margin: 0;
-  padding: 0;
-}
-.task.task100 {
-  width: 100px;
-  height: 100px;
-}
-.task.task200 {
-  width: 200px;
-  height: 200px;
-}
-.task.task300 {
-  width: 300px;
-  height: 300px;
-}
-.task.case {
-  background: @case-color;
-}
-.task.kcs {
-  background: @kcs-color;
-}
-.task-own {
-  -webkit-box-shadow: rgb(255, 255, 255) 0px 0px 30px 8px;
-  //box-shadow: rgb(255, 255, 255) 0px 0px 10px 2px;
-  box-shadow: rgb(255, 255, 255) 0px 0px 15px -1px;
-}
-.task-icon {
-  position: absolute;
-  left: 10px;
-  top: 76px;
-  font-size: 10px;
-//  color: white;
-}
-.task-symbol {
-  position: absolute;
-  left: 10px;
-  top: 0px;
-  font-size: 42px;
-  font-weight: bold;
-  color: white;
-}
-.task-state {
-  position: absolute;
-  right: 8px;
-  top: 5px;
-}
+/* ---- Bootstrap overrides ---- */
 
-
+.btn {
+  margin-bottom: 5px;
+}
 
 /* ---- Misc Task related styles ---- */
 

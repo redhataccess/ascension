@@ -33,7 +33,8 @@ Component = React.createClass
 
     queryParams = [
       {name: 'action', value: TaskActionsEnum.ASSIGN.name},
-      {name: 'userInput', value: Auth.authedUser['externalModelId']}
+      #{name: 'userInput', value: Auth.authedUser['externalModelId']}
+      {name: 'userInput', value: Auth.get()['externalModelId']}
     ]
 
     # Make a post call to assign the current authenticated user to the task

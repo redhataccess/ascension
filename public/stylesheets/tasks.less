@@ -1,0 +1,62 @@
+@case-color: hsl( 216, 100%, 50%);
+@kcs-color: hsl( 144, 100%, 50%);
+.case-text-color {
+  color: @case-color;
+}
+.kcs-text-color {
+  color: @kcs-color;
+}
+
+.task {
+  position: relative;
+  float: left;
+  margin: 5px;
+  padding: 10px;
+  width: 100px;
+  height: 100px;
+  color: #262524;
+  .rounded(2px);
+  &:hover {
+    .scale(1.1);
+  }
+  .pointer;
+}
+.task > * {
+  margin: 0;
+  padding: 0;
+}
+.task.task100 {
+  width: 100px;
+  height: 100px;
+}
+.task.case {
+  background: @case-color;
+}
+.task.kcs {
+  background: @kcs-color;
+}
+.task-own {
+  -webkit-box-shadow: rgb(255, 255, 255) 0px 0px 30px 8px;
+  //box-shadow: rgb(255, 255, 255) 0px 0px 10px 2px;
+  box-shadow: rgb(255, 255, 255) 0px 0px 15px -1px;
+}
+.task-icon {
+  position: absolute;
+  left: 10px;
+  top: 76px;
+  font-size: 10px;
+  //  color: white;
+}
+.task-symbol {
+  position: absolute;
+  left: 10px;
+  top: 0px;
+  font-size: 42px;
+  font-weight: bold;
+  color: white;
+}
+.task-state {
+  position: absolute;
+  right: 8px;
+  top: 5px;
+}

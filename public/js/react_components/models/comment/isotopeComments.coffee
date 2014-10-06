@@ -197,6 +197,7 @@ Component = React.createClass
       #  @opacify()
 
   queryComments: (props) ->
+    @setState {'loading': true}
     # Build a query if there is a ssoUsername or if the user is smendenh, pull all limit 100
     opts =
       path: "/case/#{props.caseNumber}/comments"
@@ -206,10 +207,14 @@ Component = React.createClass
       #@commentsById = _.object(_.map(comments, (c) -> [c['externalModelId'], c]))
       @setState
         'comments': _.object(_.map(comments, (c) -> [c['externalModelId'], c]))
+        'loading': false
     )
     .catch((err) ->
       console.error "Could not load comments: #{err.stack}"
-    ).done()
+    )
+    .done(=>
+      @setState {'loading': false}
+    )
 
   componentDidMount: ->
 #    @createIsotopeContainer()
@@ -235,7 +240,13 @@ Component = React.createClass
     @iso?.destroy?()
 
   render: ->
-    #sbrs = _.chain(@state.comments).values().pluck('sbrs').flatten().unique().sort().value()
+    if @state.loading is true
+      return (i {className: "fa fa-spinner fa-spin"}, [])
+
+    if not @state.comments?
+      (Alert {bsStyle: "warning", key: 'alert'}, [
+        "No case comments found for this case"
+      ])
 
     (div {}, [
       (SlaAttainment {

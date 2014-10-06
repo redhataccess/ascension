@@ -17,9 +17,14 @@ UserLogic = {}
 
 UserLogic.normalizeUserResponse = (body) ->
   u = undefined
-  if body?['resource']?
-    id = body['externalModelId']
-    u = _.clone(body['resource'])
+  if _.isArray(body)
+    u = body[0]
+  else
+    u = body
+
+  if u?
+    id = u['externalModelId']
+    u = u['resource']
     u.id = id
     u.email = u.email[0]?.address
     u.sso = u.sso[0]
@@ -33,6 +38,7 @@ UserLogic.fetchUser = (opts) ->
     url: "#{settings.UDS_URL}/user/#{opts.userInput}"
     json: true
 
+  logger.debug "UserLogic.fetchUser: #{opts.url}"
   # Lookup user based on given sso username
   request opts, (err, response, body) ->
     user = self.normalizeUserResponse(body)

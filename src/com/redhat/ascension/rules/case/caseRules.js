@@ -1,5 +1,5 @@
 (function() {
-  var CaseRules, EntityOpEnum, MongoOperations, Q, TaskOpEnum, TaskRules, TaskStateEnum, TaskTypeEnum, db, dbPromise, logger, moment, mongoose, mongooseQ, nools, prettyjson, request, salesforce, settings, _;
+  var CaseRules, EntityOpEnum, KcsRules, MongoOperations, Q, TaskOpEnum, TaskRules, TaskStateEnum, TaskTypeEnum, db, dbPromise, logger, moment, mongoose, mongooseQ, nools, prettyjson, request, salesforce, settings, _;
 
   nools = require('nools');
 
@@ -35,9 +35,11 @@
 
   request = require('request');
 
+  KcsRules = require('./kcsRules');
+
   CaseRules = {};
 
-  CaseRules.soql = "SELECT\n  AccountId,\n  Account_Number__c,\n  CaseNumber,\n  Collaboration_Score__c,\n  Comment_Count__c,\n  CreatedDate,\n  Created_By__c,\n  FTS_Role__c,\n  FTS__c,\n  Last_Breach__c,\n  PrivateCommentCount__c,\n  PublicCommentCount__c,\n  SBT__c,\n  SBR_Group__c,\n  Severity__c,\n  Status,\n  Internal_Status__c,\n  Strategic__c,\n  Tags__c\nFROM\n  Case\nWHERE\n  OwnerId != '00GA0000000XxxNMAS'\n  #andStatusCondition#\n  AND Internal_Status__c != 'Waiting on Engineering'\n  AND Internal_Status__c != 'Waiting on PM'\nLIMIT 2000";
+  CaseRules.soql = "SELECT\n  AccountId,\n  Account_Number__c,\n  CaseNumber,\n  Collaboration_Score__c,\n  Comment_Count__c,\n  CreatedDate,\n  Created_By__c,\n  FTS_Role__c,\n  FTS__c,\n  Last_Breach__c,\n  PrivateCommentCount__c,\n  PublicCommentCount__c,\n  SBT__c,\n  SBR_Group__c,\n  Severity__c,\n  Status,\n  Internal_Status__c,\n  Strategic__c,\n  Tags__c,\n  (SELECT\n    Id,\n    Linking_Mechanism__c,\n    Type__c,\n    Resource_Type__c\n  FROM\n    Case_Resource_Relationships__r)\nFROM\n  Case\nWHERE\n  OwnerId != '00GA0000000XxxNMAS'\n  #andStatusCondition#\n  AND Internal_Status__c != 'Waiting on Engineering'\n  AND Internal_Status__c != 'Waiting on PM'\nLIMIT 1000";
 
   CaseRules.fetchCases = function() {
     var soql;
@@ -72,6 +74,7 @@
   };
 
   CaseRules.normalizeCase = function(c) {
+    var _ref;
     return {
       status: c['status'] || c['Status'],
       internalStatus: c['internalStatus'] || c['Internal_Status__c'],
@@ -81,7 +84,10 @@
       sbt: c['sbt'] || c['SBT__c'] || null,
       created: c['created'] || c['CreatedDate'],
       collaborationScore: c['collaborationScore'] || c['Collaboration_Score__c'],
-      caseNumber: c['caseNumber'] || c['CaseNumber']
+      caseNumber: c['caseNumber'] || c['CaseNumber'],
+      linkedSolutionCount: _.filter(((_ref = c['Case_Resource_Relationships__r']) != null ? _ref['records'] : void 0) || [], function(r) {
+        return r['Resource_Type__c'] === 'Solution' && _.contains(['Link', 'Link;Pin'], r['Type__c']);
+      })
     };
   };
 
@@ -107,7 +113,7 @@
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
           t = TaskRules.makeTaskFromCase(c);
-          logger.warn("Discovered new Unassigned case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Unassigned case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
           return promises.push(TaskRules.saveRuleTask(t));
@@ -119,7 +125,7 @@
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
           t = TaskRules.makeTaskFromCase(c);
-          logger.warn("Discovered new Waiting on Owner case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Waiting on Owner case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
           return promises.push(TaskRules.saveRuleTask(t));
@@ -131,7 +137,7 @@
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
           t = TaskRules.makeTaskFromCase(c);
-          logger.warn("Discovered new Waiting on Contributor case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Waiting on Contributor case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
           return promises.push(TaskRules.saveRuleTask(t));
@@ -143,7 +149,7 @@
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
           t = TaskRules.makeTaskFromCase(c);
-          logger.warn("Discovered new Waiting on Collaboration case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Waiting on Collaboration case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
           return promises.push(TaskRules.saveRuleTask(t));
@@ -154,7 +160,7 @@
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
-          logger.warn("Discovered new Waiting on Engineering case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Waiting on Engineering case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
           t = TaskRules.makeTaskFromCase(c);
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
@@ -167,15 +173,16 @@
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
           t = TaskRules.makeTaskFromCase(c);
-          logger.warn("Discovered new Waiting on Engineering case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Waiting on Engineering case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
           return promises.push(TaskRules.saveRuleTask(t));
         }
       } else {
-        return logger.debug("Did not create task from case: " + (prettyjson.render(c)));
+        return logger.warn("Did not create task from case: " + (prettyjson.render(c)));
       }
     });
+    logger.debug("CaseRules.match resolving " + promises.length + " promises");
     deferred.resolve(promises);
     return deferred.promise;
   };
@@ -218,11 +225,16 @@
     }).then(function() {
       return CaseRules.fetchCases();
     }).then(function(cases) {
-      return CaseRules.match({
-        cases: cases
-      });
-    }).then(function(promises) {
-      return Q.allSettled(promises);
+      return [
+        CaseRules.match({
+          cases: cases
+        }), KcsRules.match({
+          cases: cases
+        })
+      ];
+    }).spread(function(casePromises, kcsPromises) {
+      logger.debug("Received " + casePromises.length + " caseResults and " + kcsPromises + " kcs results");
+      return Q.allSettled(_.flatten([casePromises, kcsPromises]));
     }).then(function(results) {
       return logger.debug("Completed manipulating " + results.length + " tasks");
     })["catch"](function(err) {
