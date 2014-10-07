@@ -2,10 +2,18 @@ Store = require 'store.js/store'
 
 Auth =
   'authedUser': undefined
-  set: (user) ->
+
+  setAuthedUser: (user) ->
     Auth.authedUser = user
     Store.set('authedUser', user)
-  get: ->
+  getAuthedUser: ->
     Auth.authedUser || Store.get('authedUser')
+
+  'scopedUser': undefined
+  setScopedUser: (user) ->
+    Auth.scopedUser = user
+    Store.set('scopedUser', user)
+  getScopedUser: ->
+    Auth.scopedUser || Store.get('scopedUser')
 
 module.exports = Auth

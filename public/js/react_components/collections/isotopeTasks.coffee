@@ -41,63 +41,61 @@ Component = React.createClass
     # Set to true to reload items and arrange iso
     'reloadIso': false
 
-  # TODO these CRUD ops should be extracted into a mixin
-  # TODO -- on the then, refetch the tasks so they can be re-rendered...that'll be interesting
-  takeOwnership: (task, event) ->
-    event.preventDefault()
-    event.stopPropagation()
-    console.log "#{Auth.get()['resource']['firstName']} is Taking ownership of #{task._id}"
-
-    queryParams = [
-      {name: 'action', value: TaskActionsEnum.ASSIGN.name},
-      #{name: 'userInput', value: Auth.authedUser['externalModelId']}
-      {name: 'userInput', value: Auth.get()['externalModelId']}
-    ]
-
-    # Make a post call to assign the current authenticated user to the task
-    @post({path: "/task/#{task._id}", queryParams: queryParams})
-    # Re-fetch the task after it has been assigned the user
-    .then(=> @get({path: "/task/#{task._id}"}))
-    # The returned task will be the latest, update the state
-    .then((task) => @queryTasks(@props) )
-    .catch((err) -> console.error "Could not load task: #{err.stack}" )
-    .done()
-
-  removeOwnership: (task, event) ->
-    event.preventDefault()
-    console.log "#{Auth.get()['resource']['firstName']} is removing ownership from #{task._id}"
-    queryParams = [ {name: 'action', value: TaskActionsEnum.UNASSIGN.name} ]
-
-    # Make a post call to remove the current owner
-    @post({path: "/task/#{task._id}", queryParams: queryParams})
-    # Re-fetch the task after it has been assigned the user
-    .then(=> @get({path: "/task/#{task._id}"}))
-    # The returned task will be the latest, update the state
-    .then((task) => @setState({'task': task}))
-    .catch((err) -> console.error "Could not load task: #{err.stack}" )
-    .done()
-
-  close: (task, event) ->
-    event.preventDefault()
-    console.log "#{Auth.get()['resource']['firstName']} is closing #{task._id}"
-    queryParams = [ {name: 'action', value: TaskActionsEnum.CLOSE.name} ]
-
-    # Make a post call to remove the current owner
-    @post({path: "/task/#{task._id}", queryParams: queryParams})
-    # Re-fetch the task after it has been assigned the user
-    .then(=> @get({path: "/task/#{task._id}"}))
-    # The returned task will be the latest, update the state
-    .then((task) => @setState({'task': task}))
-    .catch((err) -> console.error "Could not load task: #{err.stack}" )
-    .done()
+#  takeOwnership: (task, event) ->
+#    event.preventDefault()
+#    event.stopPropagation()
+#    console.log "#{Auth.getAuthedUser()['resource']['firstName']} is Taking ownership of #{task._id}"
+#
+#    queryParams = [
+#      {name: 'action', value: TaskActionsEnum.ASSIGN.name},
+#      #{name: 'userInput', value: Auth.authedUser['externalModelId']}
+#      {name: 'userInput', value: Auth.getAuthedUser()['externalModelId']}
+#    ]
+#
+#    # Make a post call to assign the current authenticated user to the task
+#    @post({path: "/task/#{task._id}", queryParams: queryParams})
+#    # Re-fetch the task after it has been assigned the user
+#    .then(=> @get({path: "/task/#{task._id}"}))
+#    # The returned task will be the latest, update the state
+#    .then((task) => @queryTasks(@props) )
+#    .catch((err) -> console.error "Could not load task: #{err.stack}" )
+#    .done()
+#
+#  removeOwnership: (task, event) ->
+#    event.preventDefault()
+#    console.log "#{Auth.getAuthedUser()['resource']['firstName']} is removing ownership from #{task._id}"
+#    queryParams = [ {name: 'action', value: TaskActionsEnum.UNASSIGN.name} ]
+#
+#    # Make a post call to remove the current owner
+#    @post({path: "/task/#{task._id}", queryParams: queryParams})
+#    # Re-fetch the task after it has been assigned the user
+#    .then(=> @get({path: "/task/#{task._id}"}))
+#    # The returned task will be the latest, update the state
+#    .then((task) => @setState({'task': task}))
+#    .catch((err) -> console.error "Could not load task: #{err.stack}" )
+#    .done()
+#
+#  close: (task, event) ->
+#    event.preventDefault()
+#    console.log "#{Auth.getAuthedUser()['resource']['firstName']} is closing #{task._id}"
+#    queryParams = [ {name: 'action', value: TaskActionsEnum.CLOSE.name} ]
+#
+#    # Make a post call to remove the current owner
+#    @post({path: "/task/#{task._id}", queryParams: queryParams})
+#    # Re-fetch the task after it has been assigned the user
+#    .then(=> @get({path: "/task/#{task._id}"}))
+#    # The returned task will be the latest, update the state
+#    .then((task) => @setState({'task': task}))
+#    .catch((err) -> console.error "Could not load task: #{err.stack}" )
+#    .done()
 
   genTaskClass: (t) ->
-#    console.debug "owner.id: #{t['owner']?['id']} authed user id: #{Auth.get()?['resource']?['id']}"
-#    console.debug "owner.id is authed id: #{t['owner']?['id'] is Auth.get()?['resource']?['id']}"
+#    console.debug "owner.id: #{t['owner']?['id']} authed user id: #{Auth.getAuthedUser()?['resource']?['id']}"
+#    console.debug "owner.id is authed id: #{t['owner']?['id'] is Auth.getAuthedUser()?['resource']?['id']}"
     classSet =
       'task': true
       'task100': true
-      'task-own': Auth.get()? and (t['owner']?['id'] is Auth.get()?['externalModelId'])
+      'task-own': Auth.getAuthedUser()? and (t['owner']?['id'] is Auth.getAuthedUser()?['externalModelId'])
 #    This causes the screen to 'blip', it fubars things, don't use it
 #      'task-grow': true # http://ianlunn.github.io/Hover/
       'case': t['type'] is 'case'
@@ -119,11 +117,6 @@ Component = React.createClass
     queryParams =
       ssoUsername: @props.query.ssoUsername
       admin: @props.query.admin
-#    queryParams = {}
-#    if @props.query.ssoUsername? and @props.query.ssoUsername isnt ''
-#      queryParams['ssoUsername'] = @props.query.ssoUsername
-#    Router.transitionTo("/task/#{t['_id']}")
-#    Router.transitionTo("task", params, queryParams)
     Router.transitionTo("dashboard", params, queryParams)
 
   # Handles the meta data icon for the underlying entity.  So a case with WoRH has a specific icon
@@ -147,26 +140,9 @@ Component = React.createClass
     sym || 'Task'
 
   genTaskStateIcon: (t) ->
-    TaskIconMapping[t['state']]?.icon || 'fa-medkit'
+    icon = TaskIconMapping[t['state']]?.icon || 'fa-medkit'
+    (i className: "fa #{icon} fw", [])
 
-#  genTaskElements: () ->
-#    tasks = _.map @state['tasks'], (t) =>
-#      (div
-#        id: t['_id']
-#        className: @genTaskClass(t)
-#        style: @genTaskStyle(t)
-#        key: t['_id']
-#        onClick: @taskClick.bind(@, t)
-#      , [
-#        (i {className: "task-state fa #{@genTaskStateIcon(t)}"}, [])
-#        (p {className: "task-symbol"}, [@genTaskSymbol(t)])
-#        (span {className: "task-icon"}, [
-#          (i {className: "fa #{@genTaskIconClass(t)}"}, [])
-#          nbsp
-#          (span {}, [@genTaskBid(t)])
-#        ])
-#      ])
-#    tasks
   genTaskElements: () ->
     tasks = _.map @state['tasks'], (t) =>
       (div
@@ -176,23 +152,29 @@ Component = React.createClass
         key: t['_id']
         onClick: @taskClick.bind(@, t)
       , [
-          (span {className: 'task-symbol'}, [ @genTaskSymbol(t) ])
-          nbsp
-          nbsp
-          (span {className: 'task-bid'}, [ @genTaskBid(t) ])
-          (Spacer {}, [])
+          #(span {className: 'task-symbol'}, [ @genTaskSymbol(t) ])
+          #nbsp
+          #nbsp
+          #(Spacer {}, [])
           (TaskAction {task: t,  key: 'taskAction'}, [])
-          ' '
-          (TaskMetaData {task: t, key: 'taskMetaData'}, [])
-          (span {className: 'task-state'}, [
-            (TaskState
-              task: t
-              takeOwnership: @takeOwnership.bind(@, t)
-              removeOwnership: @removeOwnership.bind(@, t)
-              close: @close.bind(@, t)
-              key: 'taskState'
-            , [])
+          # Case number
+          (span {className: 'task-bid'}, [ @genTaskBid(t) ])
+          # Metadata represents the sbrs/tags of the task
+          #' '
+          #(TaskMetaData {task: t, key: 'taskMetaData'}, [])
+          (span {className: 'task-state-icon'}, [
+            @genTaskStateIcon(t)
           ])
+          # Create a TaskStateLabel which just shows the labels instead of the dropdown
+#          (span {className: 'task-state'}, [
+#            (TaskState
+#              task: t
+#              takeOwnership: @takeOwnership.bind(@, t)
+#              removeOwnership: @removeOwnership.bind(@, t)
+#              close: @close.bind(@, t)
+#              key: 'taskState'
+#            , [])
+#          ])
         ])
     tasks
 
@@ -389,67 +371,29 @@ Component = React.createClass
     ).done()
 
   componentDidMount: ->
-    console.debug "componentDidMount"
+    #console.debug "componentDidMount"
     @createIsotopeContainer()
     @queryTasks(@props)
 
-  #TODO -- considering setting a field updateLayout in the queryTasks, so the iso container can be updated on shouldComponentUpdate
-  # or on componentDidUpdate, where it will then set the state to false
-
-  shouldComponentUpdate: (nextProps, nextState) ->
-    console.debug "state.tasks.length: #{@state.tasks?.length} nextState.tasks.length: #{nextState.tasks?.length}"
-#    #console.debug "state: #{@state.query.ssoUsername} nextState: #{nextState.query.ssoUsername}"
-#    if ((@state['tasks'].length isnt nextState['tasks'].length) or (@state.query.ssoUsername isnt nextState.query.ssoUsername))
-#      console.debug "componentShouldUpdate: true"
-#      return true
-#    else
-#      console.debug "componentShouldUpdate: false"
-#      return false
-
-    return true
+#  shouldComponentUpdate: (nextProps, nextState) ->
+#    console.debug "state.tasks.length: #{@state.tasks?.length} nextState.tasks.length: #{nextState.tasks?.length}"
+#    return true
 
   componentWillReceiveProps: (nextProps) ->
     #console.debug "componentWillReceiveProps:query: #{JSON.stringify(nextProps.query)}"
     #console.debug "componentWillReceiveProps:params: #{JSON.stringify(nextProps.params)}"
-
-    if (not _.isEqual(nextProps.query.ssoUsername)) or (not _.isEqual(nextProps.params._id))
+    if (not _.isEqual(@props.query.ssoUsername, nextProps.query.ssoUsername)) or (not _.isEqual(@props.params._id, nextProps.params._id))
       @setState
         query: nextProps.query
         params: nextProps.params
       @queryTasks(nextProps)
 
   componentDidUpdate: ->
-#    # _ids represented in these new tasks
-#    _ids = _.chain(@state.tasks).pluck('_id').value()
-#    #tasksRemoved = @removeOrphans(_ids)
-#    domIds = @getTaskDomIds()
-#    diff = _.xor(_ids, domIds)
-#    # There are REST tasks different than dom tasks, must re-init iso
-#    if diff.length > 0
-#      console.debug "Found tasks to remove, updating the component"
-#      @iso?.reloadItems()
-#      @iso.layout()
-#      @iso?.arrange()
-
     if @state.reloadItems is true
-      console.debug "reloadItems is true, updating iso"
+      #console.debug "reloadItems is true, updating iso"
       @iso?.reloadItems()
       @iso.layout()
       @iso?.arrange()
-
-    #@setState {reloadItems: false}
-
-#  componentWillReceiveProps: (nextProps) ->
-#    #console.debug "componentWillReceiveProps: #{JSON.stringify(nextProps.query)}"
-#    @setState
-#      query: nextProps.query
-#      params: nextProps.params
-#    @queryTasks(nextProps)
-
-#  componentDidUpdate: ->
-#    if @iso?
-#      @iso.arrange
-#        layoutMode: @state.layoutMode
 
   componentWillUnmount: ->
     @iso?.destroy?()
@@ -475,10 +419,10 @@ Component = React.createClass
     (div {}, [
       @genIsotopeControls()
       (div {className: 'row'}, [
-        (div {className: 'col-md-4'}, [
+        (div {className: 'col-md-3'}, [
           (div {id: @props.id, className: 'tasksContainer', key: 'tasksContainer', ref: 'tasksContainer'}, @genTaskElements())
         ])
-        (div {className: 'col-md-8'}, [
+        (div {className: 'col-md-9'}, [
           (Task {params: @props.params}, [])
         ])
       ])

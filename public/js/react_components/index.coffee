@@ -24,6 +24,9 @@ Auth            = require './auth/auth.coffee'
 # Mixins
 WebUtilsMixin   = require './mixins/webUtilsMixin.coffee'
 
+# Bootstrap components
+Alert           = require 'react-bootstrap/Alert'
+
 # global css
 #require '../../stylesheets/reset.css'
 #require '../../stylesheets/main.css'
@@ -66,45 +69,85 @@ App = React.createClass
   mixins: [WebUtilsMixin]
 
   getInitialState: ->
+    # Represents the currently authed user
     'authedUser': Auth.authedUser
+    # Represents the currently scoped user, i.e. ?ssoUsername=rhn-support-someone
+    'scopedUser': Auth.scopedUser
+    'authFailed': false
 
-#  render: ->
-#    (div {className: 'main'}, [
-#      (ul {}, [
-#        (li {}, [
-#          (Link {to: 'about'}, ['About'])
-#          (Link {to: 'dashboard'}, ['Dashboard'])
-#        ])
-#      ])
-#      @props.activeRouteHandler()
-#      #(h1 {}, ['Hello from React! mod'])
-#    ])
-
-  componentDidMount: ->
+  queryScopedUser: (ssoUsername) ->
     self = @
-    ssoUsername = @getRhUserCookie()
-    #userPromise = @getAuthenticatedUser(@props.query['ssoUsername'] || ssoUsername)
-    userPromise = @getAuthenticatedUser(ssoUsername)
+    userPromise = @getUser(ssoUsername)
     userPromise?.done((user) ->
       if _.isArray(user) then user = user[0]
 
       if user?['externalModelId']?
-        #console.debug "Setting authed user to: #{JSON.stringify(user, null, ' ')}"
-        Auth.set(user)
-        self.setState {'authedUser': Auth.authedUser}
+        console.debug "Setting scoped user to: #{user['resource']['firstName']}"
+        Auth.setScopedUser(user)
+        self.setState {'scopedUser': user}
       else
-        Auth.set(undefined)
-        self.setState {'authedUser': Auth.authedUser}
+        Auth.setScopedUser(undefined)
+        self.setState {'scopedUser': undefined}
         console.error "User: #{JSON.stringify(user, null, ' ')} has no id"
     , (err) ->
       console.error err
     )
 
-  generateAuthenticationElement: () ->
-    if Auth.get()?
-      return (p {className: 'navbar-text', key: 'navbar-right'}, ["Logged in as #{Auth.get()['resource']['firstName']} #{Auth.get()['resource']['lastName']}"])
+  componentWillReceiveProps: (nextProps) ->
+    #console.debug "componentWillReceiveProps:query: #{JSON.stringify(nextProps.query)}"
+    #console.debug "componentWillReceiveProps:params: #{JSON.stringify(nextProps.params)}"
+    # This means the ssoUsername changed, need to re-query to scope this user
+    if not _.isEqual(@props.query.ssoUsername, nextProps.query.ssoUsername)
+      @queryScopedUser(nextProps.query.ssoUsername)
+
+  componentDidMount: ->
+    self = @
+    ssoUsername = @getRhUserCookie()
+    # TODO -- if no RhUserCookie, redirect to the gss.my
+    if ssoUsername?
+      userPromise = @getUser(ssoUsername)
+      userPromise?.done((user) ->
+        if _.isArray(user) then user = user[0]
+
+        if user?['externalModelId']?
+          console.debug "Setting authed user to: #{user['resource']['firstName']}"
+          Auth.setAuthedUser(user)
+          self.setState
+            'authedUser': user
+            'authFailed': false
+        else
+          Auth.setAuthedUser(undefined)
+          self.setState
+            'authedUser': undefined
+            'authFailed': true
+          console.error "User: #{JSON.stringify(user, null, ' ')} has no id"
+      , (err) ->
+        console.error err
+      )
+    else
+      Auth.setAuthedUser(undefined)
+      self.setState
+        'authedUser': undefined
+        'authFailed': true
+
+    if @props.query.ssoUsername? and @props.query.ssoUsername isnt ''
+      @queryScopedUser(@props.query.ssoUsername)
+
+  genAuthenticationElement: () ->
+    if Auth.getAuthedUser()?
+      return (p {className: 'navbar-text', key: 'navbar-right'}, ["Logged in as #{Auth.getAuthedUser()['resource']['firstName']} #{Auth.getAuthedUser()['resource']['lastName']}"])
     else
       return (a {target: '_blank', href: 'https://gss.my.salesforce.com', key: 'sso'}, ['https://gss.my.salesforce.com'])
+
+  genMainContents: () ->
+    if @state.authFailed is true
+      return (Alert {bsStyle: "warning", key: 'alert'}, [
+        "Not authenticated, please login @ "
+        (a {target: '_blank', href: 'https://gss.my.salesforce.com', key: 'sso'}, ['https://gss.my.salesforce.com'])
+        " and refresh."
+      ])
+    else
+      @props.activeRouteHandler()
 
   render: ->
     (div {}, [
@@ -141,23 +184,15 @@ App = React.createClass
 #              (a {href: '#'}, ['Link'])
 #            ])
             (li {key: 'authLi'}, [
-              @generateAuthenticationElement()
+              @genAuthenticationElement()
             ])
           ])
         ])
       ])
       (div {className: 'container-ascension', key: 'mainContainer'}, [
-        @props.activeRouteHandler()
+        @genMainContents()
       ])
-      #(div {className: 'container', key: 'mainContainer'}, [
-      #  (div {className: 'row', key: 'row'}, [
-      #    (div {className: 'col-xs-12', key: 'col'}, [
-      #      @props.activeRouteHandler()
-      #    ])
-      #  ])
-      #])
     ])
-
 
 routes = (
   (Routes {location: 'hash'}, [

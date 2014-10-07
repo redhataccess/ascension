@@ -29,15 +29,14 @@ Component = React.createClass
   getInitialState: ->
     'task': undefined
 
-  takeOwnership: (event) ->
+  assignOwnership: (user, event) ->
     event.preventDefault()
     event.stopPropagation()
-    console.log "#{Auth.get()['resource']['firstName']} is Taking ownership of #{@state.task._id}"
+    console.log "#{user['resource']['firstName']} is Taking ownership of #{@state.task._id}"
 
     queryParams = [
       {name: 'action', value: TaskActionsEnum.ASSIGN.name},
-      #{name: 'userInput', value: Auth.authedUser['externalModelId']}
-      {name: 'userInput', value: Auth.get()['externalModelId']}
+      {name: 'userInput', value: user['externalModelId']}
     ]
 
     # Make a post call to assign the current authenticated user to the task
@@ -49,30 +48,68 @@ Component = React.createClass
     .catch((err) -> console.error "Could not load task: #{err.stack}" )
     .done()
 
+#  takeOwnership: (event) ->
+#    event.preventDefault()
+#    event.stopPropagation()
+#    console.log "#{Auth.getAuthedUser()['resource']['firstName']} is Taking ownership of #{@state.task._id}"
+#
+#    queryParams = [
+#      {name: 'action', value: TaskActionsEnum.ASSIGN.name},
+#      {name: 'userInput', value: Auth.getAuthedUser()['externalModelId']}
+#    ]
+#
+#    # Make a post call to assign the current authenticated user to the task
+#    @post({path: "/task/#{@props.params._id}", queryParams: queryParams})
+#    # Re-fetch the task after it has been assigned the user
+#    .then(=> @get({path: "/task/#{@props.params._id}"}))
+#    # The returned task will be the latest, update the state
+#    .then((task) => @setState({'task': task}) )
+#    .catch((err) -> console.error "Could not load task: #{err.stack}" )
+#    .done()
+#
+#  assignScopedOwnership: (event) ->
+#    event.preventDefault()
+#    event.stopPropagation()
+#    console.log "#{Auth.getScopedUser()['resource']['firstName']} is being assigned ownership of #{@state.task._id}"
+#
+#    queryParams = [
+#      {name: 'action', value: TaskActionsEnum.ASSIGN.name},
+#      {name: 'userInput', value: Auth.getScopedUser()['externalModelId']}
+#    ]
+#
+#    # Make a post call to assign the current authenticated user to the task
+#    # Re-fetch the task after it has been assigned the user
+#    # The returned task will be the latest, update the state
+#    @post({path: "/task/#{@props.params._id}", queryParams: queryParams})
+#    .then(=> @get({path: "/task/#{@props.params._id}"}))
+#    .then((task) => @setState({'task': task}) )
+#    .catch((err) -> console.error "Could not load task: #{err.stack}" )
+#    .done()
+
   removeOwnership: (event) ->
     event.preventDefault()
-    console.log "#{Auth.get()['resource']['firstName']} is removing ownership from #{@state.task._id}"
+    console.log "#{Auth.getAuthedUser()['resource']['firstName']} is removing ownership from #{@state.task._id}"
     queryParams = [ {name: 'action', value: TaskActionsEnum.UNASSIGN.name} ]
 
     # Make a post call to remove the current owner
-    @post({path: "/task/#{@props.params._id}", queryParams: queryParams})
     # Re-fetch the task after it has been assigned the user
-    .then(=> @get({path: "/task/#{@props.params._id}"}))
     # The returned task will be the latest, update the state
+    @post({path: "/task/#{@props.params._id}", queryParams: queryParams})
+    .then(=> @get({path: "/task/#{@props.params._id}"}))
     .then((task) => @setState({'task': task}))
     .catch((err) -> console.error "Could not load task: #{err.stack}" )
     .done()
 
   close: (event) ->
     event.preventDefault()
-    console.log "#{Auth.get()['resource']['firstName']} is closing #{@state.task._id}"
+    console.log "#{Auth.getAuthedUser()['resource']['firstName']} is closing #{@state.task._id}"
     queryParams = [ {name: 'action', value: TaskActionsEnum.CLOSE.name} ]
 
     # Make a post call to remove the current owner
-    @post({path: "/task/#{@props.params._id}", queryParams: queryParams})
     # Re-fetch the task after it has been assigned the user
-    .then(=> @get({path: "/task/#{@props.params._id}"}))
     # The returned task will be the latest, update the state
+    @post({path: "/task/#{@props.params._id}", queryParams: queryParams})
+    .then(=> @get({path: "/task/#{@props.params._id}"}))
     .then((task) => @setState({'task': task}))
     .catch((err) -> console.error "Could not load task: #{err.stack}" )
     .done()
@@ -81,28 +118,7 @@ Component = React.createClass
   genEntityContents: () ->
     if @state.task.type is TaskTypeEnum.CASE.name
       return (Case {key: 'taskCase', caseNumber: @state.task.bid}, [])
-
     null
-
-
-#  componentWillMount: ->
-#    @get({path: "/task/#{@props.params._id}"})
-#    .then((task) =>
-#      @setState {'task': task}
-#
-#      # If this is a case, return a promise to fetch the case
-#      if task.type is TaskTypeEnum.CASE.name
-#        return @get({path: "/case/#{task.bid}"})
-#    )
-#    .then((c) =>
-#      console.debug "Discovered case: #{c['resource']['caseNumber']}"
-#      @setState
-#        'case': c
-#        'kcs': undefined
-#    )
-#    .catch((err) ->
-#      console.error "Could not load tasks: #{err.stack}"
-#    ).done()
 
   queryTask: (props) ->
     @get({path: "/task/#{props.params._id}"})
@@ -114,12 +130,10 @@ Component = React.createClass
     ).done()
 
   componentWillReceiveProps: (nextProps) ->
-    console.debug "Task:componentWillReceiveProps"
     if (@props.params._id isnt nextProps.params._id) and nextProps.params._id?
       @queryTask(nextProps)
 
   componentDidMount: ->
-    console.debug "Task:componentDidMount"
     if @props.params?._id is 'tasks' or (@props.params?._id is undefined)
       console.warn '/task/tasks received, not fetching task.'
       return
@@ -143,7 +157,8 @@ Component = React.createClass
             # Assigned, unassigned, closed, abandoned
             (TaskState
               task: @state.task
-              takeOwnership: @takeOwnership
+              takeOwnership: @assignOwnership.bind(@, Auth.getAuthedUser())
+              assignScopedOwnership: @assignOwnership.bind(@, Auth.getScopedUser())
               removeOwnership: @removeOwnership
               close: @close
               key: 'taskStatus'

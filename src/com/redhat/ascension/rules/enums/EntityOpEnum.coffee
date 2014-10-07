@@ -12,49 +12,49 @@ EntityOp = {}
 
 EntityOp.TAKE_FTS =
   name: 'fts'
-  display: 'Take FTS Role'
+  display: 'Take FTS Role on case'
 _.defaults EntityOp,
   'fts': EntityOp.TAKE_FTS
 
 EntityOp.OWN =
   name: 'takeOwnership'
-  display: 'Take ownership of this case'
+  display: 'Take ownership of case'
 _.defaults EntityOp,
   'takeOwnership': EntityOp.TAKE_FTS
 
 EntityOp.COLLABORATE =
   name: 'collaborate'
-  display: 'Collaborate on this case'
+  display: 'Collaborate on case'
 _.defaults EntityOp,
   'collaborate': EntityOp.COLLABORATE
 
 EntityOp.CONTRIBUTE =
   name: 'contribute'
-  display: 'Contribute on this case'
+  display: 'Contribute on case'
 _.defaults EntityOp,
   'contribute': EntityOp.CONTRIBUTE
 
 EntityOp.UPDATE =
   name: 'update'
-  display: 'Update this case'
+  display: 'Update case'
 _.defaults EntityOp,
   'update': EntityOp.UPDATE
 
 EntityOp.SET_SBRS =
   name: 'setSbrs'
-  display: 'Set SBRs on this case'
+  display: 'Set SBRs on case'
 _.defaults EntityOp,
   'setSbrs': EntityOp.SET_SBRS
 
 EntityOp.SET_TAGS =
   name: 'setTags'
-  display: 'Set tags on this case'
+  display: 'Set tags on case'
 _.defaults EntityOp,
   'setTags': EntityOp.SET_TAGS
 
 EntityOp.TRANSLATE =
   name: 'translate'
-  display: 'Translate this case'
+  display: 'Translate case'
 _.defaults EntityOp,
   'translate': EntityOp.TRANSLATE
 
@@ -66,13 +66,13 @@ _.defaults EntityOp,
 
 EntityOp.FOLLOW_UP_WITH_ENGINEERING =
   name: 'followUpWithEngineering'
-  display: 'Follow up with engineering'
+  display: 'Follow up with engineering on case'
 _.defaults EntityOp,
   'followUpWithEngineering': EntityOp.FOLLOW_UP_WITH_ENGINEERING
 
 EntityOp.FOLLOW_UP_WITH_SALES =
   name: 'followUpWithSales'
-  display: 'Follow up with sales'
+  display: 'Follow up with sales on case'
 _.defaults EntityOp,
   'followUpWithSales': EntityOp.FOLLOW_UP_WITH_SALES
 
@@ -82,7 +82,7 @@ _.defaults EntityOp,
 
 EntityOp.CREATE_KCS =
   name: 'createKcsContent'
-  display: 'Create KCS Content'
+  display: 'Create KCS Content for case'
 _.defaults EntityOp,
   'createKcsContent': EntityOp.CREATE_KCS
 

@@ -40,7 +40,7 @@ WebUtilsMixin.getRhUserCookie = ->
   else
     return undefined
 
-WebUtilsMixin.getAuthenticatedUser = (ssoUsername) ->
+WebUtilsMixin.getUser = (ssoUsername) ->
   deferred = Q.defer()
 
   if ssoUsername? and ssoUsername isnt ''
