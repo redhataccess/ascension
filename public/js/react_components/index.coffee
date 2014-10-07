@@ -40,12 +40,14 @@ imageURL = '../../images/yeoman.png'
 Dashboard = React.createClass
   getInitialState: ->
     query: @props.query
+    params: @props.params
 
   # This is required to properly pass the query properties to the sub components
   # https://github.com/rackt/react-router/blob/master/docs/api/components/Route.md
   componentWillReceiveProps: (nextProps) ->
     @setState
       query: nextProps.query
+      params: nextProps.params
 
   render: ->
     (div {key: 'mainDashboard'}, [
@@ -54,6 +56,7 @@ Dashboard = React.createClass
         id: 'tasksContainer'
         key: 'isotopeTasks'
         query: @state.query
+        params: @state.params
       , [])
 #      (IsotopeTest {id: 'tasksContainer', key: 'isotopeTasks'}, [])
     ])
@@ -125,6 +128,7 @@ App = React.createClass
                 to: 'dashboard'
                 key: 'linkDashboard'
                 query: @props.query
+                params: {_id: 'tasks'}
               , ['Dashboard'])
             ])
             (li {key: 'admin'}, [
@@ -159,7 +163,9 @@ routes = (
   (Routes {location: 'hash'}, [
     #params: '{ssoUsername: true, admin: true}',
     (Route {key: 'app', name: 'app', path: '/', handler: App}, [
-      (Route {key: 'dashboard', name: 'dashboard', handler: Dashboard, addHandlerKey: true}, [])
+      #(Route {key: 'dashboard', name: 'dashboard', handler: Dashboard, addHandlerKey: true}, [])
+      #(Route {key: 'dashboard', name: 'dashboard', path: 'dashboard/:_id', handler: Dashboard, addHandlerKey: true}, [])
+      (Route {key: 'dashboard', name: 'dashboard', path: 'dashboard/:_id', handler: Dashboard}, [])
       (Route {key: 'admin', name: 'admin', handler: Admin}, [])
       (Route {key: 'task', name: 'task', path: 'task/:_id', handler: Task}, [])
       (NotFoundRoute {key: 'notFound', handler: Dashboard}, [])

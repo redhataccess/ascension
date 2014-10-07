@@ -37,7 +37,7 @@
 
   TaskLogic.fetchTasks = function(opts) {
     var deferred, uql;
-    if ((opts != null ? opts.ssoUsername : void 0) != null) {
+    if (((opts != null ? opts.ssoUsername : void 0) != null) && (opts != null ? opts.ssoUsername : void 0) !== '') {
       deferred = Q.defer();
       uql = {
         where: "SSO is \"" + opts.ssoUsername + "\""
@@ -56,7 +56,7 @@
           ]
         };
         logger.debug("Searching mongo with: " + (JSON.stringify(findClause)));
-        return MongoOps['models']['task'].find().where(findClause).limit(100).execQ();
+        return MongoOps['models']['task'].find().where(findClause).limit(_.parseInt(opts.limit) || 100).execQ();
       }).then(function(tasks) {
         logger.debug("Discovered: " + tasks.length + " tasks");
         return deferred.resolve(tasks);
@@ -65,7 +65,7 @@
       }).done();
       return deferred.promise;
     } else {
-      return MongoOps['models']['task'].find().where().limit(100).execQ();
+      return MongoOps['models']['task'].find().where().limit(_.parseInt(opts.limit) || 100).execQ();
     }
   };
 

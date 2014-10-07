@@ -109,9 +109,10 @@
 
   app.get("/tasks", function(req, res) {
     var opts;
-    opts = !((req.query['ssoUsername'] == null) || req.query['ssoUsername'] === '') ? {
-      ssoUsername: req.query['ssoUsername']
-    } : void 0;
+    opts = {
+      ssoUsername: req.query['ssoUsername'],
+      limit: req.query['limit']
+    };
     return TaskLogic.fetchTasks(opts).then(function(data) {
       return res.send(data);
     }, function(err) {

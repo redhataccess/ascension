@@ -20,7 +20,7 @@ TaskLogic = {}
 
 TaskLogic.fetchTasks = (opts) ->
 
-  if opts?.ssoUsername?
+  if opts?.ssoUsername? and opts?.ssoUsername isnt ''
     deferred = Q.defer()
     uql =
       where: "SSO is \"#{opts.ssoUsername}\""
@@ -37,7 +37,7 @@ TaskLogic.fetchTasks = (opts) ->
       MongoOps['models']['task']
       .find()
       .where(findClause)
-      .limit(100)
+      .limit(_.parseInt(opts.limit) || 100)
       .execQ()
     )
     .then((tasks) ->
@@ -48,7 +48,7 @@ TaskLogic.fetchTasks = (opts) ->
     ).done()
     return deferred.promise
   else
-    return MongoOps['models']['task'].find().where().limit(100).execQ()
+    return MongoOps['models']['task'].find().where().limit(_.parseInt(opts.limit) || 100).execQ()
 
 TaskLogic.fetchTask = (opts) ->
   MongoOps['models']['task']

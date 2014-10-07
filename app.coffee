@@ -99,8 +99,8 @@ app.get "/maketasks", (req, res) ->
 app.get "/tasks", (req, res) ->
   opts =
     # Opt param, fetches tasks based on this user [sbrs, ect.]
-    ssoUsername: req.query['ssoUsername'] unless (not req.query['ssoUsername']? or req.query['ssoUsername'] is '')
-
+    ssoUsername: req.query['ssoUsername']
+    limit: req.query['limit']
 
   TaskLogic.fetchTasks(opts).then((data) ->
     res.send(data)

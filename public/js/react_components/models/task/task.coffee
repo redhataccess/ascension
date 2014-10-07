@@ -1,4 +1,6 @@
 React             = require 'react'
+Router            = require 'react-router/dist/react-router'
+ActiveState       = Router.ActiveState
 AjaxMixin         = require '../../mixins/ajaxMixin.coffee'
 TaskState         = require './taskState.coffee'
 TaskHeader        = require './taskHeader.coffee'
@@ -22,13 +24,14 @@ nbsp = "\u00A0"
 
 Component = React.createClass
   displayName: 'Task'
-  mixins: [AjaxMixin]
+  mixins: [AjaxMixin, ActiveState]
 
   getInitialState: ->
     'task': undefined
 
   takeOwnership: (event) ->
     event.preventDefault()
+    event.stopPropagation()
     console.log "#{Auth.get()['resource']['firstName']} is Taking ownership of #{@state.task._id}"
 
     queryParams = [
@@ -80,6 +83,48 @@ Component = React.createClass
       return (Case {key: 'taskCase', caseNumber: @state.task.bid}, [])
 
     null
+
+
+#  componentWillMount: ->
+#    @get({path: "/task/#{@props.params._id}"})
+#    .then((task) =>
+#      @setState {'task': task}
+#
+#      # If this is a case, return a promise to fetch the case
+#      if task.type is TaskTypeEnum.CASE.name
+#        return @get({path: "/case/#{task.bid}"})
+#    )
+#    .then((c) =>
+#      console.debug "Discovered case: #{c['resource']['caseNumber']}"
+#      @setState
+#        'case': c
+#        'kcs': undefined
+#    )
+#    .catch((err) ->
+#      console.error "Could not load tasks: #{err.stack}"
+#    ).done()
+
+  queryTask: (props) ->
+    @get({path: "/task/#{props.params._id}"})
+    .then((task) =>
+      @setState {'task': task}
+    )
+    .catch((err) ->
+      console.error "Could not load tasks: #{err.stack}"
+    ).done()
+
+  componentWillReceiveProps: (nextProps) ->
+    console.debug "Task:componentWillReceiveProps"
+    if (@props.params._id isnt nextProps.params._id) and nextProps.params._id?
+      @queryTask(nextProps)
+
+  componentDidMount: ->
+    console.debug "Task:componentDidMount"
+    if @props.params?._id is 'tasks' or (@props.params?._id is undefined)
+      console.warn '/task/tasks received, not fetching task.'
+      return
+    @queryTask(@props)
+
 
   # span + font-size: 1em for all of the meta data components
   render: ->
@@ -153,33 +198,5 @@ Component = React.createClass
         ])
       ])
     ])
-
-#  componentWillMount: ->
-#    @get({path: "/task/#{@props.params._id}"})
-#    .then((task) =>
-#      @setState {'task': task}
-#
-#      # If this is a case, return a promise to fetch the case
-#      if task.type is TaskTypeEnum.CASE.name
-#        return @get({path: "/case/#{task.bid}"})
-#    )
-#    .then((c) =>
-#      console.debug "Discovered case: #{c['resource']['caseNumber']}"
-#      @setState
-#        'case': c
-#        'kcs': undefined
-#    )
-#    .catch((err) ->
-#      console.error "Could not load tasks: #{err.stack}"
-#    ).done()
-  componentWillMount: ->
-    @get({path: "/task/#{@props.params._id}"})
-    .then((task) =>
-      @setState {'task': task}
-    )
-    .catch((err) ->
-      console.error "Could not load tasks: #{err.stack}"
-    ).done()
-
 
 module.exports = Component

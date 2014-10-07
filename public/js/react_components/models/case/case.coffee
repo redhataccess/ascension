@@ -24,7 +24,7 @@ CaseAssociates    = require './caseAssociates.coffee'
 CaseIssueLinks    = require './caseIssueLinks.coffee'
 CaseResourceLinks = require './caseResourceLinks.coffee'
 
-IsotopeComments   = require '../comment/isotopeComments.coffee'
+Comments          = require '../comment/comments.coffee'
 
 {div, a, img, h1, ul, li, i, span, h3, hr} = React.DOM
 nbsp = "\u00A0"
@@ -37,9 +37,9 @@ Component = React.createClass
     'case': undefined
     'loading': false
 
-  componentWillMount: ->
+  queryCase: (props) ->
     @setState {'loading': true}
-    @get({path: "/case/#{@props.caseNumber}"})
+    @get({path: "/case/#{props.caseNumber}"})
     .then((c) =>
       console.debug "Discovered case: #{c['resource']['caseNumber']}"
       @setState
@@ -47,11 +47,21 @@ Component = React.createClass
         'loading': false
     )
     .catch((err) =>
-      console.error "Could not load case #{@props.caseNumber}: #{err.stack}"
+      console.error "Could not load case #{props.caseNumber}: #{err.stack}"
     )
     .done(=>
       @setState {'loading': false}
     )
+
+  # Initially query for the case
+  componentWillMount: ->
+    if @props.caseNumber?
+      @queryCase(@props)
+
+  # Any subsequent updates to this component will cause a re-query
+  componentWillReceiveProps: (nextProps) ->
+    if @props.caseNumber isnt nextProps.caseNumber
+      @queryCase(nextProps)
 
   render: ->
     if @state.loading is true
@@ -61,6 +71,7 @@ Component = React.createClass
       (Alert {bsStyle: "warning", key: 'alert'}, [
         "No case found with case number #{@props.caseNumber}"
       ])
+      return
 
     (div {}, [
       (CaseHeader {case: @state.case, key: 'caseHeader'}, [])
@@ -84,7 +95,7 @@ Component = React.createClass
 #        ]),
       ])
       (hr {})
-      (IsotopeComments {caseNumber: @state.case.resource.caseNumber, key: 'isotopeComments'}, [])
+      (Comments {caseNumber: @state.case.resource.caseNumber, key: 'comments'}, [])
     ])
 
 module.exports = Component

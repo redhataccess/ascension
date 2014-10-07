@@ -12,22 +12,22 @@
   float: left;
   margin: 5px;
   padding: 10px;
-  width: 100px;
-  height: 100px;
   color: #262524;
   .rounded(2px);
   &:hover {
-    .scale(1.1);
+    .scale(1.025);
   }
   .pointer;
+  // This is primarily for many sbrs/tags
+  //overflow: scroll;
 }
 .task > * {
   margin: 0;
   padding: 0;
 }
 .task.task100 {
-  width: 100px;
   height: 100px;
+  width: 100%;
 }
 .task.case {
   background: @case-color;
@@ -40,23 +40,35 @@
   //box-shadow: rgb(255, 255, 255) 0px 0px 10px 2px;
   box-shadow: rgb(255, 255, 255) 0px 0px 15px -1px;
 }
-.task-icon {
+//.task-icon {
+//  position: absolute;
+//  left: 10px;
+//  top: 56px;
+//  font-size: 10px;
+//  //  color: white;
+//}
+.task-state {
   position: absolute;
-  left: 10px;
-  top: 76px;
+  right: 10px;
   font-size: 10px;
+  top: 10px;
   //  color: white;
 }
 .task-symbol {
   position: absolute;
   left: 10px;
   top: 0px;
-  font-size: 42px;
+  font-size: 30px;
   font-weight: bold;
-  color: white;
+  //color: white;
+  color: rgba(0, 0, 0, 0.72);
 }
-.task-state {
+.task-bid {
   position: absolute;
-  right: 8px;
-  top: 5px;
+  bottom: 8px;
+  right: 10px;
+}
+.task-meta-data {
+  background-color: rgba(0, 0, 0, 0.51);
+  padding: 2px;
 }
