@@ -17,6 +17,7 @@ DefaultRoute         = Router.DefaultRoute
 About           = require './about.coffee'
 Admin           = require './admin/admin.coffee'
 IsotopeTasks    = require './collections/isotopeTasks.coffee'
+Tasks           = require './collections/tasks.coffee'
 IsotopeTest     = require './collections/isotopeTest.coffee'
 Task            = require './models/task/task.coffee'
 Auth            = require './auth/auth.coffee'
@@ -55,7 +56,7 @@ Dashboard = React.createClass
   render: ->
     (div {key: 'mainDashboard'}, [
       #(h1 {key: 'header'}, ['Dashboard'])
-      (IsotopeTasks
+      (Tasks
         id: 'tasksContainer'
         key: 'isotopeTasks'
         query: @state.query

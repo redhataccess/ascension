@@ -44,7 +44,10 @@ Component = React.createClass
     # Re-fetch the task after it has been assigned the user
     .then(=> @get({path: "/task/#{@props.params._id}"}))
     # The returned task will be the latest, update the state
-    .then((task) => @setState({'task': task}) )
+    .then((task) =>
+      @setState({'task': task})
+      @props.queryTasks.call(null)
+    )
     .catch((err) -> console.error "Could not load task: #{err.stack}" )
     .done()
 

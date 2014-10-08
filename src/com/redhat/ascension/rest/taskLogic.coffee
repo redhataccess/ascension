@@ -26,24 +26,68 @@ TaskLogic.fetchTasks = (opts) ->
       where: "SSO is \"#{opts.ssoUsername}\""
 
     UserLogic.fetchUserUql(uql).then((user) ->
-      findClause =
+      ownerFindClause =
         '$or': [
           { 'sbrs': {'$in': user.sbrs} }
           { 'owner.id': user.id }
         ]
 
-      logger.debug "Searching mongo with: #{JSON.stringify(findClause)}"
+      ownerFindClause =
+        'owner.id': user.id
+      nonOwnerFindClause =
+        '$and': [
+          { 'sbrs': {'$in': user.sbrs} }
+          { 'owner.id': {'$ne': user.id }}
+        ]
+      logger.debug "Searching mongo with ownerFindClause: #{JSON.stringify(ownerFindClause)}"
+      logger.debug "Searching mongo with nonOwnerFindClause: #{JSON.stringify(nonOwnerFindClause)}"
 
-      MongoOps['models']['task']
+      # To force the top 7 owner tasks then other by score I need to sort by owner.id then by score.  Or I could
+      # fetch all owner cases first and add those to the fetched tasks, not sure what is best atm
+
+      # 005A0000002a7XZIAY rmanes
+      # db.tasks.find({'$or': [{'sbrs': {'$in': ['Kernel']}}, {'owner.id': '005A0000002a7XZIAY '}]}).sort({'owner.id': -1, score: -1}).limit(10)
+      # db.tasks.find({'owner.id': '005A0000002a7XZIAY '}).sort({'owner.id': -1, score: -1}).limit(10)
+
+      ownerTasksPromise = MongoOps['models']['task']
       .find()
-      .where(findClause)
+      .where(ownerFindClause)
       .limit(_.parseInt(opts.limit) || 100)
+      .sort('-score') # score desc
       .execQ()
+
+      nonOwnerTasksPromise = MongoOps['models']['task']
+      .find()
+      .where(nonOwnerFindClause)
+      .limit(_.parseInt(opts.limit) || 100)
+      .sort('-score') # score desc
+      .execQ()
+
+      [ownerTasksPromise, nonOwnerTasksPromise]
     )
-    .then((tasks) ->
-      logger.debug "Discovered: #{tasks.length} tasks"
-      deferred.resolve tasks
-    ).catch((err) ->
+    #.then((tasks) ->
+    .spread((ownerTasks, nonOwnerTasks) ->
+      logger.debug "Discovered: #{ownerTasks.length} owner tasks, and #{nonOwnerTasks.length} non-owner tasks"
+#      logger.debug "Discovered: #{tasks.length} tasks"
+#      ownerTasks = _.filter(tasks, (t) -> t['owner']['sso'] is opts.ssoUsername)
+#      otherTasks = _.filter(tasks, (t) -> t['owner']['sso'] isnt opts.ssoUsername)
+      finalTasks = []
+
+      # If more than 7 owner tasks return only the top 7 owned
+      if ownerTasks.length > 7
+        deferred.resolve ownerTasks[0..6]
+      # Otherwise push the owner tasks then the other tasks so the owner in front, then take the top 7
+      else
+        logger.debug "Discovered: #{ownerTasks.length} owner tasks and #{nonOwnerTasks.length} non-owner tasks."
+        _.each ownerTasks, (t) -> finalTasks.push t
+        _.each nonOwnerTasks, (t) -> finalTasks.push t
+        deferred.resolve finalTasks[0..6]
+    )
+    #.then((tasks) ->
+    #  logger.debug "Discovered: #{tasks.length} tasks"
+    #  deferred.resolve tasks
+    #)
+    .catch((err) ->
       deferred.reject err
     ).done()
     return deferred.promise

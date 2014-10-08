@@ -54,6 +54,13 @@
   top: 10px;
   //  color: white;
 }
+.entity-state-icon {
+  position: absolute;
+  right: 73px;
+  font-size: 12px;
+  top: 10px;
+  //  color: white;
+}
 .task-symbol {
   position: absolute;
   left: 10px;
@@ -76,4 +83,56 @@
 .task-meta-data {
   background-color: rgba(0, 0, 0, 0.51);
   padding: 2px;
+}
+
+
+// Transition for tasks.coffee
+.tasks-transition-enter {
+  opacity: 0.01;
+  transition: opacity .5s ease-in;
+}
+.tasks-transition-enter.tasks-transition-enter-active {
+  opacity: 1;
+}
+.tasks-transition-leave {
+  opacity: 1;
+  transition: opacity .5s ease-in;
+}
+.tasks-transition-leave.tasks-transition-leave-active {
+  opacity: 0.01;
+}
+
+// Transition for tasks.coffee
+.fade-enter {
+  opacity: 0.01;
+  transition: opacity 2.5s ease-in;
+}
+.fade-enter.fade-enter-active {
+  opacity: 1;
+}
+.fade-leave {
+  opacity: 1;
+  transition: opacity 2.5s ease-in;
+}
+.fade-leave.fade-leave-active {
+  opacity: 0.01;
+}
+
+
+.example-enter {
+  opacity: 0.01;
+  transition: opacity .5s ease-in;
+}
+
+.example-enter.example-enter-active {
+  opacity: 1;
+}
+
+.example-leave {
+  opacity: 1;
+  transition: opacity .5s ease-in;
+}
+
+.example-leave.example-leave-active {
+  opacity: 0.01;
 }

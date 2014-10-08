@@ -26,12 +26,16 @@ Mapping =
 # Relating to task state
 Mapping[TaskStateEnum.UNASSIGNED.name] =
   icon: 'fa-medkit'
+  display: 'Unassigned'
 Mapping[TaskStateEnum.CLOSED.name] =
   icon: 'fa-check'
+  display: 'Closed'
 Mapping[TaskStateEnum.ASSIGNED.name] =
   icon: 'fa-user'
+  display: 'assigned'
 Mapping[TaskStateEnum.ABANDONED.name] =
   icon: 'fa-exclamation'
+  display: 'Abandoned'
 
 
 module.exports = Mapping

@@ -43,8 +43,8 @@
         where: "SSO is \"" + opts.ssoUsername + "\""
       };
       UserLogic.fetchUserUql(uql).then(function(user) {
-        var findClause;
-        findClause = {
+        var nonOwnerFindClause, nonOwnerTasksPromise, ownerFindClause, ownerTasksPromise;
+        ownerFindClause = {
           '$or': [
             {
               'sbrs': {
@@ -55,11 +55,43 @@
             }
           ]
         };
-        logger.debug("Searching mongo with: " + (JSON.stringify(findClause)));
-        return MongoOps['models']['task'].find().where(findClause).limit(_.parseInt(opts.limit) || 100).execQ();
-      }).then(function(tasks) {
-        logger.debug("Discovered: " + tasks.length + " tasks");
-        return deferred.resolve(tasks);
+        ownerFindClause = {
+          'owner.id': user.id
+        };
+        nonOwnerFindClause = {
+          '$and': [
+            {
+              'sbrs': {
+                '$in': user.sbrs
+              }
+            }, {
+              'owner.id': {
+                '$ne': user.id
+              }
+            }
+          ]
+        };
+        logger.debug("Searching mongo with ownerFindClause: " + (JSON.stringify(ownerFindClause)));
+        logger.debug("Searching mongo with nonOwnerFindClause: " + (JSON.stringify(nonOwnerFindClause)));
+        ownerTasksPromise = MongoOps['models']['task'].find().where(ownerFindClause).limit(_.parseInt(opts.limit) || 100).sort('-score').execQ();
+        nonOwnerTasksPromise = MongoOps['models']['task'].find().where(nonOwnerFindClause).limit(_.parseInt(opts.limit) || 100).sort('-score').execQ();
+        return [ownerTasksPromise, nonOwnerTasksPromise];
+      }).spread(function(ownerTasks, nonOwnerTasks) {
+        var finalTasks;
+        logger.debug("Discovered: " + ownerTasks.length + " owner tasks, and " + nonOwnerTasks.length + " non-owner tasks");
+        finalTasks = [];
+        if (ownerTasks.length > 7) {
+          return deferred.resolve(ownerTasks.slice(0, 7));
+        } else {
+          logger.debug("Discovered: " + ownerTasks.length + " owner tasks and " + nonOwnerTasks.length + " non-owner tasks.");
+          _.each(ownerTasks, function(t) {
+            return finalTasks.push(t);
+          });
+          _.each(nonOwnerTasks, function(t) {
+            return finalTasks.push(t);
+          });
+          return deferred.resolve(finalTasks.slice(0, 7));
+        }
       })["catch"](function(err) {
         return deferred.reject(err);
       }).done();

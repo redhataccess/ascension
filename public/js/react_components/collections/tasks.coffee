@@ -1,8 +1,8 @@
 React       = require 'react'
+ReactCSSTransitionGroup = React.addons.CSSTransitionGroup
+ReactTransitionGroup = React.addons.TransitionGroup
 Router      = require 'react-router/dist/react-router'
 ActiveState = Router.ActiveState
-Isotope     = require 'isotope/js/isotope'
-#Isotope     = require 'isotope/dist/isotope.pkgd'
 AjaxMixin   = require '../mixins/ajaxMixin.coffee'
 cx          = React.addons.classSet
 d3          = require 'd3/d3'
@@ -25,7 +25,7 @@ nbsp = "\u00A0"
 
 Component = React.createClass
   displayName: 'Tasks'
-  mixins: [AjaxMixin, ActiveState]
+  mixins: [AjaxMixin]
 
   # We want the boxes between 100px x 100px and 200px x 200px
 
@@ -39,77 +39,21 @@ Component = React.createClass
     'sortBy': @props.sortBy || 'score'
     'query': @props.query
     'params': @props.params
-    # Set to true to reload items and arrange iso
-    'reloadIso': false
-
-#  takeOwnership: (task, event) ->
-#    event.preventDefault()
-#    event.stopPropagation()
-#    console.log "#{Auth.getAuthedUser()['resource']['firstName']} is Taking ownership of #{task._id}"
-#
-#    queryParams = [
-#      {name: 'action', value: TaskActionsEnum.ASSIGN.name},
-#      #{name: 'userInput', value: Auth.authedUser['externalModelId']}
-#      {name: 'userInput', value: Auth.getAuthedUser()['externalModelId']}
-#    ]
-#
-#    # Make a post call to assign the current authenticated user to the task
-#    @post({path: "/task/#{task._id}", queryParams: queryParams})
-#    # Re-fetch the task after it has been assigned the user
-#    .then(=> @get({path: "/task/#{task._id}"}))
-#    # The returned task will be the latest, update the state
-#    .then((task) => @queryTasks(@props) )
-#    .catch((err) -> console.error "Could not load task: #{err.stack}" )
-#    .done()
-#
-#  removeOwnership: (task, event) ->
-#    event.preventDefault()
-#    console.log "#{Auth.getAuthedUser()['resource']['firstName']} is removing ownership from #{task._id}"
-#    queryParams = [ {name: 'action', value: TaskActionsEnum.UNASSIGN.name} ]
-#
-#    # Make a post call to remove the current owner
-#    @post({path: "/task/#{task._id}", queryParams: queryParams})
-#    # Re-fetch the task after it has been assigned the user
-#    .then(=> @get({path: "/task/#{task._id}"}))
-#    # The returned task will be the latest, update the state
-#    .then((task) => @setState({'task': task}))
-#    .catch((err) -> console.error "Could not load task: #{err.stack}" )
-#    .done()
-#
-#  close: (task, event) ->
-#    event.preventDefault()
-#    console.log "#{Auth.getAuthedUser()['resource']['firstName']} is closing #{task._id}"
-#    queryParams = [ {name: 'action', value: TaskActionsEnum.CLOSE.name} ]
-#
-#    # Make a post call to remove the current owner
-#    @post({path: "/task/#{task._id}", queryParams: queryParams})
-#    # Re-fetch the task after it has been assigned the user
-#    .then(=> @get({path: "/task/#{task._id}"}))
-#    # The returned task will be the latest, update the state
-#    .then((task) => @setState({'task': task}))
-#    .catch((err) -> console.error "Could not load task: #{err.stack}" )
-#    .done()
+    'items': [{}, {}]
 
   genTaskClass: (t) ->
-#    console.debug "owner.id: #{t['owner']?['id']} authed user id: #{Auth.getAuthedUser()?['resource']?['id']}"
-#    console.debug "owner.id is authed id: #{t['owner']?['id'] is Auth.getAuthedUser()?['resource']?['id']}"
     classSet =
       'task': true
       'task100': true
       'task-own': Auth.getAuthedUser()? and (t['owner']?['id'] is Auth.getAuthedUser()?['externalModelId'])
-#    This causes the screen to 'blip', it fubars things, don't use it
-#      'task-grow': true # http://ianlunn.github.io/Hover/
       'case': t['type'] is 'case'
       'kcs': t['type'] is 'kcs'
     cx(classSet)
 
   # Sizes the element by the linear score scale based on the task score
   genTaskStyle: (t) ->
-    #console.log "Task #{t['bid']} now has opacity score: " + @scoreOpacityScale(t.score)
     theStyle =
       opacity: @scoreOpacityScale(t.score)
-      #width: @scoreScale(t.score)
-      #height: @scoreScale(t.score)
 
   taskClick: (t, event) ->
     event.preventDefault()
@@ -151,12 +95,17 @@ Component = React.createClass
     #(i className: "fa #{icon} fw", [])
 
   genTaskElements: () ->
-    tasks = _.map @state['tasks'], (t) =>
+    console.log "here"
+    tasks = _.values(@state['tasks'])
+    tasks.sort (a, b) -> b.score - a.score
+    elems = _.map tasks, (t) =>
+    #tasks = _.chain(@state['tasks'].values()).sort((a, b) -> b.score - a.score).value().map (t, idx) =>
       (div
         id: t['_id']
         className: @genTaskClass(t)
         style: @genTaskStyle(t)
         key: t['_id']
+        score: t['score']
         onClick: @taskClick.bind(@, t)
       , [
           #(span {className: 'task-symbol'}, [ @genTaskSymbol(t) ])
@@ -177,49 +126,15 @@ Component = React.createClass
           #' '
           #(TaskMetaData {task: t, key: 'taskMetaData'}, [])
           (span {className: 'task-state-icon'}, [
-#            @genTaskStateIcon(t)
             (IconWithTooltip
               iconName: @genTaskStateIcon(t)
               tooltipPrefix: 'Task'
               tooltipText: TaskIconMapping[t['state']]?.display || '?'
             , [])
           ])
-          # Create a TaskStateLabel which just shows the labels instead of the dropdown
-#          (span {className: 'task-state'}, [
-#            (TaskState
-#              task: t
-#              takeOwnership: @takeOwnership.bind(@, t)
-#              removeOwnership: @removeOwnership.bind(@, t)
-#              close: @close.bind(@, t)
-#              key: 'taskState'
-#            , [])
-#          ])
         ])
-    tasks
+    elems
 
-  changeLayout: (layoutMode, event) ->
-    event.preventDefault()
-    @iso.arrange
-      layoutMode: layoutMode
-
-  changeSort: (sortByName, event) ->
-    event.preventDefault()
-    @iso.arrange
-      sortBy: sortByName
-
-  filterBySbr: (sbr, event) ->
-    self = @
-    event.preventDefault()
-    @iso.arrange
-      filter: (itemElem) ->
-        _id = $(itemElem).attr('id')
-        task = self.state['tasks'][_id]
-        #task = self.tasksById[_id]
-        _.contains(task['sbrs'], sbr)
-  clearFilter: (event) ->
-    event.preventDefault()
-    @iso.arrange
-      filter: (itemElem) -> true
 
   genBtnGroupClass: (opts) ->
     classSet =
@@ -273,9 +188,9 @@ Component = React.createClass
   # filtering.  This is because the hidden and show styles of hiding and showing elements by isotope uses the opacity
   # to do it's magic
   opacify: () ->
-    #console.debug "Opacifying"
     $('.task').each (idx, itemElem) =>
       _id = $(itemElem).attr('id')
+      console.debug "Opacifying _id: #{_id}"
       task = @state['tasks'][_id]
       $(itemElem).css
         'opacity': @scoreOpacityScale(task['score'])
@@ -284,62 +199,10 @@ Component = React.createClass
         '-o-transition': 'opacity 0.5s ease-in-out'
         'transition': 'opacity 0.5s ease-in-out'
 
-  # Given a list of _ids from tasks, remove the orphans, aka, the xor between the old tasks and the new tasks from
-  # an ajax call
-  removeOrphans: (_ids) ->
-    tasksRemoved = 0
-    $('.task').each (idx, itemElem) =>
-      _id = $(itemElem).attr('id')
-      # If the new old _id isn't in the new _ids, remove it from isotope
-      if not _.contains(_ids, _id)
-        @iso.remove itemElem
-        tasksRemoved++
-    tasksRemoved
-
-  getTaskDomIds: () ->
-    _ids = []
-    $('.task').each (idx, itemElem) -> _ids.push $(itemElem).attr('id')
-    _ids
 
   setScoreScale: (min, max) ->
     @scoreScale = d3.scale.quantize().domain([min, max]).range([100, 200, 300])
     @scoreOpacityScale = d3.scale.linear().domain([min, max]).range([.25, 1])
-
-  idSelector: () -> '#' + @props.id
-  createIsotopeContainer: () ->
-    self = @
-    if not @iso?
-      @iso = new Isotope @refs['tasksContainer'].getDOMNode(),
-        itemSelector: '.task'
-        layoutMode: 'masonry'
-        masonry:
-          rowHeight: 100
-        sortBy: 'score'
-        sortAscending:
-          score: false
-        getSortData:
-          score: (itemElem) ->
-            _id = $(itemElem).attr('id')
-            task = self.state['tasks'][_id]
-            #task = self.tasksById[_id]
-            task['score']
-          bid: (itemElem) ->
-            _id = $(itemElem).attr('id')
-            task = self.state['tasks'][_id]
-            #task = self.tasksById[_id]
-            task['bid']
-          sbt: (itemElem) ->
-            _id = $(itemElem).attr('id')
-            task = self.state['tasks'][_id]
-            #task = self.tasksById[_id]
-            sbt = task['case']?['sbt'] || -999999
-            #if not task['case']?['sbt']?
-            #  console.error JSON.stringify(task)
-            sbt
-
-      @iso.on 'layoutComplete', () =>
-        # Whenever the layout completes, re-opacity the tasks
-        @opacify()
 
   queryTasks: (props) ->
     # Build a query if there is a ssoUsername or if the user is smendenh, pull all limit 100
@@ -365,6 +228,7 @@ Component = React.createClass
       @tasksById = _.object(_.map(tasks, (t) -> [t['_id'], t]))
       min = _.chain(tasks).pluck('score').min().value()
       max = _.chain(tasks).pluck('score').max().value()
+      @setScoreScale(min, max)
 
       stateHash =
         # Hash the tasks by _id so they can be quickly looked up elsewhere
@@ -372,17 +236,6 @@ Component = React.createClass
         'minScore': min
         'maxScore': max
 
-      existingIds = _.chain(@state.tasks).pluck('_id').value()
-      restIds = _.chain(tasks).pluck('_id').value()
-      diff = _.xor(existingIds, restIds)
-      # There are REST tasks different than dom tasks, must re-init iso
-      if diff.length > 0
-        console.debug "Found new tasks"
-        stateHash['reloadItems'] = true
-      else
-        stateHash['reloadItems'] = false
-
-      @setScoreScale(min, max)
       @setState stateHash
     )
     .catch((err) ->
@@ -390,61 +243,42 @@ Component = React.createClass
     ).done()
 
   componentDidMount: ->
-    #console.debug "componentDidMount"
-    @createIsotopeContainer()
     @queryTasks(@props)
 
-#  shouldComponentUpdate: (nextProps, nextState) ->
-#    console.debug "state.tasks.length: #{@state.tasks?.length} nextState.tasks.length: #{nextState.tasks?.length}"
-#    return true
+  componentDidUpdate: ->
+    @opacify()
 
   componentWillReceiveProps: (nextProps) ->
-    #console.debug "componentWillReceiveProps:query: #{JSON.stringify(nextProps.query)}"
-    #console.debug "componentWillReceiveProps:params: #{JSON.stringify(nextProps.params)}"
     if (not _.isEqual(@props.query.ssoUsername, nextProps.query.ssoUsername)) or (not _.isEqual(@props.params._id, nextProps.params._id))
       @setState
         query: nextProps.query
         params: nextProps.params
       @queryTasks(nextProps)
 
-  componentDidUpdate: ->
-    if @state.reloadItems is true
-      #console.debug "reloadItems is true, updating iso"
-      @iso?.reloadItems()
-      @iso.layout()
-      @iso?.arrange()
+  handleAdd: () ->
+    items = @state.items
+    items.push {}
+    @setState
+      items: items
+    console.debug "State now has: #{@state.items.length} items"
+    return
 
-  componentWillUnmount: ->
-    @iso?.destroy?()
-
-  # Adds layers of controls based on admin query param
-  genIsotopeControls: () ->
-    if (@state.query.admin is undefined) or (@state.query.admin is false)
-      return null
-
-    sbrs = _.chain(@state.tasks).values().pluck('sbrs').flatten().unique().sort().value()
-    (div {key: 'isotopeControls'}, [
-      (div {className: "btn-group", key: 'layout'}, @genBtnGroupLayout())
-      (br {})
-      (br {})
-      (div {className: "btn-group", key: 'sbr'}, @genBtnGroupSbrFilter(sbrs))
-      (br {})
-      (br {})
-      (div {className: "btn-group", key: 'sort'}, @genBtnGroupSort())
-      (br {})
-    ])
 
   render: ->
+    items = @state.items.map (item, i) => (div {key: i}, ['Item: ' + i])
+    tasks = @genTaskElements()
     (div {}, [
-      @genIsotopeControls()
       (div {className: 'row'}, [
-        (div {className: 'col-md-3'}, [
-          (div {id: @props.id, className: 'tasksContainer', key: 'tasksContainer', ref: 'tasksContainer'}, @genTaskElements())
-        ])
+#        (div {className: 'col-md-3'}, [
+#          #(button {onClick: @handleAdd.bind(@)}, ['Add Item'])
+#          #(ReactCSSTransitionGroup {transitionName: "fade"}, items)
+#          (ReactCSSTransitionGroup {transitionName: "fade"}, tasks)
+#        ])
+        (div {className: 'col-md-3'}, tasks)
         (div {className: 'col-md-9'}, [
           (Task {params: @props.params, queryTasks: @queryTasks.bind(@, @props)}, [])
         ])
       ])
-    ]);
+    ])
 
 module.exports = Component

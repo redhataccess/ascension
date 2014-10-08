@@ -43,6 +43,7 @@
     "q": "^1.0.1",
     "request": "~2.44.0",
     "serve-favicon": "~2.1.4",
+    "string": "~2.1.0",
     "style-loader": "~0.8.0",
     "tracer": "^0.7.3",
     "url-loader": "~0.5.5",
