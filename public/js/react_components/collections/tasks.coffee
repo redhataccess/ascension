@@ -202,13 +202,20 @@ Component = React.createClass
     @scoreOpacityScale = d3.scale.linear().domain([min, max]).range([.25, 1])
 
   queryTasks: (props) ->
-    # Build a query if there is a ssoUsername or if the user is smendenh, pull all limit 100
+    # Build a query if there is a ssoUsername
+
+    ssoUsername = undefined
+    if Auth.getScopedUser()?.resource?
+      ssoUsername = Auth.getScopedUser().resource.sso[0]
+    else if Auth.getAuthedUser()?.resource?
+      ssoUsername = Auth.getAuthedUser().resource.sso[0]
+
     opts =
       path: '/tasks'
       queryParams: [
         {
           name: 'ssoUsername'
-          value: props.query['ssoUsername']
+          value: ssoUsername
         }
         {
           name: 'admin'
@@ -234,6 +241,15 @@ Component = React.createClass
         'maxScore': max
 
       @setState stateHash
+
+      if (props.params._id is '' or (not props.params._id?)) and tasks.length > 0
+        params =
+          _id: tasks[0]['_id']
+        queryParams =
+          ssoUsername: @props.query.ssoUsername
+          admin: @props.query.admin
+        Router.transitionTo("dashboard", params, queryParams)
+
     )
     .catch((err) ->
       console.error "Could not load tasks: #{err.stack}"

@@ -173,7 +173,9 @@
 
   server = void 0;
 
-  MongoOps.init();
+  MongoOps.init({
+    mongoDebug: true
+  });
 
   db = mongoose['connection'];
 

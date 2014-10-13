@@ -41,10 +41,11 @@ TaskLogic.fetchTasks = (opts) ->
       nonOwnerFindClause =
         '$and': [
           {'state': {'$ne': 'closed'}}
-          {'sbrs': {'$in': user.sbrs} }
+          {'sbrs': {'$in': user.sbrs} } unless user.sbrs is undefined
           {'owner.id': {'$ne': user.id }}
           {'declinedUsers.id': {'$ne': user.id}}
         ]
+
       logger.debug "Searching mongo with ownerFindClause: #{JSON.stringify(ownerFindClause)}"
       logger.debug "Searching mongo with nonOwnerFindClause: #{JSON.stringify(nonOwnerFindClause)}"
 

@@ -34,14 +34,18 @@ MongoOps.generateMongoUrl = (db) ->
     #logger.debug "Finished generating mongo url: #{mongourl}"
     return mongourl
 
-MongoOps.init = (test=false) ->
+MongoOps.init = (opts) ->
+  mongoDebug = opts?['mongoDebug'] || false
+  testDb = opts?['testDb'] || false
+
   opts =
     native_parser: true
     server:
       socketOptions:
         keepAlive: 1
-  mongoose.set 'debug', true
-  db = if test then 'ascension-test' else 'ascension'
+
+  if mongoDebug is true then  mongoose.set 'debug', true
+  db = if testDb is true then 'ascension-test' else 'ascension'
   mongoose.connect MongoOps.generateMongoUrl(db), opts
 
 MongoOps.defineCollections = () ->

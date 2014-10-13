@@ -20,6 +20,7 @@ d3                = require 'd3'
 #MongoClient   = require('mongodb').MongoClient
 #Server        = require('mongodb').Server
 
+#http://stackoverflow.com/questions/8760570/how-to-provide-most-relevant-results-with-multiple-factor-weighted-sorting
 M = {}
 
 M.determinePotentialOwners = (opts) ->

@@ -1,5 +1,5 @@
 (function() {
-  var EntityOpEnum, MongoOperations, Q, ScoringLogic, TaskActionsEnum, TaskOpEnum, TaskRules, TaskStateEnum, TaskTypeEnum, TaskUtils, assert, chai, errorHandler, expect, fs, logger, moment, mongoose, path, prettyjson, should, userTaskCounts, users, yaml, _;
+  var CaseRules, EntityOpEnum, MongoOperations, Q, ScoringLogic, TaskActionsEnum, TaskCounts, TaskOpEnum, TaskRules, TaskStateEnum, TaskTypeEnum, TaskUtils, UserLogic, assert, chai, errorHandler, expect, fs, logger, moment, mongoose, path, prettyjson, should, userTaskCounts, users, yaml, _;
 
   chai = require('chai');
 
@@ -32,6 +32,12 @@
   MongoOperations = require('../../../../../src/com/redhat/ascension/db/MongoOperations');
 
   ScoringLogic = require('../../../../../src/com/redhat/ascension/rules/scoring/scoringLogic');
+
+  TaskCounts = require('../../../../../src/com/redhat/ascension/db/taskCounts');
+
+  UserLogic = require('../../../../../src/com/redhat/ascension/rest/userLogic');
+
+  CaseRules = require('../../../../../src/com/redhat/ascension/rules/case/caseRules');
 
   TaskUtils = require('../../../../../src/com/redhat/ascension/utils/taskUtils');
 
@@ -137,6 +143,24 @@
   };
 
   describe("Scoring Logic", function() {
+    before(function(done) {
+      var db;
+      MongoOperations.init({
+        mongoDebug: true,
+        testDb: true
+      });
+      db = mongoose['connection'];
+      db.on('error', logger.error.bind(logger, 'connection error:'));
+      return db.once('open', function() {
+        MongoOperations.defineCollections();
+        TaskRules.initFlow();
+        return MongoOperations.reset().done(function() {
+          return done();
+        }, function(err) {
+          return logger.error(err.stack);
+        });
+      });
+    });
     return describe("Score a httpd task higher for higher skill user", function() {
       it("Score aogburn higher", function(done) {
         var aogburn, coty, t;
@@ -153,7 +177,7 @@
             'tags': ['httpd']
           }
         });
-        t = ScoringLogic.determinePotentialOwners({
+        ScoringLogic.determinePotentialOwners({
           task: t,
           userTaskCounts: userTaskCounts,
           users: users
@@ -168,7 +192,7 @@
         aogburn.score.should.be.above(coty.score);
         return done();
       });
-      return it("Score coty equal to aogburn due to tasks owned", function(done) {
+      it("Score coty equal to aogburn due to tasks owned", function(done) {
         var aogburn, coty, t;
         t = TaskUtils.generateMockTask({
           'case': {
@@ -183,7 +207,7 @@
             'tags': ['mod_cluster']
           }
         });
-        t = ScoringLogic.determinePotentialOwners({
+        ScoringLogic.determinePotentialOwners({
           task: t,
           userTaskCounts: userTaskCounts,
           users: users
@@ -197,6 +221,46 @@
         });
         coty.score.should.equal(aogburn.score);
         return done();
+      });
+      return it("rmanes should show up in a Kernel case", function(done) {
+        this.timeout(5000);
+        return CaseRules.fetchCase({
+          caseNumber: '01167752'
+        }).then(function(c) {
+          var sbrs, t, uql, uqlParts;
+          t = TaskRules.makeTaskFromCase(c);
+          sbrs = t['sbrs'];
+          uqlParts = [];
+          _.each(sbrs, function(sbr) {
+            return uqlParts.push("(sbrName is \"" + sbr + "\")");
+          });
+          uql = uqlParts.join(' OR ');
+          return [
+            t, UserLogic.fetchUsersUql({
+              where: uql
+            })
+          ];
+        }).spread(function(task, users) {
+          var ssos, userIds;
+          ssos = _.chain(users).pluck('sso').value();
+          expect(ssos).to.contain('rhn-support-rmanes');
+          userIds = _.chain(users).pluck('id').unique().value();
+          logger.debug("Discovered " + userIds + " userIds");
+          return [task, users, TaskCounts.getTaskCounts(userIds)];
+        }).spread(function(task, users, userTaskCounts) {
+          var potentialOwnersSsos;
+          ScoringLogic.determinePotentialOwners({
+            task: task,
+            userTaskCounts: {
+              '005A0000002a7XZIAY': 0
+            },
+            users: users
+          });
+          potentialOwnersSsos = _.chain(task.potentialOwners).pluck('sso').value();
+          logger.debug("Potential Owners: " + potentialOwnersSsos);
+          potentialOwnersSsos.should.contain('rhn-support-rmanes');
+          return done();
+        }).done();
       });
     });
   });

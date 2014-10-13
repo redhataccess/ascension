@@ -29,8 +29,7 @@ TaskLogic         = require '../../rest/taskLogic'
 
 CaseRules = {}
 
-CaseRules.soql = """
-SELECT
+CaseRules.caseFields = """
   AccountId,
   Account_Number__c,
   CaseNumber,
@@ -57,6 +56,19 @@ SELECT
     Resource_Type__c
   FROM
     Case_Resource_Relationships__r)
+"""
+
+CaseRules.fetchCaseSoql = """
+SELECT
+  #caseFields#
+FROM
+  Case
+WHERE
+  CaseNumber = #caseNumber#
+"""
+CaseRules.fetchCasesSoql = """
+SELECT
+  #caseFields#
 FROM
   Case
 WHERE
@@ -67,8 +79,14 @@ WHERE
 LIMIT 100
 """
 
+CaseRules.fetchCase = (opts) ->
+  soql = @fetchCaseSoql.replace /#caseFields#/, @caseFields
+  soql = soql.replace /#caseNumber#/, "'#{opts.caseNumber}'"
+  Q.nfcall(salesforce.querySf, {'soql': soql, single: true})
+
 CaseRules.fetchCases = () ->
-  soql = @soql.replace /#andStatusCondition#/, " AND Status = 'Waiting on Red Hat'"
+  soql = @fetchCasesSoql.replace /#caseFields#/, @caseFields
+  soql = soql.replace /#andStatusCondition#/, " AND Status = 'Waiting on Red Hat'"
   Q.nfcall(salesforce.querySf, {'soql': soql})
 
 # Uses UDS UQL
@@ -336,7 +354,7 @@ CaseRules.reset = () ->
 module.exports = CaseRules
 
 if require.main is module
-  MongoOperations.init()
+  MongoOperations.init({mongoDebug: true})
   db = mongoose['connection']
   db.on 'error', logger.error.bind(logger, 'connection error:')
   dbPromise = Q.defer()

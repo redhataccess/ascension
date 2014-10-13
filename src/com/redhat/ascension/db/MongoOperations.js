@@ -48,11 +48,10 @@
     }
   };
 
-  MongoOps.init = function(test) {
-    var db, opts;
-    if (test == null) {
-      test = false;
-    }
+  MongoOps.init = function(opts) {
+    var db, mongoDebug, testDb;
+    mongoDebug = (opts != null ? opts['mongoDebug'] : void 0) || false;
+    testDb = (opts != null ? opts['testDb'] : void 0) || false;
     opts = {
       native_parser: true,
       server: {
@@ -61,8 +60,10 @@
         }
       }
     };
-    mongoose.set('debug', true);
-    db = test ? 'ascension-test' : 'ascension';
+    if (mongoDebug === true) {
+      mongoose.set('debug', true);
+    }
+    db = testDb === true ? 'ascension-test' : 'ascension';
     return mongoose.connect(MongoOps.generateMongoUrl(db), opts);
   };
 

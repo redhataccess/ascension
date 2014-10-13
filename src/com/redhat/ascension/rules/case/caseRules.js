@@ -51,11 +51,26 @@
 
   CaseRules = {};
 
-  CaseRules.soql = "SELECT\n  AccountId,\n  Account_Number__c,\n  CaseNumber,\n  Collaboration_Score__c,\n  Comment_Count__c,\n  CreatedDate,\n  Created_By__c,\n  FTS_Role__c,\n  FTS__c,\n  Last_Breach__c,\n  PrivateCommentCount__c,\n  PublicCommentCount__c,\n  SBT__c,\n  SBR_Group__c,\n  Severity__c,\n  Status,\n  Internal_Status__c,\n  Strategic__c,\n  Tags__c,\n  (SELECT\n    Id,\n    Linking_Mechanism__c,\n    Type__c,\n    Resource_Type__c\n  FROM\n    Case_Resource_Relationships__r)\nFROM\n  Case\nWHERE\n  OwnerId != '00GA0000000XxxNMAS'\n  #andStatusCondition#\n  AND Internal_Status__c != 'Waiting on Engineering'\n  AND Internal_Status__c != 'Waiting on PM'\nLIMIT 100";
+  CaseRules.caseFields = "AccountId,\nAccount_Number__c,\nCaseNumber,\nCollaboration_Score__c,\nComment_Count__c,\nCreatedDate,\nCreated_By__c,\nFTS_Role__c,\nFTS__c,\nLast_Breach__c,\nPrivateCommentCount__c,\nPublicCommentCount__c,\nSBT__c,\nSBR_Group__c,\nSeverity__c,\nStatus,\nInternal_Status__c,\nStrategic__c,\nTags__c,\n(SELECT\n  Id,\n  Linking_Mechanism__c,\n  Type__c,\n  Resource_Type__c\nFROM\n  Case_Resource_Relationships__r)";
+
+  CaseRules.fetchCaseSoql = "SELECT\n  #caseFields#\nFROM\n  Case\nWHERE\n  CaseNumber = #caseNumber#";
+
+  CaseRules.fetchCasesSoql = "SELECT\n  #caseFields#\nFROM\n  Case\nWHERE\n  OwnerId != '00GA0000000XxxNMAS'\n  #andStatusCondition#\n  AND Internal_Status__c != 'Waiting on Engineering'\n  AND Internal_Status__c != 'Waiting on PM'\nLIMIT 100";
+
+  CaseRules.fetchCase = function(opts) {
+    var soql;
+    soql = this.fetchCaseSoql.replace(/#caseFields#/, this.caseFields);
+    soql = soql.replace(/#caseNumber#/, "'" + opts.caseNumber + "'");
+    return Q.nfcall(salesforce.querySf, {
+      'soql': soql,
+      single: true
+    });
+  };
 
   CaseRules.fetchCases = function() {
     var soql;
-    soql = this.soql.replace(/#andStatusCondition#/, " AND Status = 'Waiting on Red Hat'");
+    soql = this.fetchCasesSoql.replace(/#caseFields#/, this.caseFields);
+    soql = soql.replace(/#andStatusCondition#/, " AND Status = 'Waiting on Red Hat'");
     return Q.nfcall(salesforce.querySf, {
       'soql': soql
     });
@@ -277,7 +292,9 @@
   module.exports = CaseRules;
 
   if (require.main === module) {
-    MongoOperations.init();
+    MongoOperations.init({
+      mongoDebug: true
+    });
     db = mongoose['connection'];
     db.on('error', logger.error.bind(logger, 'connection error:'));
     dbPromise = Q.defer();

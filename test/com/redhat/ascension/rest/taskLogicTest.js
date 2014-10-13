@@ -54,7 +54,10 @@
   describe("Task Logic", function() {
     before(function(done) {
       var db;
-      MongoOperations.init(true);
+      MongoOperations.init({
+        mongoDebug: true,
+        testDb: true
+      });
       db = mongoose['connection'];
       db.on('error', logger.error.bind(logger, 'connection error:'));
       return db.once('open', function() {

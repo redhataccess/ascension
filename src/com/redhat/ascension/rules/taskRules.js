@@ -101,7 +101,7 @@
   TaskRules.makeTaskFromCase = function(c) {
     return {
       _id: null,
-      bid: c['caseNumber'] || c['CaseNumber'],
+      bid: ("" + c['caseNumber']) || ("" + c['CaseNumber']),
       score: c['collaborationScore'] || c['Collaboration_Score__c'] || 0,
       timeout: -1,
       sbrs: c['sbrs'] || this.parseSfArray(c['SBR_Group__c']),
@@ -308,7 +308,9 @@
   module.exports = TaskRules;
 
   if (require.main === module) {
-    MongoOperations.init();
+    MongoOperations.init({
+      mongoDebug: true
+    });
     db = mongoose['connection'];
     db.on('error', logger.error.bind(logger, 'connection error:'));
     db.once('open', function() {

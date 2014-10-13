@@ -26,7 +26,7 @@ errorHandler = (err) -> throw err
 describe "Case rules", ->
 
   before (done) ->
-    MongoOperations.init(true)
+    MongoOperations.init({mongoDebug: true, testDb: true})
     db = mongoose['connection']
     db.on 'error', logger.error.bind(logger, 'connection error:')
     db.once 'open', () ->

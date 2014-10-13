@@ -59,11 +59,11 @@
               'state': {
                 '$ne': 'closed'
               }
-            }, {
+            }, user.sbrs !== void 0 ? {
               'sbrs': {
                 '$in': user.sbrs
               }
-            }, {
+            } : void 0, {
               'owner.id': {
                 '$ne': user.id
               }

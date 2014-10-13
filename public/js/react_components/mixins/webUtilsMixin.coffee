@@ -61,14 +61,14 @@ WebUtilsMixin.getUser = (ssoUsername) ->
       ).bind(this)
       error: ((jqXHR, textStatus, errorThrown) ->
         console.error("Error while retrieving user: #{ssoUsername}")
-        deferred.reject errorThrown
+        deferred.reject "Error while retreiving user: #{ssoUsername}"
       ).bind(this)
 
     #_.defaults(config, {'url': url})
 
     $.ajax config
 
-  return deferred.promise
+  deferred.promise
 
 
 module.exports = WebUtilsMixin

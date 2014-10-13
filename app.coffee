@@ -164,7 +164,7 @@ process.on 'SIGTERM', () ->
 # Must specify an IP for openshift as there are other processes listening on 8080
 server = undefined
 
-MongoOps.init()
+MongoOps.init({mongoDebug: true})
 db = mongoose['connection']
 db.on 'error', logger.error.bind(logger, 'connection error:')
 db.once 'open', () ->

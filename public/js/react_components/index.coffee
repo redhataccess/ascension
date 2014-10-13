@@ -75,6 +75,7 @@ App = React.createClass
     # Represents the currently scoped user, i.e. ?ssoUsername=rhn-support-someone
     'scopedUser': Auth.scopedUser
     'authFailed': false
+    'scopedFailed': false
 
   queryScopedUser: (ssoUsername) ->
     self = @
@@ -85,12 +86,20 @@ App = React.createClass
       if user?['externalModelId']?
         console.debug "Setting scoped user to: #{user['resource']['firstName']}"
         Auth.setScopedUser(user)
-        self.setState {'scopedUser': user}
+        self.setState
+          'scopedUser': user
+          'scopedFailed': false
       else
         Auth.setScopedUser(undefined)
-        self.setState {'scopedUser': undefined}
+        self.setState
+          'scopedUser': user
+          'scopedFailed': true
         console.error "User: #{JSON.stringify(user, null, ' ')} has no id"
     , (err) ->
+      Auth.setScopedUser(undefined)
+      self.setState
+        'scopedUser': undefined
+        'scopedFailed': true
       console.error err
     )
 
@@ -123,6 +132,10 @@ App = React.createClass
             'authFailed': true
           console.error "User: #{JSON.stringify(user, null, ' ')} has no id"
       , (err) ->
+        Auth.setAuthedUser(undefined)
+        self.setState
+          'authedUser': undefined
+          'authFailed': true
         console.error err
       )
     else
@@ -146,6 +159,10 @@ App = React.createClass
         "Not authenticated, please login @ "
         (a {target: '_blank', href: 'https://gss.my.salesforce.com', key: 'sso'}, ['https://gss.my.salesforce.com'])
         " and refresh."
+      ])
+    else if @state.scopedFailed is true
+      return (Alert {bsStyle: "warning", key: 'alert'}, [
+        "Scoped User failed to load, make sure you typed in the rhn-support-<name> correctly, ex. rhn-support-rmanes"
       ])
     else
       @props.activeRouteHandler()

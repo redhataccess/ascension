@@ -30,7 +30,7 @@ errorHandler = (err) -> throw err
 describe "Task Logic", ->
 
   before (done) ->
-    MongoOperations.init(true)
+    MongoOperations.init({mongoDebug: true, testDb: true})
     db = mongoose['connection']
     db.on 'error', logger.error.bind(logger, 'connection error:')
     db.once 'open', () ->

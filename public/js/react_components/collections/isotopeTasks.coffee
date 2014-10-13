@@ -342,7 +342,14 @@ Component = React.createClass
         @opacify()
 
   queryTasks: (props) ->
-    # Build a query if there is a ssoUsername or if the user is smendenh, pull all limit 100
+    # Build a query if there is a ssoUsername
+
+    ssoUsername = undefined
+    if Auth.getScopedUser()?.resource?
+      ssoUsername = Auth.getScopedUser().resource.sso[0]
+    if Auth.getAuthedUser()?.resource?
+      ssoUsername = Auth.getAuthedUser().resource.sso[0]
+
     opts =
       path: '/tasks'
       queryParams: [
@@ -435,6 +442,14 @@ Component = React.createClass
     ])
 
   render: ->
+
+    if @state.tasks.loading is true
+      return (i {className: 'fa-sinnper fa-spin'})
+    else if @state.tasks.length is 0
+      return (div {}, [
+        '0 Task(s) loaded'
+      ])
+
     (div {}, [
       @genIsotopeControls()
       (div {className: 'row'}, [
