@@ -36,7 +36,7 @@
   TaskLogic = {};
 
   TaskLogic.fetchTasks = function(opts) {
-    var deferred, uql;
+    var deferred, findClause, uql;
     if (((opts != null ? opts.ssoUsername : void 0) != null) && (opts != null ? opts.ssoUsername : void 0) !== '') {
       deferred = Q.defer();
       uql = {
@@ -45,27 +45,30 @@
       UserLogic.fetchUserUql(uql).then(function(user) {
         var nonOwnerFindClause, nonOwnerTasksPromise, ownerFindClause, ownerTasksPromise;
         ownerFindClause = {
-          '$or': [
-            {
-              'sbrs': {
-                '$in': user.sbrs
-              }
-            }, {
-              'owner.id': user.id
-            }
-          ]
-        };
-        ownerFindClause = {
-          'owner.id': user.id
+          'owner.id': user.id,
+          'state': {
+            '$ne': 'closed'
+          },
+          'declinedUsers.id': {
+            '$ne': user.id
+          }
         };
         nonOwnerFindClause = {
           '$and': [
             {
+              'state': {
+                '$ne': 'closed'
+              }
+            }, {
               'sbrs': {
                 '$in': user.sbrs
               }
             }, {
               'owner.id': {
+                '$ne': user.id
+              }
+            }, {
+              'declinedUsers.id': {
                 '$ne': user.id
               }
             }
@@ -97,7 +100,12 @@
       }).done();
       return deferred.promise;
     } else {
-      return MongoOps['models']['task'].find().where().limit(_.parseInt(opts.limit) || 100).execQ();
+      findClause = {
+        'state': {
+          '$ne': 'closed'
+        }
+      };
+      return MongoOps['models']['task'].find().where(findClause).limit(_.parseInt(opts.limit) || 100).execQ();
     }
   };
 
@@ -121,6 +129,28 @@
         return MongoOps['models']['task'].findOneAndUpdate({
           _id: new ObjectId(opts['_id'])
         }, $set).execQ();
+      }).then(function() {
+        return deferred.resolve();
+      })["catch"](function(err) {
+        return deferred.reject(err);
+      }).done();
+    } else if (opts.action === TaskActionsEnum.DECLINE.name) {
+      UserLogic.fetchUser(opts).then(function(user) {
+        var $update;
+        $update = {
+          $push: {
+            declinedUsers: {
+              id: user['id'],
+              sso: user['sso'],
+              fullName: user['fullName'],
+              declinedOn: new Date()
+            }
+          }
+        };
+        logger.debug("Declining the event with " + (prettyjson.render($update)));
+        return MongoOps['models']['task'].findOneAndUpdate({
+          _id: new ObjectId(opts['_id'])
+        }, $update).execQ();
       }).then(function() {
         return deferred.resolve();
       })["catch"](function(err) {

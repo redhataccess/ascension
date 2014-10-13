@@ -13,13 +13,19 @@ TaskOpEnum        = require '../enums/TaskOpEnum'
 EntityOpEnum        = require '../enums/EntityOpEnum'
 _                 = require 'lodash'
 moment            = require 'moment'
+MongoOps          = require '../../db/MongoOperations'
 mongoose          = require 'mongoose'
 mongooseQ         = require('mongoose-q')(mongoose)
+ObjectId          = mongoose.Types.ObjectId
 request           = require 'request'
 #MongoClient   = require('mongodb').MongoClient
 #Server        = require('mongodb').Server
 
 KcsRules          = require './kcsRules'
+UserLogic         = require '../../rest/userLogic'
+TaskCounts        = require '../../db/taskCounts'
+ScoringLogic      = require '../../rules/scoring/scoringLogic'
+TaskLogic         = require '../../rest/taskLogic'
 
 CaseRules = {}
 
@@ -58,7 +64,7 @@ WHERE
   #andStatusCondition#
   AND Internal_Status__c != 'Waiting on Engineering'
   AND Internal_Status__c != 'Waiting on PM'
-LIMIT 1000
+LIMIT 100
 """
 
 CaseRules.fetchCases = () ->
@@ -134,8 +140,8 @@ CaseRules.match = (opts) ->
   existingTasksByBid = _.groupBy existingTasks, (t) -> t['bid']
 
   logger.debug "Matching #{cases.length} cases"
-  _.each cases, (x) ->
-    c = self.normalizeCase(x)
+  _.each cases, (c) ->
+    #c = self.normalizeCase(x)
 
     logger.debug "Attempting to match case: #{c['caseNumber'] || c['CaseNumber']}, intStatus: #{c['internalStatus']}"
 
@@ -253,7 +259,11 @@ CaseRules.reset = () ->
     CaseRules.fetchCases()
   )
   .then((cases) ->
-    [CaseRules.match({cases: cases}), KcsRules.match({cases: cases})]
+
+    # Normalize all cases before passing them to the respective rules
+    normalizedCases = _.map cases, (c) -> CaseRules.normalizeCase(c)
+
+    [CaseRules.match({cases: normalizedCases}), KcsRules.match({cases:  normalizedCases})]
   )
   .spread((casePromises, kcsPromises) ->
     logger.debug "Received #{casePromises.length} caseResults and #{kcsPromises} kcs results"
@@ -261,6 +271,57 @@ CaseRules.reset = () ->
   )
   .then((results) ->
     logger.debug "Completed manipulating #{results.length} tasks"
+
+    # Fetch all open tasks to score them
+    TaskLogic.fetchTasks({})
+  )
+  .then((tasks) ->
+
+    # Get a unique list of SBRs and grab the users in those SBRs
+    sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().value()
+
+    uqlParts = []
+    _.each sbrs, (sbr) -> uqlParts.push "(sbrName is \"#{sbr}\")"
+    uql = uqlParts.join(' OR ')
+    logger.debug "Generated uql: #{uql}"
+
+    [tasks, UserLogic.fetchUsersUql({where: uql})]
+  )
+  .spread((tasks, users) ->
+
+    userIds = _.chain(users).pluck('id').unique().value()
+    logger.debug "Discovered #{userIds} userIds"
+
+    [tasks, users, TaskCounts.getTaskCounts(userIds)]
+  )
+  .spread((tasks, users, userTaskCounts) ->
+
+    logger.debug "Determining potential owners"
+
+    # TODO -- the scoreTask should return a promise
+    # Create a convenience method to score tasks which will return an array of promises which will be updates
+    # to mongoose
+    updatePromises = []
+    # Remember t here is the mongoose representation, the actual object is t._doc
+    _.each tasks, (t) ->
+      #logger.debug prettyjson.render t._doc
+      ScoringLogic.determinePotentialOwners
+        task: t
+        users: users
+        userTaskCounts: userTaskCounts
+      potentialOwners = t.potentialOwners
+      $update =
+        $set:
+          potentialOwners: potentialOwners
+
+      updatePromises.push MongoOps['models']['task'].findOneAndUpdate({_id: new ObjectId(t._id)}, $update).execQ()
+
+    logger.debug "Generated #{updatePromises.length} update promises"
+
+    Q.allSettled(updatePromises)
+  )
+  .then((results) ->
+    logger.debug "Completed setting potential owners on #{results.length} tasks"
   )
   .catch((err) ->
     logger.error err.stack
@@ -269,6 +330,7 @@ CaseRules.reset = () ->
   .done(->
     deferred.resolve()
   )
+
   deferred.promise
 
 module.exports = CaseRules
@@ -290,8 +352,17 @@ if require.main is module
     CaseRules.fetchCases()
   )
   .then((cases) ->
-    [CaseRules.match({cases: cases}), KcsRules.match({cases: cases})]
+
+    # Normalize all cases before passing them to the respective rules
+    normalizedCases = _.map cases, (c) -> CaseRules.normalizeCase(c)
+
+    [CaseRules.match({cases: normalizedCases}), KcsRules.match({cases:  normalizedCases})]
   )
+#  .spread((cases, users, taskCounts) ->
+#    logger.debug "taskCounts: #{prettyjson.render taskCounts}"
+#
+#    [CaseRules.match({cases: cases}), KcsRules.match({cases: cases})]
+#  )
   .spread((casePromises, kcsPromises) ->
     logger.debug "Received #{casePromises.length} caseResults and #{kcsPromises} kcs results"
     Q.allSettled(_.flatten([casePromises, kcsPromises]))
@@ -302,6 +373,57 @@ if require.main is module
   #)
   .then((results) ->
     logger.debug "Completed manipulating #{results.length} tasks"
+
+    # Fetch all open tasks to score them
+    TaskLogic.fetchTasks({})
+  )
+  .then((tasks) ->
+
+    # Get a unique list of SBRs and grab the users in those SBRs
+    sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().value()
+
+    uqlParts = []
+    _.each sbrs, (sbr) -> uqlParts.push "(sbrName is \"#{sbr}\")"
+    uql = uqlParts.join(' OR ')
+    logger.debug "Generated uql: #{uql}"
+
+    [tasks, UserLogic.fetchUsersUql({where: uql})]
+  )
+  .spread((tasks, users) ->
+
+    userIds = _.chain(users).pluck('id').unique().value()
+    logger.debug "Discovered #{userIds} userIds"
+
+    [tasks, users, TaskCounts.getTaskCounts(userIds)]
+  )
+  .spread((tasks, users, userTaskCounts) ->
+
+    logger.debug "Determining potential owners"
+
+    # TODO -- the scoreTask should return a promise
+    # Create a convenience method to score tasks which will return an array of promises which will be updates
+    # to mongoose
+    updatePromises = []
+    # Remember t here is the mongoose representation, the actual object is t._doc
+    _.each tasks, (t) ->
+      #logger.debug prettyjson.render t._doc
+      ScoringLogic.determinePotentialOwners
+        task: t
+        users: users
+        userTaskCounts: userTaskCounts
+      potentialOwners = t.potentialOwners
+      $update =
+        $set:
+          potentialOwners: potentialOwners
+
+      updatePromises.push MongoOps['models']['task'].findOneAndUpdate({_id: new ObjectId(t._id)}, $update).execQ()
+
+    logger.debug "Generated #{updatePromises.length} update promises"
+
+    Q.allSettled(updatePromises)
+  )
+  .then((results) ->
+    logger.debug "Completed setting potential owners on #{results.length} tasks"
   )
   .catch((err) ->
     logger.error err.stack

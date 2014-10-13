@@ -3,6 +3,9 @@
     ASSIGN: {
       name: 'assign'
     },
+    DECLINE: {
+      name: 'decline'
+    },
     UNASSIGN: {
       name: 'unassign'
     },

@@ -143,6 +143,26 @@ MongoOps.defineCollections = () ->
       strategic: Boolean
       internalStatus: String
 
+    # Users who have declined this task
+    declinedUsers:
+      id: String
+      sso: String
+      fullName: String
+      declinedOn: Date
+
+    # Potential users for this task
+#    potentialOwners: [
+#      id: String
+#      sso: String
+#      fullName: String
+#      score: Number
+#      sbrWeight: Number
+#      skillWeight: Number
+#      tasksOwned: Number
+#      tasksOwnedWeight: Number
+#    ]
+    potentialOwners: []
+
   MongoOps['models']['task'] = mongoose.model 'Task', MongoOps['schemas']['task']
 
 

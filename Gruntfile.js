@@ -89,6 +89,10 @@
           files: "src/**/*.coffee",
           tasks: ["newer:coffee:compileSrc"]
         },
+        testCoffee: {
+          files: "test/**/*.coffee",
+          tasks: ["newer:coffee:compileTest"]
+        },
         webCoffee: {
           files: ["public/js/**/*.coffee", "public/stylesheets/**/*.less"],
           tasks: ['webpack:build-dev'],
@@ -184,6 +188,18 @@
             sourceMap: true
           }
         },
+        compileTest: {
+          expand: true,
+          cwd: 'test',
+          dest: 'test',
+          src: ['**/*.coffee'],
+          ext: '.js',
+          options: {
+            runtime: 'inline',
+            preserve_dirs: true,
+            sourceMap: true
+          }
+        },
         compileWeb: {
           expand: true,
           sourceMap: true,
@@ -198,8 +214,8 @@
         }
       }
     });
-    grunt.registerTask("dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', "watch"]);
-    grunt.registerTask("prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', "webpack:build-dev"]);
+    grunt.registerTask("dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "watch"]);
+    grunt.registerTask("prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "webpack:build-dev"]);
     grunt.registerTask("default", ["prod"]);
     return grunt.registerTask("test", ["mochaTest"]);
   };

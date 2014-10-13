@@ -66,8 +66,8 @@ KcsRules.match = (opts) ->
   existingTasksByBid = _.groupBy existingTasks, (t) -> t['bid']
 
   logger.debug "KcsRules matching #{cases.length} cases"
-  _.each cases, (x) ->
-    c = self.normalizeCase(x)
+  _.each cases, (c) ->
+    #c = self.normalizeCase(x)
 
     #######################################################################################################
     # Cases with no KCS attached

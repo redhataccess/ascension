@@ -95,7 +95,6 @@ Component = React.createClass
     #(i className: "fa #{icon} fw", [])
 
   genTaskElements: () ->
-    console.log "here"
     tasks = _.values(@state['tasks'])
     tasks.sort (a, b) -> b.score - a.score
     elems = _.map tasks, (t) =>
@@ -112,7 +111,7 @@ Component = React.createClass
           #nbsp
           #nbsp
           #(Spacer {}, [])
-          (TaskAction {task: t,  key: 'taskAction'}, [])
+          (TaskAction {task: t,  key: 'taskAction', absolute: true}, [])
           # Case number
           (span {className: 'entity-state-icon'}, [
             (IconWithTooltip
@@ -134,7 +133,6 @@ Component = React.createClass
           ])
         ])
     elems
-
 
   genBtnGroupClass: (opts) ->
     classSet =
@@ -190,7 +188,6 @@ Component = React.createClass
   opacify: () ->
     $('.task').each (idx, itemElem) =>
       _id = $(itemElem).attr('id')
-      console.debug "Opacifying _id: #{_id}"
       task = @state['tasks'][_id]
       $(itemElem).css
         'opacity': @scoreOpacityScale(task['score'])
@@ -245,8 +242,8 @@ Component = React.createClass
   componentDidMount: ->
     @queryTasks(@props)
 
-  componentDidUpdate: ->
-    @opacify()
+#  componentDidUpdate: ->
+#    @opacify()
 
   componentWillReceiveProps: (nextProps) ->
     if (not _.isEqual(@props.query.ssoUsername, nextProps.query.ssoUsername)) or (not _.isEqual(@props.params._id, nextProps.params._id))
@@ -265,10 +262,15 @@ Component = React.createClass
 
 
   render: ->
-    items = @state.items.map (item, i) => (div {key: i}, ['Item: ' + i])
+    #items = @state.items.map (item, i) => (div {key: i}, ['Item: ' + i])
     tasks = @genTaskElements()
     (div {}, [
       (div {className: 'row'}, [
+        # https://github.com/facebook/react/issues/669 ?
+        # http://jsfiddle.net/k9gy7/3/
+        # https://groups.google.com/forum/#!topic/reactjs/2-RhZTHxNdc
+        # http://jsfiddle.net/k9gy7/2/
+        # http://codepen.io/makenosound/pen/rstvx  Low level api example
 #        (div {className: 'col-md-3'}, [
 #          #(button {onClick: @handleAdd.bind(@)}, ['Add Item'])
 #          #(ReactCSSTransitionGroup {transitionName: "fade"}, items)

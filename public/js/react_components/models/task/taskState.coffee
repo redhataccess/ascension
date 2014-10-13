@@ -26,6 +26,17 @@ Component = React.createClass
       "Assign to #{Auth.getScopedUser()['resource']['firstName']}"
     ])
 
+  generateScopedDeclineElem: () ->
+    if not Auth.getScopedUser()?
+      return null
+
+    id = Auth.getScopedUser()['externalModelId']
+    (MenuItem {key: "decline#{id}", onClick: @props.declineScopedOwnership}, [
+      (i className: 'fa fa-ban fw', [])
+      nbsp
+      "Decline for #{Auth.getScopedUser()['resource']['firstName']}"
+    ])
+
   render: ->
 
     if not Auth.getAuthedUser()?
@@ -40,7 +51,14 @@ Component = React.createClass
           nbsp
           'Take Ownership'
         ])
+        (MenuItem {key: "decline#{id}", onClick: @props.declineOwnership}, [
+          (i className: 'fa fa-ban fw', [])
+          nbsp
+          'Decline Ownership'
+        ])
+        (MenuItem {divider: true})
         @generateScopedOwnershipElem()
+        @generateScopedDeclineElem()
       ])
     else if @props.task.state is TaskStateEnum.ASSIGNED.name
       return (DropdownButton {bsStyle: 'primary', bsSize: "xsmall", title: 'Assigned'}, [

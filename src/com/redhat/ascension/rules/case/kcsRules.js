@@ -92,9 +92,8 @@
       return t['bid'];
     });
     logger.debug("KcsRules matching " + cases.length + " cases");
-    _.each(cases, function(x) {
-      var c, entityOp, existingTask, t;
-      c = self.normalizeCase(x);
+    _.each(cases, function(c) {
+      var entityOp, existingTask, t;
       if (c['linkedSolutionCount'] === 0) {
         entityOp = EntityOpEnum.CREATE_KCS;
         existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], entityOp.name);

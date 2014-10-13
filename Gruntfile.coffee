@@ -160,6 +160,9 @@ module.exports = (grunt) ->
       srcCoffee:
         files: "src/**/*.coffee"
         tasks: ["newer:coffee:compileSrc"]
+      testCoffee:
+        files: "test/**/*.coffee"
+        tasks: ["newer:coffee:compileTest"]
       webCoffee:
         files: ["public/js/**/*.coffee", "public/stylesheets/**/*.less"]
         #tasks: ["newer:coffee:compileWeb", 'webpack:build-dev']
@@ -258,6 +261,16 @@ module.exports = (grunt) ->
           runtime: 'inline'
           preserve_dirs: true
           sourceMap: true
+      compileTest:
+        expand: true
+        cwd: 'test'
+        dest: 'test'
+        src: ['**/*.coffee']
+        ext: '.js'
+        options:
+          runtime: 'inline'
+          preserve_dirs: true
+          sourceMap: true
       compileWeb:
         expand: true
         sourceMap: true
@@ -273,8 +286,8 @@ module.exports = (grunt) ->
   #grunt.registerTask "prod", ["less", "coffee"]
   #grunt.registerTask "dev", ['less', 'coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "watch"]
   #grunt.registerTask "dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "watch"]
-  grunt.registerTask "dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', "watch"]
+  grunt.registerTask "dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "watch"]
   # For now let's go with webpack:build-dev because build-prod takes forever
-  grunt.registerTask "prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', "webpack:build-dev"]
+  grunt.registerTask "prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "webpack:build-dev"]
   grunt.registerTask "default", ["prod"]
   grunt.registerTask "test", ["mochaTest"]

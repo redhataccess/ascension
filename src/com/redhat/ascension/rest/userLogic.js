@@ -32,19 +32,19 @@
   UserLogic = {};
 
   UserLogic.normalizeUserResponse = function(body) {
-    var id, u, _ref;
+    var id, u, _ref, _ref1, _ref2;
     u = void 0;
     if (_.isArray(body)) {
       u = body[0];
     } else {
       u = body;
     }
-    if (u != null) {
+    if ((u != null ? u['resource'] : void 0) != null) {
       id = u['externalModelId'];
       u = u['resource'];
       u.id = id;
-      u.email = (_ref = u.email[0]) != null ? _ref.address : void 0;
-      u.sso = u.sso[0];
+      u.email = (_ref = u.email) != null ? (_ref1 = _ref[0]) != null ? _ref1.address : void 0 : void 0;
+      u.sso = (_ref2 = u.sso) != null ? _ref2[0] : void 0;
     }
     return u;
   };
@@ -100,6 +100,33 @@
         return;
       }
       return deferred.resolve(user);
+    });
+    return deferred.promise;
+  };
+
+  UserLogic.fetchUsersUql = function(opts) {
+    var deferred, self, uri;
+    self = UserLogic;
+    deferred = Q.defer();
+    uri = new Uri(settings.UDS_URL).setPath('/user').setQuery('where=' + opts.where);
+    opts = {
+      url: uri.toString(),
+      json: true
+    };
+    logger.debug("Fetching users with uri: " + opts.url);
+    request(opts, function(err, response, body) {
+      var users;
+      if (err) {
+        deferred.reject(err);
+        return;
+      }
+      users = [];
+      _.each(body, function(u) {
+        var normalizedUser;
+        normalizedUser = self.normalizeUserResponse(u);
+        return users.push(normalizedUser);
+      });
+      return deferred.resolve(users);
     });
     return deferred.promise;
   };

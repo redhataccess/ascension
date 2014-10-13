@@ -2,6 +2,8 @@ React     = require 'react'
 
 {div, img, h1, ul, li} = React.DOM
 
+Well      = require 'react-bootstrap/Well'
+
 Component = React.createClass
   render: ->
     (div {key: 'adminContainer'}, [

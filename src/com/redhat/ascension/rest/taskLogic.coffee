@@ -26,18 +26,24 @@ TaskLogic.fetchTasks = (opts) ->
       where: "SSO is \"#{opts.ssoUsername}\""
 
     UserLogic.fetchUserUql(uql).then((user) ->
-      ownerFindClause =
-        '$or': [
-          { 'sbrs': {'$in': user.sbrs} }
-          { 'owner.id': user.id }
-        ]
+      #ownerFindClause =
+      #  'state': {'$ne': 'closed'}
+      #  '$or': [
+      #    { 'sbrs': {'$in': user.sbrs} }
+      #    { 'owner.id': user.id }
+      #  ]
 
       ownerFindClause =
         'owner.id': user.id
+        'state': {'$ne': 'closed'}
+        'declinedUsers.id': {'$ne': user.id}
+
       nonOwnerFindClause =
         '$and': [
-          { 'sbrs': {'$in': user.sbrs} }
-          { 'owner.id': {'$ne': user.id }}
+          {'state': {'$ne': 'closed'}}
+          {'sbrs': {'$in': user.sbrs} }
+          {'owner.id': {'$ne': user.id }}
+          {'declinedUsers.id': {'$ne': user.id}}
         ]
       logger.debug "Searching mongo with ownerFindClause: #{JSON.stringify(ownerFindClause)}"
       logger.debug "Searching mongo with nonOwnerFindClause: #{JSON.stringify(nonOwnerFindClause)}"
@@ -68,9 +74,6 @@ TaskLogic.fetchTasks = (opts) ->
     #.then((tasks) ->
     .spread((ownerTasks, nonOwnerTasks) ->
       logger.debug "Discovered: #{ownerTasks.length} owner tasks, and #{nonOwnerTasks.length} non-owner tasks"
-#      logger.debug "Discovered: #{tasks.length} tasks"
-#      ownerTasks = _.filter(tasks, (t) -> t['owner']['sso'] is opts.ssoUsername)
-#      otherTasks = _.filter(tasks, (t) -> t['owner']['sso'] isnt opts.ssoUsername)
       finalTasks = []
 
       # If more than 7 owner tasks return only the top 7 owned
@@ -83,16 +86,14 @@ TaskLogic.fetchTasks = (opts) ->
         _.each nonOwnerTasks, (t) -> finalTasks.push t
         deferred.resolve finalTasks[0..6]
     )
-    #.then((tasks) ->
-    #  logger.debug "Discovered: #{tasks.length} tasks"
-    #  deferred.resolve tasks
-    #)
     .catch((err) ->
       deferred.reject err
     ).done()
     return deferred.promise
   else
-    return MongoOps['models']['task'].find().where().limit(_.parseInt(opts.limit) || 100).execQ()
+    findClause =
+      'state': {'$ne': 'closed'}
+    return MongoOps['models']['task'].find().where(findClause).limit(_.parseInt(opts.limit) || 100).execQ()
 
 TaskLogic.fetchTask = (opts) ->
   MongoOps['models']['task']
@@ -111,6 +112,24 @@ TaskLogic.updateTask = (opts) ->
       MongoOps['models']['task'].findOneAndUpdate({_id: new ObjectId(opts['_id'])}, $set).execQ()
     )
     .then(() ->
+      deferred.resolve()
+    ).catch((err) ->
+      deferred.reject err
+    ).done()
+  else if opts.action is TaskActionsEnum.DECLINE.name
+    UserLogic.fetchUser(opts)
+    .then((user) ->
+      $update =
+        $push:
+          declinedUsers:
+            id: user['id']
+            sso: user['sso']
+            fullName: user['fullName']
+            declinedOn: new Date()
+      logger.debug "Declining the event with #{prettyjson.render $update}"
+      MongoOps['models']['task'].findOneAndUpdate({_id: new ObjectId(opts['_id'])}, $update).execQ()
+    )
+    .then(->
       deferred.resolve()
     ).catch((err) ->
       deferred.reject err

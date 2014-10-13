@@ -1,5 +1,5 @@
 (function() {
-  var CaseRules, EntityOpEnum, KcsRules, MongoOperations, Q, TaskOpEnum, TaskRules, TaskStateEnum, TaskTypeEnum, db, dbPromise, logger, moment, mongoose, mongooseQ, nools, prettyjson, request, salesforce, settings, _;
+  var CaseRules, EntityOpEnum, KcsRules, MongoOperations, MongoOps, ObjectId, Q, ScoringLogic, TaskCounts, TaskLogic, TaskOpEnum, TaskRules, TaskStateEnum, TaskTypeEnum, UserLogic, db, dbPromise, logger, moment, mongoose, mongooseQ, nools, prettyjson, request, salesforce, settings, _;
 
   nools = require('nools');
 
@@ -29,17 +29,29 @@
 
   moment = require('moment');
 
+  MongoOps = require('../../db/MongoOperations');
+
   mongoose = require('mongoose');
 
   mongooseQ = require('mongoose-q')(mongoose);
+
+  ObjectId = mongoose.Types.ObjectId;
 
   request = require('request');
 
   KcsRules = require('./kcsRules');
 
+  UserLogic = require('../../rest/userLogic');
+
+  TaskCounts = require('../../db/taskCounts');
+
+  ScoringLogic = require('../../rules/scoring/scoringLogic');
+
+  TaskLogic = require('../../rest/taskLogic');
+
   CaseRules = {};
 
-  CaseRules.soql = "SELECT\n  AccountId,\n  Account_Number__c,\n  CaseNumber,\n  Collaboration_Score__c,\n  Comment_Count__c,\n  CreatedDate,\n  Created_By__c,\n  FTS_Role__c,\n  FTS__c,\n  Last_Breach__c,\n  PrivateCommentCount__c,\n  PublicCommentCount__c,\n  SBT__c,\n  SBR_Group__c,\n  Severity__c,\n  Status,\n  Internal_Status__c,\n  Strategic__c,\n  Tags__c,\n  (SELECT\n    Id,\n    Linking_Mechanism__c,\n    Type__c,\n    Resource_Type__c\n  FROM\n    Case_Resource_Relationships__r)\nFROM\n  Case\nWHERE\n  OwnerId != '00GA0000000XxxNMAS'\n  #andStatusCondition#\n  AND Internal_Status__c != 'Waiting on Engineering'\n  AND Internal_Status__c != 'Waiting on PM'\nLIMIT 1000";
+  CaseRules.soql = "SELECT\n  AccountId,\n  Account_Number__c,\n  CaseNumber,\n  Collaboration_Score__c,\n  Comment_Count__c,\n  CreatedDate,\n  Created_By__c,\n  FTS_Role__c,\n  FTS__c,\n  Last_Breach__c,\n  PrivateCommentCount__c,\n  PublicCommentCount__c,\n  SBT__c,\n  SBR_Group__c,\n  Severity__c,\n  Status,\n  Internal_Status__c,\n  Strategic__c,\n  Tags__c,\n  (SELECT\n    Id,\n    Linking_Mechanism__c,\n    Type__c,\n    Resource_Type__c\n  FROM\n    Case_Resource_Relationships__r)\nFROM\n  Case\nWHERE\n  OwnerId != '00GA0000000XxxNMAS'\n  #andStatusCondition#\n  AND Internal_Status__c != 'Waiting on Engineering'\n  AND Internal_Status__c != 'Waiting on PM'\nLIMIT 100";
 
   CaseRules.fetchCases = function() {
     var soql;
@@ -102,9 +114,8 @@
       return t['bid'];
     });
     logger.debug("Matching " + cases.length + " cases");
-    _.each(cases, function(x) {
-      var c, entityOp, existingTask, t;
-      c = self.normalizeCase(x);
+    _.each(cases, function(c) {
+      var entityOp, existingTask, t;
       logger.debug("Attempting to match case: " + (c['caseNumber'] || c['CaseNumber']) + ", intStatus: " + c['internalStatus']);
       if (self.intStatus(c, 'Unassigned')) {
         entityOp = EntityOpEnum.OWN;
@@ -193,18 +204,67 @@
     MongoOperations.reset().then(function() {
       return CaseRules.fetchCases();
     }).then(function(cases) {
+      var normalizedCases;
+      normalizedCases = _.map(cases, function(c) {
+        return CaseRules.normalizeCase(c);
+      });
       return [
         CaseRules.match({
-          cases: cases
+          cases: normalizedCases
         }), KcsRules.match({
-          cases: cases
+          cases: normalizedCases
         })
       ];
     }).spread(function(casePromises, kcsPromises) {
       logger.debug("Received " + casePromises.length + " caseResults and " + kcsPromises + " kcs results");
       return Q.allSettled(_.flatten([casePromises, kcsPromises]));
     }).then(function(results) {
-      return logger.debug("Completed manipulating " + results.length + " tasks");
+      logger.debug("Completed manipulating " + results.length + " tasks");
+      return TaskLogic.fetchTasks({});
+    }).then(function(tasks) {
+      var sbrs, uql, uqlParts;
+      sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().value();
+      uqlParts = [];
+      _.each(sbrs, function(sbr) {
+        return uqlParts.push("(sbrName is \"" + sbr + "\")");
+      });
+      uql = uqlParts.join(' OR ');
+      logger.debug("Generated uql: " + uql);
+      return [
+        tasks, UserLogic.fetchUsersUql({
+          where: uql
+        })
+      ];
+    }).spread(function(tasks, users) {
+      var userIds;
+      userIds = _.chain(users).pluck('id').unique().value();
+      logger.debug("Discovered " + userIds + " userIds");
+      return [tasks, users, TaskCounts.getTaskCounts(userIds)];
+    }).spread(function(tasks, users, userTaskCounts) {
+      var updatePromises;
+      logger.debug("Determining potential owners");
+      updatePromises = [];
+      _.each(tasks, function(t) {
+        var $update, potentialOwners;
+        ScoringLogic.determinePotentialOwners({
+          task: t,
+          users: users,
+          userTaskCounts: userTaskCounts
+        });
+        potentialOwners = t.potentialOwners;
+        $update = {
+          $set: {
+            potentialOwners: potentialOwners
+          }
+        };
+        return updatePromises.push(MongoOps['models']['task'].findOneAndUpdate({
+          _id: new ObjectId(t._id)
+        }, $update).execQ());
+      });
+      logger.debug("Generated " + updatePromises.length + " update promises");
+      return Q.allSettled(updatePromises);
+    }).then(function(results) {
+      return logger.debug("Completed setting potential owners on " + results.length + " tasks");
     })["catch"](function(err) {
       logger.error(err.stack);
       return deferred.reject(err);
@@ -230,18 +290,67 @@
     }).then(function() {
       return CaseRules.fetchCases();
     }).then(function(cases) {
+      var normalizedCases;
+      normalizedCases = _.map(cases, function(c) {
+        return CaseRules.normalizeCase(c);
+      });
       return [
         CaseRules.match({
-          cases: cases
+          cases: normalizedCases
         }), KcsRules.match({
-          cases: cases
+          cases: normalizedCases
         })
       ];
     }).spread(function(casePromises, kcsPromises) {
       logger.debug("Received " + casePromises.length + " caseResults and " + kcsPromises + " kcs results");
       return Q.allSettled(_.flatten([casePromises, kcsPromises]));
     }).then(function(results) {
-      return logger.debug("Completed manipulating " + results.length + " tasks");
+      logger.debug("Completed manipulating " + results.length + " tasks");
+      return TaskLogic.fetchTasks({});
+    }).then(function(tasks) {
+      var sbrs, uql, uqlParts;
+      sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().value();
+      uqlParts = [];
+      _.each(sbrs, function(sbr) {
+        return uqlParts.push("(sbrName is \"" + sbr + "\")");
+      });
+      uql = uqlParts.join(' OR ');
+      logger.debug("Generated uql: " + uql);
+      return [
+        tasks, UserLogic.fetchUsersUql({
+          where: uql
+        })
+      ];
+    }).spread(function(tasks, users) {
+      var userIds;
+      userIds = _.chain(users).pluck('id').unique().value();
+      logger.debug("Discovered " + userIds + " userIds");
+      return [tasks, users, TaskCounts.getTaskCounts(userIds)];
+    }).spread(function(tasks, users, userTaskCounts) {
+      var updatePromises;
+      logger.debug("Determining potential owners");
+      updatePromises = [];
+      _.each(tasks, function(t) {
+        var $update, potentialOwners;
+        ScoringLogic.determinePotentialOwners({
+          task: t,
+          users: users,
+          userTaskCounts: userTaskCounts
+        });
+        potentialOwners = t.potentialOwners;
+        $update = {
+          $set: {
+            potentialOwners: potentialOwners
+          }
+        };
+        return updatePromises.push(MongoOps['models']['task'].findOneAndUpdate({
+          _id: new ObjectId(t._id)
+        }, $update).execQ());
+      });
+      logger.debug("Generated " + updatePromises.length + " update promises");
+      return Q.allSettled(updatePromises);
+    }).then(function(results) {
+      return logger.debug("Completed setting potential owners on " + results.length + " tasks");
     })["catch"](function(err) {
       return logger.error(err.stack);
     }).done(function() {

@@ -22,12 +22,12 @@ UserLogic.normalizeUserResponse = (body) ->
   else
     u = body
 
-  if u?
+  if u?['resource']?
     id = u['externalModelId']
     u = u['resource']
     u.id = id
-    u.email = u.email[0]?.address
-    u.sso = u.sso[0]
+    u.email = u.email?[0]?.address
+    u.sso = u.sso?[0]
   u
 
 UserLogic.fetchUser = (opts) ->
@@ -45,7 +45,7 @@ UserLogic.fetchUser = (opts) ->
 
     if err
       deferred.reject err
-      return
+      return;
 
     if not user?
       deferred.reject "Could not find user with input: #{opts.userInput}"
@@ -83,6 +83,33 @@ UserLogic.fetchUserUql = (opts) ->
       return
 
     deferred.resolve user
+
+  deferred.promise
+
+UserLogic.fetchUsersUql = (opts) ->
+  self = UserLogic
+  deferred = Q.defer()
+
+  uri = new Uri(settings.UDS_URL).setPath('/user').setQuery('where=' + opts.where)
+  opts =
+    url: uri.toString()
+    json: true
+
+  logger.debug "Fetching users with uri: #{opts.url}"
+
+  # Lookup user based on given sso username
+  request opts, (err, response, body) ->
+    if err
+      deferred.reject err
+      return
+
+    users = []
+
+    _.each body, (u) ->
+      normalizedUser = self.normalizeUserResponse(u)
+      users.push normalizedUser
+
+    deferred.resolve users
 
   deferred.promise
 

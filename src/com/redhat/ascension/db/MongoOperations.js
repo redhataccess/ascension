@@ -147,7 +147,14 @@
         status: String,
         strategic: Boolean,
         internalStatus: String
-      }
+      },
+      declinedUsers: {
+        id: String,
+        sso: String,
+        fullName: String,
+        declinedOn: Date
+      },
+      potentialOwners: []
     });
     return MongoOps['models']['task'] = mongoose.model('Task', MongoOps['schemas']['task']);
   };
