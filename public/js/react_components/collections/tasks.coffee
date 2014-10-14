@@ -153,7 +153,6 @@ Component = React.createClass
     cx(classSet)
 
   genBtnGroupLayout: () ->
-    #layoutModes = ['masonry', 'fitRows', 'cellsByRow', 'vertical', 'masonryHorizontal', 'fitColumns', 'cellsByColumn', 'horizontal']
     layoutModes = ['masonry', 'vertical']
     _.map layoutModes, (layoutMode) =>
       (button
