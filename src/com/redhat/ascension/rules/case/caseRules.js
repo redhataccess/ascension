@@ -39,7 +39,7 @@
 
   request = require('request');
 
-  S = require('String');
+  S = require('string');
 
   KcsRules = require('./kcsRules');
 

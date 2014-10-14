@@ -18,7 +18,7 @@ mongoose          = require 'mongoose'
 mongooseQ         = require('mongoose-q')(mongoose)
 ObjectId          = mongoose.Types.ObjectId
 request           = require 'request'
-S                 = require 'String'
+S                 = require 'string'
 #MongoClient   = require('mongodb').MongoClient
 #Server        = require('mongodb').Server
 

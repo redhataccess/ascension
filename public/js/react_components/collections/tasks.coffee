@@ -7,7 +7,8 @@ AjaxMixin   = require '../mixins/ajaxMixin.coffee'
 cx          = React.addons.classSet
 d3          = require 'd3/d3'
 _           = require 'lodash'
-S           = require 'String'
+S           = require 'string'
+
 
 Task              = require '../models/task/task.coffee'
 TaskIconMapping   = require '../utils/taskIconMapping.coffee'
