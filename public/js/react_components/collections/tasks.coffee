@@ -7,11 +7,13 @@ AjaxMixin   = require '../mixins/ajaxMixin.coffee'
 cx          = React.addons.classSet
 d3          = require 'd3/d3'
 _           = require 'lodash'
+S           = require 'String'
 
 Task              = require '../models/task/task.coffee'
 TaskIconMapping   = require '../utils/taskIconMapping.coffee'
 TaskTypeEnum      = require '../../../../src/com/redhat/ascension/rules/enums/TaskTypeEnum.coffee'
 TaskActionsEnum   = require '../../../../src/com/redhat/ascension/rest/enums/taskActionsEnum.coffee'
+EntityOpEnum      = require '../../../../src/com/redhat/ascension/rules/enums/EntityOpEnum.coffee'
 TaskStateEnum     = require '../../../../src/com/redhat/ascension/rules/enums/TaskStateEnum.coffee'
 Auth              = require '../auth/auth.coffee'
 TaskAction        = require '../models/task/taskAction.coffee'
@@ -94,6 +96,12 @@ Component = React.createClass
     TaskIconMapping[t['state']]?.icon || 'fa-medkit'
     #(i className: "fa #{icon} fw", [])
 
+  genEntityDescription: (t) ->
+    if (t['type'] is 'case') or (t['type'] is 'kcs' and t['entityOp'] is EntityOpEnum.CREATE_KCS.name)
+      return S(t['case']['subject']).truncate(50).s
+    else
+      return ''
+
   genTaskElements: () ->
     tasks = _.values(@state['tasks'])
     tasks.sort (a, b) -> b.score - a.score
@@ -113,12 +121,15 @@ Component = React.createClass
           #(Spacer {}, [])
           (TaskAction {task: t,  key: 'taskAction', absolute: true}, [])
           # Case number
-          (span {className: 'entity-state-icon'}, [
+          (span {className: 'task-entity-state-icon'}, [
             (IconWithTooltip
               iconName: @genEntityStateIcon(t)
               tooltipPrefix: t['type'].toUpperCase()
               tooltipText: t['case']?['internalStatus'] || undefined
             , [])
+          ])
+          (span {className: 'task-entity-description'}, [
+            @genEntityDescription(t)
           ])
           (span {className: 'task-bid'}, [ @genTaskBid(t) ])
           # Metadata represents the sbrs/tags of the task

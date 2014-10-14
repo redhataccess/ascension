@@ -59,14 +59,14 @@ TaskLogic.fetchTasks = (opts) ->
       ownerTasksPromise = MongoOps['models']['task']
       .find()
       .where(ownerFindClause)
-      .limit(_.parseInt(opts.limit) || 100)
+      .limit(_.parseInt(opts.limit))
       .sort('-score') # score desc
       .execQ()
 
       nonOwnerTasksPromise = MongoOps['models']['task']
       .find()
       .where(nonOwnerFindClause)
-      .limit(_.parseInt(opts.limit) || 100)
+      .limit(_.parseInt(opts.limit))
       .sort('-score') # score desc
       .execQ()
 
@@ -94,7 +94,7 @@ TaskLogic.fetchTasks = (opts) ->
   else
     findClause =
       'state': {'$ne': 'closed'}
-    return MongoOps['models']['task'].find().where(findClause).limit(_.parseInt(opts.limit) || 100).execQ()
+    return MongoOps['models']['task'].find().where(findClause).limit(_.parseInt(opts.limit)).execQ()
 
 TaskLogic.fetchTask = (opts) ->
   MongoOps['models']['task']

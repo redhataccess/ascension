@@ -100,7 +100,7 @@ app.get "/tasks", (req, res) ->
   opts =
     # Opt param, fetches tasks based on this user [sbrs, ect.]
     ssoUsername: req.query['ssoUsername']
-    limit: req.query['limit']
+    limit: _.parseInt(req.query['limit']) || 100
 
   TaskLogic.fetchTasks(opts).then((data) ->
     res.send(data)

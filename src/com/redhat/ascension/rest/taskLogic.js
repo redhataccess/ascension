@@ -76,8 +76,8 @@
         };
         logger.debug("Searching mongo with ownerFindClause: " + (JSON.stringify(ownerFindClause)));
         logger.debug("Searching mongo with nonOwnerFindClause: " + (JSON.stringify(nonOwnerFindClause)));
-        ownerTasksPromise = MongoOps['models']['task'].find().where(ownerFindClause).limit(_.parseInt(opts.limit) || 100).sort('-score').execQ();
-        nonOwnerTasksPromise = MongoOps['models']['task'].find().where(nonOwnerFindClause).limit(_.parseInt(opts.limit) || 100).sort('-score').execQ();
+        ownerTasksPromise = MongoOps['models']['task'].find().where(ownerFindClause).limit(_.parseInt(opts.limit)).sort('-score').execQ();
+        nonOwnerTasksPromise = MongoOps['models']['task'].find().where(nonOwnerFindClause).limit(_.parseInt(opts.limit)).sort('-score').execQ();
         return [ownerTasksPromise, nonOwnerTasksPromise];
       }).spread(function(ownerTasks, nonOwnerTasks) {
         var finalTasks;
@@ -105,7 +105,7 @@
           '$ne': 'closed'
         }
       };
-      return MongoOps['models']['task'].find().where(findClause).limit(_.parseInt(opts.limit) || 100).execQ();
+      return MongoOps['models']['task'].find().where(findClause).limit(_.parseInt(opts.limit)).execQ();
     }
   };
 

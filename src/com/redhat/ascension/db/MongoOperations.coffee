@@ -36,7 +36,9 @@ MongoOps.generateMongoUrl = (db) ->
 
 MongoOps.init = (opts) ->
   mongoDebug = opts?['mongoDebug'] || false
+  logger.debug "mongoDebug: #{mongoDebug}"
   testDb = opts?['testDb'] || false
+  logger.debug "testDb: #{testDb}"
 
   opts =
     native_parser: true
@@ -144,6 +146,7 @@ MongoOps.defineCollections = () ->
       tags: Array
       severity: String
       status: String
+      subject: String
       strategic: Boolean
       internalStatus: String
 

@@ -121,7 +121,8 @@
         tags: c['tags'] || this.parseSfArray(c['Tags__c']),
         sbt: c['sbt'] || c['SBT__c'],
         created: c['created'] || c['CreatedDate'],
-        score: c['collaborationScore'] || c['Collaboration_Score__c']
+        score: c['collaborationScore'] || c['Collaboration_Score__c'],
+        subject: c['subject'] || c['Subject']
       }
     };
   };

@@ -111,7 +111,7 @@
     var opts;
     opts = {
       ssoUsername: req.query['ssoUsername'],
-      limit: req.query['limit']
+      limit: _.parseInt(req.query['limit']) || 100
     };
     return TaskLogic.fetchTasks(opts).then(function(data) {
       return res.send(data);

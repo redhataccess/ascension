@@ -51,7 +51,9 @@
   MongoOps.init = function(opts) {
     var db, mongoDebug, testDb;
     mongoDebug = (opts != null ? opts['mongoDebug'] : void 0) || false;
+    logger.debug("mongoDebug: " + mongoDebug);
     testDb = (opts != null ? opts['testDb'] : void 0) || false;
+    logger.debug("testDb: " + testDb);
     opts = {
       native_parser: true,
       server: {
@@ -146,6 +148,7 @@
         tags: Array,
         severity: String,
         status: String,
+        subject: String,
         strategic: Boolean,
         internalStatus: String
       },

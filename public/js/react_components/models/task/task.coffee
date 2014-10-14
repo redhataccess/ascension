@@ -20,6 +20,7 @@ TaskTypeEnum      = require '../../../../../src/com/redhat/ascension/rules/enums
 
 # Bootstrap components
 Well            = require 'react-bootstrap/Well'
+Alert           = require 'react-bootstrap/Alert'
 
 {div, strong, a, img, h1, ul, li, i, span, h3, hr} = React.DOM
 nbsp = "\u00A0"
@@ -139,9 +140,12 @@ Component = React.createClass
 
   # span + font-size: 1em for all of the meta data components
   render: ->
+    if @state.task is ''
+      return (Alert {bsStyle: "danger", key: 'alert'}, [
+        "Error fetching task with id: #{@props.params?._id}"
+      ])
     if not @state['task']?
       return null
-
 
     (div {key: 'mainContainer'}, [
       (div {key: 'taskContainer', className: 'row'}, [

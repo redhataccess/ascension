@@ -1,5 +1,5 @@
 (function() {
-  var CaseRules, EntityOpEnum, KcsRules, MongoOperations, MongoOps, ObjectId, Q, ScoringLogic, TaskCounts, TaskLogic, TaskOpEnum, TaskRules, TaskStateEnum, TaskTypeEnum, UserLogic, db, dbPromise, logger, moment, mongoose, mongooseQ, nools, prettyjson, request, salesforce, settings, _;
+  var CaseRules, EntityOpEnum, KcsRules, MongoOperations, MongoOps, ObjectId, Q, S, ScoringLogic, TaskCounts, TaskLogic, TaskOpEnum, TaskRules, TaskStateEnum, TaskTypeEnum, UserLogic, db, dbPromise, logger, moment, mongoose, mongooseQ, nools, prettyjson, request, salesforce, settings, _;
 
   nools = require('nools');
 
@@ -39,6 +39,8 @@
 
   request = require('request');
 
+  S = require('String');
+
   KcsRules = require('./kcsRules');
 
   UserLogic = require('../../rest/userLogic');
@@ -51,11 +53,11 @@
 
   CaseRules = {};
 
-  CaseRules.caseFields = "AccountId,\nAccount_Number__c,\nCaseNumber,\nCollaboration_Score__c,\nComment_Count__c,\nCreatedDate,\nCreated_By__c,\nFTS_Role__c,\nFTS__c,\nLast_Breach__c,\nPrivateCommentCount__c,\nPublicCommentCount__c,\nSBT__c,\nSBR_Group__c,\nSeverity__c,\nStatus,\nInternal_Status__c,\nStrategic__c,\nTags__c,\n(SELECT\n  Id,\n  Linking_Mechanism__c,\n  Type__c,\n  Resource_Type__c\nFROM\n  Case_Resource_Relationships__r)";
+  CaseRules.caseFields = "AccountId,\nAccount_Number__c,\nCaseNumber,\nCollaboration_Score__c,\nComment_Count__c,\nCreatedDate,\nCreated_By__c,\nFTS_Role__c,\nFTS__c,\nLast_Breach__c,\nPrivateCommentCount__c,\nPublicCommentCount__c,\nSBT__c,\nSBR_Group__c,\nSeverity__c,\nStatus,\nSubject,\nInternal_Status__c,\nStrategic__c,\nTags__c,\n(SELECT\n  Id,\n  Linking_Mechanism__c,\n  Type__c,\n  Resource_Type__c\nFROM\n  Case_Resource_Relationships__r)";
 
   CaseRules.fetchCaseSoql = "SELECT\n  #caseFields#\nFROM\n  Case\nWHERE\n  CaseNumber = #caseNumber#";
 
-  CaseRules.fetchCasesSoql = "SELECT\n  #caseFields#\nFROM\n  Case\nWHERE\n  OwnerId != '00GA0000000XxxNMAS'\n  #andStatusCondition#\n  AND Internal_Status__c != 'Waiting on Engineering'\n  AND Internal_Status__c != 'Waiting on PM'\nLIMIT 100";
+  CaseRules.fetchCasesSoql = "SELECT\n  #caseFields#\nFROM\n  Case\nWHERE\n  OwnerId != '00GA0000000XxxNMAS'\n  #andStatusCondition#\n  AND Internal_Status__c != 'Waiting on Engineering'\n  AND Internal_Status__c != 'Waiting on PM'\nLIMIT 1000";
 
   CaseRules.fetchCase = function(opts) {
     var soql;
@@ -112,6 +114,7 @@
       created: c['created'] || c['CreatedDate'],
       collaborationScore: c['collaborationScore'] || c['Collaboration_Score__c'],
       caseNumber: c['caseNumber'] || c['CaseNumber'],
+      subject: c['subject'] || c['Subject'],
       linkedSolutionCount: _.filter(((_ref = c['Case_Resource_Relationships__r']) != null ? _ref['records'] : void 0) || [], function(r) {
         return r['Resource_Type__c'] === 'Solution' && _.contains(['Link', 'Link;Pin'], r['Type__c']);
       })
@@ -238,7 +241,9 @@
       return TaskLogic.fetchTasks({});
     }).then(function(tasks) {
       var sbrs, uql, uqlParts;
-      sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().value();
+      sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().filter(function(x) {
+        return !S(x).contains('&');
+      }).value();
       uqlParts = [];
       _.each(sbrs, function(sbr) {
         return uqlParts.push("(sbrName is \"" + sbr + "\")");

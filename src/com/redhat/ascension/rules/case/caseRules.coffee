@@ -18,6 +18,7 @@ mongoose          = require 'mongoose'
 mongooseQ         = require('mongoose-q')(mongoose)
 ObjectId          = mongoose.Types.ObjectId
 request           = require 'request'
+S                 = require 'String'
 #MongoClient   = require('mongodb').MongoClient
 #Server        = require('mongodb').Server
 
@@ -46,6 +47,7 @@ CaseRules.caseFields = """
   SBR_Group__c,
   Severity__c,
   Status,
+  Subject,
   Internal_Status__c,
   Strategic__c,
   Tags__c,
@@ -76,7 +78,7 @@ WHERE
   #andStatusCondition#
   AND Internal_Status__c != 'Waiting on Engineering'
   AND Internal_Status__c != 'Waiting on PM'
-LIMIT 100
+LIMIT 1000
 """
 
 CaseRules.fetchCase = (opts) ->
@@ -133,6 +135,7 @@ CaseRules.normalizeCase = (c) ->
   created: c['created'] || c['CreatedDate']
   collaborationScore: c['collaborationScore'] || c['Collaboration_Score__c']
   caseNumber: c['caseNumber'] || c['CaseNumber']
+  subject: c['subject'] || c['Subject']
   linkedSolutionCount: _.filter(c['Case_Resource_Relationships__r']?['records'] || [], (r) -> r['Resource_Type__c'] is 'Solution' and _.contains(['Link', 'Link;Pin'], r['Type__c']))
   # TODO add linked solution count based on the resource Type__c is 'Link'
   # Prob don't even need Resource_Type__c is 'Solution' just see if there are any 'Link's
@@ -281,7 +284,7 @@ CaseRules.reset = () ->
     # Normalize all cases before passing them to the respective rules
     normalizedCases = _.map cases, (c) -> CaseRules.normalizeCase(c)
 
-    [CaseRules.match({cases: normalizedCases}), KcsRules.match({cases:  normalizedCases})]
+    [CaseRules.match({cases: normalizedCases}), KcsRules.match({cases: normalizedCases})]
   )
   .spread((casePromises, kcsPromises) ->
     logger.debug "Received #{casePromises.length} caseResults and #{kcsPromises} kcs results"
@@ -295,8 +298,9 @@ CaseRules.reset = () ->
   )
   .then((tasks) ->
 
-    # Get a unique list of SBRs and grab the users in those SBRs
-    sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().value()
+    # TODO, remove the & filter in the future when UDS is fixed
+    # Get a unique list of SBRs and grab the users in those SBRs.  For now filter out all sbrs containing & since UDS can't handle
+    sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().filter((x) -> not S(x).contains('&')).value()
 
     uqlParts = []
     _.each sbrs, (sbr) -> uqlParts.push "(sbrName is \"#{sbr}\")"
