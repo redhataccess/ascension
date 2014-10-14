@@ -1,5 +1,5 @@
 (function() {
-  var CaseRules, MongoOps, TaskLogic, Uri, app, bodyParser, compression, cookieParser, db, env, express, favicon, http, ipAddress, logger, mongoose, morgan, oneDay, path, port, request, server, serverStartTime, settings;
+  var CaseRules, MongoOps, TaskLogic, Uri, app, bodyParser, compression, cookieParser, db, env, express, favicon, http, ipAddress, logger, mongoose, morgan, oneDay, path, port, request, server, serverStartTime, settings, _;
 
   express = require('express');
 
@@ -26,6 +26,8 @@
   settings = require('./src/com/redhat/ascension/settings/settings');
 
   Uri = require('jsuri');
+
+  _ = require('lodash');
 
   mongoose = require('mongoose');
 

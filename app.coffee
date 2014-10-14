@@ -11,6 +11,7 @@ compression     = require 'compression'
 request         = require 'request'
 settings        = require './src/com/redhat/ascension/settings/settings'
 Uri             = require 'jsuri'
+_               = require 'lodash'
 
 mongoose        = require 'mongoose'
 MongoOps        = require './src/com/redhat/ascension/db/MongoOperations'
