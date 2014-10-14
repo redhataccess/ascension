@@ -104,11 +104,17 @@ App = React.createClass
     )
 
   componentWillReceiveProps: (nextProps) ->
+    #console.debug "Auth.scopedUser: #{JSON.stringify(Auth.getScopedUser()?.resource?.sso)}"
     #console.debug "componentWillReceiveProps:query: #{JSON.stringify(nextProps.query)}"
     #console.debug "componentWillReceiveProps:params: #{JSON.stringify(nextProps.params)}"
     # This means the ssoUsername changed, need to re-query to scope this user
     if not _.isEqual(@props.query.ssoUsername, nextProps.query.ssoUsername)
       @queryScopedUser(nextProps.query.ssoUsername)
+    else if (nextProps.query.ssoUsername is '' or (not nextProps.query.ssoUsername?))
+      Auth.setScopedUser(undefined)
+      @setState
+        'scopedUser': undefined
+        'scopedFailed': false
 
   componentDidMount: ->
     self = @
@@ -146,6 +152,11 @@ App = React.createClass
 
     if @props.query.ssoUsername? and @props.query.ssoUsername isnt ''
       @queryScopedUser(@props.query.ssoUsername)
+    else
+      Auth.setScopedUser(undefined)
+      self.setState
+        'scopedUser': undefined
+        'scopedFailed': false
 
   genAuthenticationElement: () ->
     if Auth.getAuthedUser()?

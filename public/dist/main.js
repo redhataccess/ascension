@@ -163,6 +163,12 @@
 	  componentWillReceiveProps: function(nextProps) {
 	    if (!_.isEqual(this.props.query.ssoUsername, nextProps.query.ssoUsername)) {
 	      return this.queryScopedUser(nextProps.query.ssoUsername);
+	    } else if (nextProps.query.ssoUsername === '' || (nextProps.query.ssoUsername == null)) {
+	      Auth.setScopedUser(void 0);
+	      return this.setState({
+	        'scopedUser': void 0,
+	        'scopedFailed': false
+	      });
 	    }
 	  },
 	  componentDidMount: function() {
@@ -209,6 +215,12 @@
 	    }
 	    if ((this.props.query.ssoUsername != null) && this.props.query.ssoUsername !== '') {
 	      return this.queryScopedUser(this.props.query.ssoUsername);
+	    } else {
+	      Auth.setScopedUser(void 0);
+	      return self.setState({
+	        'scopedUser': void 0,
+	        'scopedFailed': false
+	      });
 	    }
 	  },
 	  genAuthenticationElement: function() {
@@ -1205,7 +1217,9 @@
 	  queryTasks: function(props) {
 	    var opts, ssoUsername, _ref1, _ref2;
 	    ssoUsername = void 0;
-	    if (((_ref1 = Auth.getScopedUser()) != null ? _ref1.resource : void 0) != null) {
+	    if (props.query.ssoUsername != null) {
+	      ssoUsername = props.query.ssoUsername;
+	    } else if (((_ref1 = Auth.getScopedUser()) != null ? _ref1.resource : void 0) != null) {
 	      ssoUsername = Auth.getScopedUser().resource.sso[0];
 	    } else if (((_ref2 = Auth.getAuthedUser()) != null ? _ref2.resource : void 0) != null) {
 	      ssoUsername = Auth.getAuthedUser().resource.sso[0];
@@ -2308,9 +2322,9 @@
 	          i({
 	            className: 'fa fa-ban fw'
 	          }, []), nbsp, 'Decline Ownership'
-	        ]), MenuItem({
+	        ]), Auth.getScopedUser() !== void 0 ? MenuItem({
 	          divider: true
-	        }), this.generateScopedOwnershipElem(), this.generateScopedDeclineElem()
+	        }) : void 0, this.generateScopedOwnershipElem(), this.generateScopedDeclineElem()
 	      ]);
 	    } else if (this.props.task.state === TaskStateEnum.ASSIGNED.name) {
 	      return DropdownButton({

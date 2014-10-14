@@ -241,9 +241,7 @@
       return TaskLogic.fetchTasks({});
     }).then(function(tasks) {
       var sbrs, uql, uqlParts;
-      sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().filter(function(x) {
-        return !S(x).contains('&');
-      }).value();
+      sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().value();
       uqlParts = [];
       _.each(sbrs, function(sbr) {
         return uqlParts.push("(sbrName is \"" + sbr + "\")");

@@ -56,7 +56,7 @@ Component = React.createClass
           nbsp
           'Decline Ownership'
         ])
-        (MenuItem {divider: true})
+        (MenuItem {divider: true}) unless Auth.getScopedUser() is undefined
         @generateScopedOwnershipElem()
         @generateScopedDeclineElem()
       ])

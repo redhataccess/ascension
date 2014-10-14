@@ -216,7 +216,9 @@ Component = React.createClass
     # Build a query if there is a ssoUsername
 
     ssoUsername = undefined
-    if Auth.getScopedUser()?.resource?
+    if props.query.ssoUsername?
+      ssoUsername = props.query.ssoUsername
+    else if Auth.getScopedUser()?.resource?
       ssoUsername = Auth.getScopedUser().resource.sso[0]
     else if Auth.getAuthedUser()?.resource?
       ssoUsername = Auth.getAuthedUser().resource.sso[0]

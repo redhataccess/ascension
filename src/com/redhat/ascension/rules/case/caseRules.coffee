@@ -300,7 +300,8 @@ CaseRules.reset = () ->
 
     # TODO, remove the & filter in the future when UDS is fixed
     # Get a unique list of SBRs and grab the users in those SBRs.  For now filter out all sbrs containing & since UDS can't handle
-    sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().filter((x) -> not S(x).contains('&')).value()
+    #.filter((x) -> not S(x).contains('&'))
+    sbrs = _.chain(tasks).pluck('sbrs').flatten().unique().value()
 
     uqlParts = []
     _.each sbrs, (sbr) -> uqlParts.push "(sbrName is \"#{sbr}\")"

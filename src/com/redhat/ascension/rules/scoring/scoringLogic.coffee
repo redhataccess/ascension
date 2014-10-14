@@ -64,7 +64,7 @@ M.determinePotentialOwners = (opts) ->
     #logger.debug "userId: #{userId}: obj: #{obj}"
     taskCounts.push obj['taskCount']
 
-  logger.debug "taskCounts: #{taskCounts}"
+  #logger.debug "taskCounts: #{taskCounts}"
 
   minTaskCount = _.min(taskCounts)
   maxTaskCount = _.max(taskCounts)

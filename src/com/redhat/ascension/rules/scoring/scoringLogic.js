@@ -52,7 +52,6 @@
       obj = userTaskCounts[userId];
       taskCounts.push(obj['taskCount']);
     }
-    logger.debug("taskCounts: " + taskCounts);
     minTaskCount = _.min(taskCounts);
     maxTaskCount = _.max(taskCounts);
     scale = d3.scale.linear().domain([minTaskCount, maxTaskCount]).range([1, .25]);
