@@ -29,6 +29,9 @@
         publicPath: "dist/",
         filename: "main.js"
       },
+      externals: {
+        "jquery": "jQuery"
+      },
       module: {
         loaders: [
           {
@@ -59,7 +62,6 @@
         extensions: ['', '.js'],
         modulesDirectories: ['./node_modules', './public/js/bower_components'],
         alias: {
-          jquery: "jquery/dist/jquery",
           react: "react/react-with-addons"
         }
       },

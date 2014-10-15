@@ -1,5 +1,6 @@
 _   = require 'lodash'
 Q   = require 'q'
+S   = require 'string'
 
 
 WebUtilsMixin = {}
@@ -23,6 +24,7 @@ WebUtilsMixin.getCookie = (key) ->
   return null
 
 WebUtilsMixin.getRhUserCookie = ->
+
   rh_user = WebUtilsMixin.getCookie('rh_user')
   if rh_user? and rh_user.indexOf("|") != -1
     rh_user = rh_user.substring(0, rh_user.indexOf("|"))
@@ -46,6 +48,7 @@ WebUtilsMixin.getUser = (ssoUsername) ->
   if ssoUsername? and ssoUsername isnt ''
 
     #url = "/user/#{ssoUsername}"
+    ssoUsername = S(ssoUsername).replaceAll('"', '').s
     url = "/user?where=SSO is \"#{ssoUsername}\" and (isActive is true)"
 
     config =

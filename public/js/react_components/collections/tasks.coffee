@@ -223,6 +223,7 @@ Component = React.createClass
     else if Auth.getAuthedUser()?.resource?
       ssoUsername = Auth.getAuthedUser().resource.sso[0]
 
+    ssoUsername = S(ssoUsername).replaceAll('"', '').s
     opts =
       path: '/tasks'
       queryParams: [

@@ -46,6 +46,15 @@ module.exports = (grunt) ->
       filename: "main.js"
       #chunkFilename: "[chunkhash].js"
 
+    # So for whatever reason, including jquery in bower_components simply is not working with webpack.  I can't even
+    # require jquery even though I can use $, maybe some optimization filter?  What I do know is using it externally
+    # Actually works perfect.
+    externals: {
+      # require("jquery") is external and available
+      #/  on the global var jQuery
+      "jquery": "jQuery"
+    }
+
     module:
       #preLoaders: [{
       #  test: /\.coffee$/
@@ -112,14 +121,9 @@ module.exports = (grunt) ->
       #modulesDirectories: [path.join(__dirname, "node_modules"), path.join(__dirname, 'public/js/bower_components')]
 
       alias:
-#        # Bind version of jquery
-        jquery: "jquery/dist/jquery"
+      #  # Bind version of jquery
+      #  jquery: "jquery/dist/jquery"
         react: "react/react-with-addons"
-#        # Bind version of jquery-ui
-#        #"jquery-ui": "jquery-ui-1.10.3"
-#        # jquery-ui doesn't contain a index file
-#        # bind module to the complete module
-#        #"jquery-ui-1.10.3$": "jquery-ui-1.10.3/ui/jquery-ui.js"
 
     plugins: [new webpack.ProvidePlugin(
 

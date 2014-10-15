@@ -1,11 +1,16 @@
 React     = require 'react'
+#$         = require 'jquery'
+#require('imports?jQuery=jquery!readmore/readmore')
+require('readmore/readmore')
 
-{div, img, h1, ul, li} = React.DOM
+
+{div, img, h1, ul, li, h3} = React.DOM
 
 Well      = require 'react-bootstrap/Well'
 
 Component = React.createClass
   render: ->
+    console.debug "admin"
     (div {key: 'adminContainer'}, [
       (h1 {}, ['Admin'])
       (div {key: 'statsRow', className: 'row'}, [
