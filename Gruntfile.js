@@ -217,7 +217,7 @@
       }
     });
     grunt.registerTask("dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "watch"]);
-    grunt.registerTask("prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "webpack:build-dev"]);
+    grunt.registerTask("prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "webpack:build-prod"]);
     grunt.registerTask("default", ["prod"]);
     return grunt.registerTask("test", ["mochaTest"]);
   };

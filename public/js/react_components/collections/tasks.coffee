@@ -223,6 +223,10 @@ Component = React.createClass
     else if Auth.getAuthedUser()?.resource?
       ssoUsername = Auth.getAuthedUser().resource.sso[0]
 
+    # Short circuit if ssoUsername is undefined
+    if ssoUsername is undefined
+      return
+
     ssoUsername = S(ssoUsername).replaceAll('"', '').s
     opts =
       path: '/tasks'
