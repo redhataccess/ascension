@@ -23,6 +23,7 @@ TaskTypeEnum      = require '../../../../../src/com/redhat/ascension/rules/enums
 
 errorHandler = (err) -> throw err
 
+# TODO -- this needs to be rewritten considering not using nools
 describe "Case rules", ->
 
   before (done) ->

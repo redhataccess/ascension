@@ -6,7 +6,7 @@ settings          = require '../../settings/settings'
 Q                 = require 'q'
 #DbOperations    = require '../db/dbOperations'
 MongoOperations   = require '../../db/MongoOperations'
-TaskRules         = require '../taskRules'
+TaskUtils         = require '../../utils/taskUtils'
 TaskStateEnum     = require '../enums/TaskStateEnum'
 TaskTypeEnum      = require '../enums/TaskTypeEnum'
 TaskOpEnum        = require '../enums/TaskOpEnum'
@@ -121,29 +121,22 @@ CaseRules.findTask = (c, tasks, entityOp) ->
 # Given an existing task, updates the metadata of the task given the case and returns a promise
 CaseRules.updateTaskFromCase = (c, t) ->
   logger.warn("Existing #{c['internalStatus']} Task: #{c['caseNumber']}, updating metadata")
-  updateHash = TaskRules.taskFromCaseUpdateHash(t, c)
+  updateHash = TaskUtils.taskFromCaseUpdateHash(t, c)
   _.assign t, updateHash
-  TaskRules.updateTaskFromCase(t, c)
+  TaskUtils.updateTaskFromCase(t, c)
 
 CaseRules.normalizeCase = (c) ->
   status: c['status'] || c['Status']
   internalStatus: c['internalStatus'] || c['Internal_Status__c']
   severity: c['severity'] || c['Severity__c']
-  sbrs: c['sbrs'] || TaskRules.parseSfArray(c['SBR_Group__c'])
-  tags: c['tags'] || TaskRules.parseSfArray(c['Tags__c'])
+  sbrs: c['sbrs'] || TaskUtils.parseSfArray(c['SBR_Group__c'])
+  tags: c['tags'] || TaskUtils.parseSfArray(c['Tags__c'])
   sbt: c['sbt'] || c['SBT__c'] || null
   created: c['created'] || c['CreatedDate']
   collaborationScore: c['collaborationScore'] || c['Collaboration_Score__c']
   caseNumber: c['caseNumber'] || c['CaseNumber']
   subject: c['subject'] || c['Subject']
   linkedSolutionCount: _.filter(c['Case_Resource_Relationships__r']?['records'] || [], (r) -> r['Resource_Type__c'] is 'Solution' and _.contains(['Link', 'Link;Pin'], r['Type__c']))
-  # TODO add linked solution count based on the resource Type__c is 'Link'
-  # Prob don't even need Resource_Type__c is 'Solution' just see if there are any 'Link's
-#10	001A000000K7A1OIAV	574448	00334568	1668.0
-#Id	Linking_Mechanism__c	Type__c	Resource_Type__c
-#1	a1eA00000046aHXIAY	Search	Link	Solution
-#2	a1eA00000046aHcIAI	Search	Link	Solution
-#3	a1eA00000046aHeIAI	Search
 
 CaseRules.match = (opts) ->
   self = CaseRules
@@ -178,11 +171,11 @@ CaseRules.match = (opts) ->
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
-        t = TaskRules.makeTaskFromCase(c)
+        t = TaskUtils.makeTaskFromCase(c)
         logger.debug("Discovered new Unassigned case: #{t['bid']} setting the task to #{entityOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
-        promises.push TaskRules.saveRuleTask(t)
+        promises.push TaskUtils.saveRuleTask(t)
 
     #######################################################################################################
     # Waiting on Owner tasks
@@ -195,11 +188,11 @@ CaseRules.match = (opts) ->
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
-        t = TaskRules.makeTaskFromCase(c)
+        t = TaskUtils.makeTaskFromCase(c)
         logger.debug("Discovered new Waiting on Owner case: #{t['bid']} setting the task to #{entityOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
-        promises.push TaskRules.saveRuleTask(t)
+        promises.push TaskUtils.saveRuleTask(t)
 
     #######################################################################################################
     # Waiting on Contributor tasks
@@ -212,11 +205,11 @@ CaseRules.match = (opts) ->
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
-        t = TaskRules.makeTaskFromCase(c)
+        t = TaskUtils.makeTaskFromCase(c)
         logger.debug("Discovered new Waiting on Contributor case: #{t['bid']} setting the task to #{entityOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
-        promises.push TaskRules.saveRuleTask(t)
+        promises.push TaskUtils.saveRuleTask(t)
 
     #######################################################################################################
     # Waiting on Collaboration tasks
@@ -229,11 +222,11 @@ CaseRules.match = (opts) ->
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
-        t = TaskRules.makeTaskFromCase(c)
+        t = TaskUtils.makeTaskFromCase(c)
         logger.debug("Discovered new Waiting on Collaboration case: #{t['bid']} setting the task to #{entityOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
-        promises.push TaskRules.saveRuleTask(t)
+        promises.push TaskUtils.saveRuleTask(t)
 
     #######################################################################################################
     # Tasks for this case relating to Waiting on Engineering
@@ -245,10 +238,10 @@ CaseRules.match = (opts) ->
         promises.push self.updateTaskFromCase(c, existingTask)
       else
         logger.debug("Discovered new Waiting on Engineering case: #{t['bid']} setting the task to #{entityOp.display}.")
-        t = TaskRules.makeTaskFromCase(c)
+        t = TaskUtils.makeTaskFromCase(c)
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
-        promises.push TaskRules.saveRuleTask(t)
+        promises.push TaskUtils.saveRuleTask(t)
 
     #######################################################################################################
     # Tasks for this case relating to Waiting on Sales
@@ -260,11 +253,11 @@ CaseRules.match = (opts) ->
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
-        t = TaskRules.makeTaskFromCase(c)
+        t = TaskUtils.makeTaskFromCase(c)
         logger.debug("Discovered new Waiting on Engineering case: #{t['bid']} setting the task to #{entityOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
         t.entityOp = entityOp.name
-        promises.push TaskRules.saveRuleTask(t)
+        promises.push TaskUtils.saveRuleTask(t)
     else
       logger.warn "Did not create task from case: #{prettyjson.render c}"
 
@@ -454,5 +447,3 @@ if require.main is module
   .done(->
     process.exit()
   )
-
-#TaskRules.executeTest()

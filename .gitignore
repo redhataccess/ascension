@@ -14,20 +14,20 @@ node_modules/*
 npm-debug.log
 
 # Ignore the public/dist dir as it will contain combined/minified code
-public/dist/
+dist
+public/dist
 
 # Ignore all js and map files in the src dir since in prod the files are minified regardless
 app.js.map
 public/index.html
 public/js/lib/ascension/**/*.map
-# Let's allow the js files so the workers can be loaded in prod
-test/*.js
-# But in reality, really don't need the mapping files in prod for the backend
-#test/*.map
 
 # Don't exclude these otherwise the server wont' start
-#src/**/*.map
-#src/**/*.js
+src/**/*.map
+src/**/*.js
+
+test/*.js
+test/*.map
 
 # OS generated files #
 # ######################

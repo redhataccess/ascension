@@ -279,6 +279,7 @@ Component = React.createClass
 #  componentDidUpdate: ->
 #    @opacify()
 
+  # TODO -- replace with more streamlined equals testing from scorecard
   componentWillReceiveProps: (nextProps) ->
     if (not _.isEqual(@props.query.ssoUsername, nextProps.query.ssoUsername)) or (not _.isEqual(@props.params._id, nextProps.params._id))
       @setState

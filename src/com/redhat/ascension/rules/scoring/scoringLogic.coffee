@@ -6,7 +6,6 @@ settings          = require '../../settings/settings'
 Q                 = require 'q'
 #DbOperations    = require '../db/dbOperations'
 MongoOperations   = require '../../db/MongoOperations'
-TaskRules         = require '../taskRules'
 TaskStateEnum     = require '../enums/TaskStateEnum'
 TaskTypeEnum      = require '../enums/TaskTypeEnum'
 TaskOpEnum        = require '../enums/TaskOpEnum'
@@ -23,6 +22,7 @@ d3                = require 'd3'
 #http://stackoverflow.com/questions/8760570/how-to-provide-most-relevant-results-with-multiple-factor-weighted-sorting
 M = {}
 
+# This is currently a prototype and not used in production in any capacity
 M.determinePotentialOwners = (opts) ->
   #############################
   # Function args

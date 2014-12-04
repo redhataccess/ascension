@@ -17,18 +17,9 @@ mongooseQ = require('mongoose-q')(mongoose)
 #Server        = require('mongodb').Server
 
 
+# TODO remove -- This is deprecated, leaving it a bit for reference
 TaskRules = {}
 
-# TODO Extract into task utils
-TaskRules.parseSfArray = (o) ->
-  if o? and o isnt ''
-    if ';' in o
-      return o.split(';')
-    if _.isArray(o)
-      return o
-    else
-      return [o]
-  return []
 
 #OwnerId != '{spam_queue_id}'
 #AND SBR_Group__c includes ({sbr_groups})
@@ -226,17 +217,6 @@ rule "noop task/default" {
 
 """;
 
-# Constructs a Mongo Task from a Rule Task and returns a promise
-# INFO -- Must construct a new instance of the task first then assign data, don't pass the obj hash to the new Task
-# That presents problems with the default assignments in mongoose.
-TaskRules.saveRuleTask = (t) ->
-  #logger.debug "saveRuleTask: Creating task [p]"
-  x = new MongoOperations['models']['task']();
-  _.keys(t).forEach (key) -> x[key] = t[key] unless key is 'toString'
-  _.keys(t['case']).forEach (key) -> x['case'][key] = t['case'][key] unless key is 'toString'
-  # Do not return the promise with this way of instantiation of the task.
-  #new MongoOperations['models']['task'](x).saveQ()
-  x.saveQ()
 
 #TaskRules.saveRuleTaskCb = (t, cb) ->
 #  logger.debug "saveRuleTask: Creating task [cb]: " + t.bid
@@ -277,32 +257,6 @@ TaskRules.saveTasks = (tasks) ->
   )
   deferred.promise
 
-TaskRules.makeTaskFromCase = (c) ->
-  _id: null
-  bid: "#{c['caseNumber']}" || "#{c['CaseNumber']}"
-  score: c['collaborationScore'] || c['Collaboration_Score__c'] || 0
-  timeout: -1
-  #sbrs: @parseSfArray(c['SBR_Group__c'])
-  #tags: @parseSfArray(c['Tags__c'])
-  sbrs: c['sbrs'] || @parseSfArray(c['SBR_Group__c'])
-  tags: c['tags'] || @parseSfArray(c['Tags__c'])
-  owner: null
-  created: new Date()
-  closed: null # Date or null
-  type: TaskTypeEnum.CASE.name
-  taskOp: TaskOpEnum.NOOP.name
-  entityOp: TaskOpEnum.NOOP.name
-  state: TaskStateEnum.UNASSIGNED.name
-  'case':
-    status: c['status'] || c['Status']
-    internalStatus: c['internalStatus'] || c['Internal_Status__c']
-    severity: c['severity'] || c['Severity__c']
-    sbrs: c['sbrs'] || @parseSfArray(c['SBR_Group__c'])
-    tags: c['tags'] || @parseSfArray(c['Tags__c'])
-    sbt: c['sbt'] || c['SBT__c']
-    created: c['created'] || c['CreatedDate']
-    score: c['collaborationScore'] || c['Collaboration_Score__c']
-    subject: c['subject'] || c['Subject']
 
 #TaskRules.makeTaskFromRule = (t) ->
 #  _id: t['_id']
@@ -319,22 +273,6 @@ TaskRules.makeTaskFromCase = (c) ->
 #  state: t['score']
 #  'case': t['case']
 
-# Returns an update hash to be pushed to mongo to just update these fields that overlap
-TaskRules.taskFromCaseUpdateHash = (t, c) ->
-  'score': c['collaborationScore'] || 0
-  #'sbrs': @parseSfArray(c['SBR_Group__c'])
-  #'tags': @parseSfArray(c['Tags__c'])
-  'sbrs': c['sbrs']
-  'tags': c['tags']
-  'lastUpdated': new Date()
-  'case': c
-
-# Update a task from a case, this assumes task is mongoose modeled
-TaskRules.updateTaskFromCase = (t, c) ->
-  MongoOperations['models']['task'].where()
-  .setOptions({multi: true})
-  .update({'bid': c['caseNumber']}, @taskFromCaseUpdateHash(t, c))
-  .exec()
 
 # A simple update to Mongo with the case meta data.  The input is the noop task which will have the very latest
 # case data always
