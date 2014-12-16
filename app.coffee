@@ -13,10 +13,10 @@ settings        = require './src/com/redhat/ascension/settings/settings'
 Uri             = require 'jsuri'
 _               = require 'lodash'
 
-mongoose        = require 'mongoose'
-MongoOps        = require './src/com/redhat/ascension/db/MongoOperations'
-TaskLogic       = require './src/com/redhat/ascension/rest/taskLogic'
-CaseRules       = require './src/com/redhat/ascension/rules/case/caseRules'
+#mongoose        = require 'mongoose'
+#MongoOps        = require './src/com/redhat/ascension/db/MongoOperations'
+#TaskLogic       = require './src/com/redhat/ascension/rest/taskLogic'
+#CaseRules       = require './src/com/redhat/ascension/rules/case/caseRules'
 
 
 ##########################################################
@@ -148,11 +148,13 @@ process.on 'SIGTERM', () ->
 # Must specify an IP for openshift as there are other processes listening on 8080
 server = undefined
 
-MongoOps.init({mongoDebug: true})
-db = mongoose['connection']
-db.on 'error', logger.error.bind(logger, 'connection error:')
-db.once 'open', () ->
-  MongoOps.defineCollections()
-  server = app.listen app.get('port'), app.get('ipAddress'), () ->
-    console.log "Started Express on port: #{server.address().port}"
+#MongoOps.init({mongoDebug: true})
+#db = mongoose['connection']
+#db.on 'error', logger.error.bind(logger, 'connection error:')
+#db.once 'open', () ->
+#  MongoOps.defineCollections()
+#  server = app.listen app.get('port'), app.get('ipAddress'), () ->
+#    console.log "Started Express on port: #{server.address().port}"
+server = app.listen app.get('port'), app.get('ipAddress'), () ->
+  console.log "Started Express on port: #{server.address().port}"
 ##########################################################

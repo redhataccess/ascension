@@ -1,4 +1,4 @@
-React           = require 'react'
+React           = require 'react/addons'
 MenuItem        = require 'react-bootstrap/MenuItem'
 DropdownButton  = require 'react-bootstrap/DropdownButton'
 SplitButton     = require 'react-bootstrap/SplitButton'

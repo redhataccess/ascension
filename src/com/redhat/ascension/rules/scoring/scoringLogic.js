@@ -1,5 +1,5 @@
 (function() {
-  var EntityOpEnum, M, Mocha, MongoOperations, Q, TaskOpEnum, TaskRules, TaskStateEnum, TaskTypeEnum, d3, f, fs, logger, mocha, moment, mongoose, mongooseQ, nools, path, prettyjson, request, runner, salesforce, settings, _;
+  var EntityOpEnum, M, Mocha, MongoOperations, Q, TaskOpEnum, TaskStateEnum, TaskTypeEnum, d3, f, fs, logger, mocha, moment, mongoose, mongooseQ, nools, path, prettyjson, request, runner, salesforce, settings, _;
 
   nools = require('nools');
 
@@ -14,8 +14,6 @@
   Q = require('q');
 
   MongoOperations = require('../../db/MongoOperations');
-
-  TaskRules = require('../taskRules');
 
   TaskStateEnum = require('../enums/TaskStateEnum');
 

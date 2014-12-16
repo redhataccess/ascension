@@ -1,8 +1,4 @@
-React     = require 'react'
-#$         = require 'jquery'
-#require('imports?jQuery=jquery!readmore/readmore')
-#require('readmore/readmore')
-
+React     = require 'react/addons'
 
 {div, img, h1, ul, li, h3} = React.DOM
 

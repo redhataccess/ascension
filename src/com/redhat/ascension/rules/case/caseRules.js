@@ -1,5 +1,5 @@
 (function() {
-  var CaseRules, EntityOpEnum, KcsRules, MongoOperations, MongoOps, ObjectId, Q, S, ScoringLogic, TaskCounts, TaskLogic, TaskOpEnum, TaskRules, TaskStateEnum, TaskTypeEnum, UserLogic, db, dbPromise, logger, moment, mongoose, mongooseQ, nools, prettyjson, request, salesforce, settings, _;
+  var CaseRules, EntityOpEnum, KcsRules, MongoOperations, MongoOps, ObjectId, Q, S, ScoringLogic, TaskCounts, TaskLogic, TaskOpEnum, TaskStateEnum, TaskTypeEnum, TaskUtils, UserLogic, db, dbPromise, logger, moment, mongoose, mongooseQ, nools, prettyjson, request, salesforce, settings, _;
 
   nools = require('nools');
 
@@ -15,7 +15,7 @@
 
   MongoOperations = require('../../db/MongoOperations');
 
-  TaskRules = require('../taskRules');
+  TaskUtils = require('../../utils/taskUtils');
 
   TaskStateEnum = require('../enums/TaskStateEnum');
 
@@ -97,9 +97,9 @@
   CaseRules.updateTaskFromCase = function(c, t) {
     var updateHash;
     logger.warn("Existing " + c['internalStatus'] + " Task: " + c['caseNumber'] + ", updating metadata");
-    updateHash = TaskRules.taskFromCaseUpdateHash(t, c);
+    updateHash = TaskUtils.taskFromCaseUpdateHash(t, c);
     _.assign(t, updateHash);
-    return TaskRules.updateTaskFromCase(t, c);
+    return TaskUtils.updateTaskFromCase(t, c);
   };
 
   CaseRules.normalizeCase = function(c) {
@@ -108,8 +108,8 @@
       status: c['status'] || c['Status'],
       internalStatus: c['internalStatus'] || c['Internal_Status__c'],
       severity: c['severity'] || c['Severity__c'],
-      sbrs: c['sbrs'] || TaskRules.parseSfArray(c['SBR_Group__c']),
-      tags: c['tags'] || TaskRules.parseSfArray(c['Tags__c']),
+      sbrs: c['sbrs'] || TaskUtils.parseSfArray(c['SBR_Group__c']),
+      tags: c['tags'] || TaskUtils.parseSfArray(c['Tags__c']),
       sbt: c['sbt'] || c['SBT__c'] || null,
       created: c['created'] || c['CreatedDate'],
       collaborationScore: c['collaborationScore'] || c['Collaboration_Score__c'],
@@ -141,11 +141,11 @@
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
-          t = TaskRules.makeTaskFromCase(c);
+          t = TaskUtils.makeTaskFromCase(c);
           logger.debug("Discovered new Unassigned case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
-          return promises.push(TaskRules.saveRuleTask(t));
+          return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else if (self.intStatus(c, 'Waiting on Owner')) {
         entityOp = EntityOpEnum.UPDATE;
@@ -153,11 +153,11 @@
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
-          t = TaskRules.makeTaskFromCase(c);
+          t = TaskUtils.makeTaskFromCase(c);
           logger.debug("Discovered new Waiting on Owner case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
-          return promises.push(TaskRules.saveRuleTask(t));
+          return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else if (self.intStatus(c, 'Waiting on Contributor')) {
         entityOp = EntityOpEnum.CONTRIBUTE;
@@ -165,11 +165,11 @@
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
-          t = TaskRules.makeTaskFromCase(c);
+          t = TaskUtils.makeTaskFromCase(c);
           logger.debug("Discovered new Waiting on Contributor case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
-          return promises.push(TaskRules.saveRuleTask(t));
+          return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else if (self.intStatus(c, 'Waiting on Collaboration')) {
         entityOp = EntityOpEnum.COLLABORATE;
@@ -177,11 +177,11 @@
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
-          t = TaskRules.makeTaskFromCase(c);
+          t = TaskUtils.makeTaskFromCase(c);
           logger.debug("Discovered new Waiting on Collaboration case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
-          return promises.push(TaskRules.saveRuleTask(t));
+          return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else if (self.intStatus(c, 'Waiting on Engineering')) {
         entityOp = EntityOpEnum.FOLLOW_UP_WITH_ENGINEERING;
@@ -190,10 +190,10 @@
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
           logger.debug("Discovered new Waiting on Engineering case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
-          t = TaskRules.makeTaskFromCase(c);
+          t = TaskUtils.makeTaskFromCase(c);
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
-          return promises.push(TaskRules.saveRuleTask(t));
+          return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else if (self.intStatus(c, 'Waiting on Sales')) {
         entityOp = EntityOpEnum.FOLLOW_UP_WITH_SALES;
@@ -201,11 +201,11 @@
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
-          t = TaskRules.makeTaskFromCase(c);
+          t = TaskUtils.makeTaskFromCase(c);
           logger.debug("Discovered new Waiting on Engineering case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
           t.entityOp = entityOp.name;
-          return promises.push(TaskRules.saveRuleTask(t));
+          return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else {
         return logger.warn("Did not create task from case: " + (prettyjson.render(c)));

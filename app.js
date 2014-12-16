@@ -1,5 +1,5 @@
 (function() {
-  var CaseRules, MongoOps, TaskLogic, Uri, app, bodyParser, compression, cookieParser, db, env, express, favicon, http, ipAddress, logger, mongoose, morgan, oneDay, path, port, request, server, serverStartTime, settings, _;
+  var Uri, app, bodyParser, compression, cookieParser, env, express, favicon, http, ipAddress, logger, morgan, oneDay, path, port, request, server, serverStartTime, settings, _;
 
   express = require('express');
 
@@ -28,14 +28,6 @@
   Uri = require('jsuri');
 
   _ = require('lodash');
-
-  mongoose = require('mongoose');
-
-  MongoOps = require('./src/com/redhat/ascension/db/MongoOperations');
-
-  TaskLogic = require('./src/com/redhat/ascension/rest/taskLogic');
-
-  CaseRules = require('./src/com/redhat/ascension/rules/case/caseRules');
 
   env = 'development';
 
@@ -175,19 +167,8 @@
 
   server = void 0;
 
-  MongoOps.init({
-    mongoDebug: true
-  });
-
-  db = mongoose['connection'];
-
-  db.on('error', logger.error.bind(logger, 'connection error:'));
-
-  db.once('open', function() {
-    MongoOps.defineCollections();
-    return server = app.listen(app.get('port'), app.get('ipAddress'), function() {
-      return console.log("Started Express on port: " + (server.address().port));
-    });
+  server = app.listen(app.get('port'), app.get('ipAddress'), function() {
+    return console.log("Started Express on port: " + (server.address().port));
   });
 
 }).call(this);

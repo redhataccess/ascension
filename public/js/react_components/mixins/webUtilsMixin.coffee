@@ -73,5 +73,23 @@ WebUtilsMixin.getUser = (ssoUsername) ->
 
   deferred.promise
 
+WebUtilsMixin.isDefined = (obj, path) ->
+  return false unless obj # no object, return false
+  return true if obj and not path # has object, no path, return true
+
+  # I suggest var per variable for clarity
+  props = path.split(".")
+  currentObject = obj
+  i = 0
+
+  while i < props.length
+
+    #store the next property, evaluate and break out if it's undefined
+    currentObject = currentObject[props[i]]
+    return false  unless currentObject
+    ++i
+
+  # If the loop did not break until the last path, then the path exists
+  true
 
 module.exports = WebUtilsMixin

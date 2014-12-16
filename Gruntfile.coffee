@@ -26,25 +26,12 @@ module.exports = (grunt) ->
     stats:
       colors: true
       reasons: true
-    #entry:
-      #jquery: '<%= bower %>/jquery'
-      #react: '<%= bower %>/react'
-      #bootstrap: ["<%= react_components %>/index.coffee"]
-      #bootstrap: "./public/js/react_components/index.js"
-    entry: "./public/js/react_components/index.coffee"
-#    entry:
-#      jquery: "./public/js/bower_components/jquery"
-#      bootstrap: [
-#        #"!bootstrap-webpack!./app/bootstrap/bootstrap.config.js"
-#        "<%= dist>/public/index.coffee"
-#      ]
-#      #react: "./app/react"
+    entry: "./public/js/react_components/index.jsx"
 
     output:
       path: path.join(__dirname, "public/dist")
-      publicPath: "dist/"
+      publicPath: "http://localhost:8090/assets/"
       filename: "main.js"
-      #chunkFilename: "[chunkhash].js"
 
     # So for whatever reason, including jquery in bower_components simply is not working with webpack.  I can't even
     # require jquery even though I can use $, maybe some optimization filter?  What I do know is using it externally
@@ -68,21 +55,13 @@ module.exports = (grunt) ->
           loader: "style-loader!css-loader"
         }
         # required for bootstrap icons
-        #{
-        #  test: /\.woff$/
-        #  loader: "url-loader?prefix=font/&limit=5000&mimetype=application/font-woff"
-        #}
-        #{
-        #  test: /\.ttf$/
-        #  loader: "file-loader?prefix=font/"
-        #}
         {
           test: /\.woff(\?v=[0-9]\.[0-9]\.[0-9])?$/
-          loader: "url-loader?limit=10000&minetype=application/font-woff"
+          loader: "url-loader?prefix=font/&limit=5000&mimetype=application/font-woff"
         }
         {
           test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/
-          loader: "file-loader"
+          loader: "file-loader?prefix=font/"
         }
         {
           test: /\.eot$/
@@ -100,11 +79,11 @@ module.exports = (grunt) ->
           test: /\.(coffee\.md|litcoffee)$/
           loader: "coffee-loader?literate"
         }
-        #{
-        #  # required for react jsx
-        #  test: /\.js$/
-        #  loader: "jsx-loader"
-        #}
+        {
+          test: /\.jsx$/
+#          loaders: ["6to5", "jsx-loader?harmony"]
+          loader: "jsx-loader?harmony"
+        }
         #{
         #  test: /\.jsx$/
         #  loader: "jsx-loader?insertPragma=React.DOM"
@@ -118,12 +97,13 @@ module.exports = (grunt) ->
       extensions: ['', '.js']
       #root: path.join(__dirname, "node_modules")
       modulesDirectories: ['./node_modules', './public/js/bower_components']
-      #modulesDirectories: [path.join(__dirname, "node_modules"), path.join(__dirname, 'public/js/bower_components')]
+#      modulesDirectories: [path.join(__dirname, "node_modules"), path.join(__dirname, 'public/js/bower_components')]
 
-      alias:
+#      alias:
       #  # Bind version of jquery
       #  jquery: "jquery/dist/jquery"
-        react: "react/react-with-addons"
+      # Don't want to do this with React .12
+#        'react': "react/react"
 
     plugins: [new webpack.ProvidePlugin(
 
@@ -167,13 +147,13 @@ module.exports = (grunt) ->
       testCoffee:
         files: "test/**/*.coffee"
         tasks: ["newer:coffee:compileTest"]
-      webCoffee:
-        files: ["public/js/**/*.coffee", "public/stylesheets/**/*.less"]
-        #tasks: ["newer:coffee:compileWeb", 'webpack:build-dev']
-        # On change don't need to recompile coffee/less, webpack does that for us, just need to kick webpack
-        tasks: ['webpack:build-dev']
-        options:
-          spawn: false
+#      webCoffee:
+#        files: ["public/js/**/*.coffee", "public/stylesheets/**/*.less"]
+#        #tasks: ["newer:coffee:compileWeb", 'webpack:build-dev']
+#        # On change don't need to recompile coffee/less, webpack does that for us, just need to kick webpack
+#        tasks: ['webpack:build-dev']
+#        options:
+#          spawn: false
 
     webpack:
       options: webpackConfig
@@ -207,6 +187,21 @@ module.exports = (grunt) ->
             new webpack.optimize.DedupePlugin(),
             new webpack.optimize.UglifyJsPlugin()
         )
+
+    "webpack-dev-server":
+      options:
+        webpack: webpackConfig
+        publicPath: webpackConfig.output.publicPath
+      #publicPath: "/assets"
+      #publicPath: "/assets/"
+        port: 8090
+        headers: { "X-Custom-Header": "yes" }
+        stats: { colors: true }
+      start:
+        keepAlive: true
+        webpack:
+          devtool: "eval"
+          debug: true
 
     less:
       dist:
@@ -290,7 +285,8 @@ module.exports = (grunt) ->
   #grunt.registerTask "prod", ["less", "coffee"]
   #grunt.registerTask "dev", ['less', 'coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "watch"]
   #grunt.registerTask "dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileApp', 'coffee:compileWeb', "watch"]
-  grunt.registerTask "dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "watch"]
+  grunt.registerTask "dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', 'watch']
+  grunt.registerTask "devui", ['webpack-dev-server:start']
   # For now let's go with webpack:build-dev because build-prod takes forever
   grunt.registerTask "prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "webpack:build-prod"]
   grunt.registerTask "default", ["prod"]

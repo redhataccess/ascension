@@ -23,10 +23,10 @@
         colors: true,
         reasons: true
       },
-      entry: "./public/js/react_components/index.coffee",
+      entry: "./public/js/react_components/index.jsx",
       output: {
         path: path.join(__dirname, "public/dist"),
-        publicPath: "dist/",
+        publicPath: "http://localhost:8090/assets/",
         filename: "main.js"
       },
       externals: {
@@ -39,10 +39,10 @@
             loader: "style-loader!css-loader"
           }, {
             test: /\.woff(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-            loader: "url-loader?limit=10000&minetype=application/font-woff"
+            loader: "url-loader?prefix=font/&limit=5000&mimetype=application/font-woff"
           }, {
             test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-            loader: "file-loader"
+            loader: "file-loader?prefix=font/"
           }, {
             test: /\.eot$/,
             loader: "file-loader?prefix=font/"
@@ -55,15 +55,15 @@
           }, {
             test: /\.(coffee\.md|litcoffee)$/,
             loader: "coffee-loader?literate"
+          }, {
+            test: /\.jsx$/,
+            loader: "jsx-loader?harmony"
           }
         ]
       },
       resolve: {
         extensions: ['', '.js'],
-        modulesDirectories: ['./node_modules', './public/js/bower_components'],
-        alias: {
-          react: "react/react-with-addons"
-        }
+        modulesDirectories: ['./node_modules', './public/js/bower_components']
       },
       plugins: [
         new webpack.ProvidePlugin({
@@ -94,13 +94,6 @@
         testCoffee: {
           files: "test/**/*.coffee",
           tasks: ["newer:coffee:compileTest"]
-        },
-        webCoffee: {
-          files: ["public/js/**/*.coffee", "public/stylesheets/**/*.less"],
-          tasks: ['webpack:build-dev'],
-          options: {
-            spawn: false
-          }
         }
       },
       webpack: {
@@ -120,6 +113,26 @@
               "NODE_ENV": JSON.stringify("production")
             }
           }), new webpack.optimize.DedupePlugin(), new webpack.optimize.UglifyJsPlugin())
+        }
+      },
+      "webpack-dev-server": {
+        options: {
+          webpack: webpackConfig,
+          publicPath: webpackConfig.output.publicPath,
+          port: 8090,
+          headers: {
+            "X-Custom-Header": "yes"
+          },
+          stats: {
+            colors: true
+          }
+        },
+        start: {
+          keepAlive: true,
+          webpack: {
+            devtool: "eval",
+            debug: true
+          }
         }
       },
       less: {
@@ -216,7 +229,8 @@
         }
       }
     });
-    grunt.registerTask("dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "watch"]);
+    grunt.registerTask("dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', 'watch']);
+    grunt.registerTask("devui", ['webpack-dev-server:start']);
     grunt.registerTask("prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "webpack:build-prod"]);
     grunt.registerTask("default", ["prod"]);
     return grunt.registerTask("test", ["mochaTest"]);
