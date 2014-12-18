@@ -1,5 +1,5 @@
 var React           = require('react/addons');
-var WebUtilsMixin   = React.createFactory(require('../../mixins/webUtilsMixin.coffee'));
+var WebUtilsMixin   = require('../../mixins/webUtilsMixin.coffee');
 
 var Label           = require('react-bootstrap/Label');
 
@@ -14,9 +14,9 @@ var Component = React.createClass({
         if (this.isDefined(this, 'props.case.resource.product')) {
             return null;
         }
-        product = this.props.case.resource.product.resource;
+        product = this.props.case.product.resource;
         version = (product != null ? product.version : void 0) || "";
-        return <Label bsStyle='default' key='caseProduct'>{`${product['productName']} ${version}`}</Label>;
+        return <Label bsStyle='default' key='caseProduct'>{`${product.line.resource.name} ${version}`}</Label>;
     }
 });
 

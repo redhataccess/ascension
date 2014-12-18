@@ -12,9 +12,16 @@ var Component = React.createClass({
         //}
         return (
             <Well key='caseHeader'>
-                <h2 key='header'>`Case ${this.props["case"].resource.caseNumber}`</h2>
-                <span key='headerSubject'>{this.props.case.resource.subject}</span>
-                <CaseProduct case={this.props.case} key='product'></CaseProduct>
+                <div>
+                    <div className='pull-left'>
+                        <h2 key='header'>{`Case ${this.props.case.caseNumber}`}</h2>
+                    </div>
+                    <div className='pull-right'>
+                        <CaseProduct case={this.props.case} key='product'></CaseProduct>
+                    </div>
+                </div>
+                <div className='clearfix'></div>
+                <span key='headerSubject'>{this.props.case.subject}</span>
             </Well>
         )
     }

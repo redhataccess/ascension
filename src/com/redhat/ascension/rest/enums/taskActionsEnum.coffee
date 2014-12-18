@@ -1,14 +1,14 @@
 module.exports =
   # This is the default state so that the rules can assign further states
   ASSIGN:
-    name: 'assign'
+    name: 'ASSIGN'
   DECLINE:
-    name: 'decline'
+    name: 'DECLINE'
   UNASSIGN:
-    name: 'unassign'
+    name: 'UNASSIGN'
   CLOSE:
-    name: 'close'
+    name: 'CLOSE'
   UPDATE:
-    name: 'update'
+    name: 'UPDATE'
   DELETE:
-    name: 'delete'
+    name: 'DELETE'

@@ -14,7 +14,11 @@ var WebUtilsMixin           = require('./mixins/webUtilsMixin.coffee');
 
 var Alert                   = require('react-bootstrap/Alert');
 
-require("style!css!less!../../stylesheets/main.less");
+// This will load inline in javascript however it appears while it works fine in the brower, Chrome doesn't render those
+// In the chrome console making debugging hard
+//require("style!css!less!../../stylesheets/main.less");
+// Just load the less which we have bound to the extract-text plusin
+require("../../stylesheets/main.less");
 
 var Dashboard = React.createClass({
     displayName: 'Dashboard',

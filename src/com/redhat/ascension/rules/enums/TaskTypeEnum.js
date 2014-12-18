@@ -1,15 +1,15 @@
 (function() {
   module.exports = {
     CASE: {
-      name: 'case',
+      name: 'CASE',
       display: 'Case'
     },
     KCS: {
-      name: 'kcs',
+      name: 'KCS',
       display: 'KCS'
     },
     USER_DEFINED: {
-      name: 'user_defined',
+      name: 'USER_DEFINED',
       display: 'User Defined'
     }
   };

@@ -25,12 +25,15 @@ html.chrometwo.legacyfalse
     //script(type="text/javascript",src="#{baseUrl}js/lib/dygraphs/dygraph-combined.js")
     if env == 'development'
       script(type="text/javascript",src="/webpack-dev-server.js")
+
     // Google Charts API
     //script(type="text/javascript",src="https://www.google.com/jsapi")
     //script(type="text/javascript") google.load('visualization', '1', {packages: ['corechart', 'table', 'timeline']});
     link(rel="stylesheet", href="/chrome_themes/chrometwo/chrometwo.css")
     link(href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css",rel="stylesheet")
     script(type="text/javascript",src="/webassets/avalon/j/lib/require.js")
+    if env == 'development'
+      link(rel="stylesheet", href="/assets/main.css")
   body
     div#chrometwo
       div#chromed-app-content

@@ -37,26 +37,26 @@ var Component = React.createClass({
         };
     },
     // CS FTW -- would just be one line -- 'task-own': Auth.getAuthedUser()? and (t['owner']?['id'] is Auth.getAuthedUser()?['externalModelId'])
-    isOwner: (task) => {
+    isOwner: (theTask) => {
         if (Auth.getAuthedUser() != null
-            && task && task['owner'] && task['owner']['id'] == Auth.getAuthedUser()['externalModelId']) {
+            && theTask && theTask['owner'] && theTask['owner']['id'] == Auth.getAuthedUser()['externalModelId']) {
             return true;
         }
         return false;
     },
-    genTaskClass: function(t) {
+    genTaskClass: function(theTask) {
         var classSet = {
             'task': true,
             'task100': true,
-            'task-own': this.isOwner(t),
-            'case': t['type'] === 'case',
-            'kcs': t['type'] === 'kcs'
+            'task-own': this.isOwner(theTask),
+            'case': theTask['type'] === 'CASE',
+            'kcs': theTask['type'] === 'KCS'
         };
         return cx(classSet);
     },
-    genTaskStyle: function(t) {
+    genTaskStyle: function(theTask) {
         return {
-            opacity: this.scoreOpacityScale(t.resource.score)
+            opacity: this.scoreOpacityScale(theTask.score)
         };
     },
     taskClick: function(t, event) {
@@ -79,13 +79,13 @@ var Component = React.createClass({
         }
         return tmp || 'fa-medkit';
     },
-    genTaskBid: function(t) {
-        return t['bid'];
+    genTaskBid: function(theCase) {
+        return theCase.caseNumber;
     },
-    genEntityStateIcon: function(t) {
+    genEntityStateIcon: function(theTask, theCase) {
         var _ref1;
-        if (t['type'] === TaskTypeEnum.CASE.name) {
-            return ((_ref1 = TaskIconMapping[t['case']['internalStatus']]) != null ? _ref1.icon : void 0) || 'fa-medkit';
+        if (theTask.type === TaskTypeEnum.CASE.name) {
+            return ((_ref1 = TaskIconMapping[theCase.internalStatus]) != null ? _ref1.icon : void 0) || 'fa-medkit';
         } else {
             return null;
         }
@@ -100,47 +100,52 @@ var Component = React.createClass({
         }
         return sym || 'Task';
     },
-    genTaskStateIcon: function(t) {
-        var _ref1;
-        return ((_ref1 = TaskIconMapping[t['state']]) != null ? _ref1.icon : void 0) || 'fa-medkit';
+    genTaskStateIcon: function(theTask) {
+        var iconMapping = TaskIconMapping[theTask.status];
+        return (iconMapping != null ? iconMapping.icon : void 0) || 'fa-medkit';
     },
-    genEntityDescription: function(t) {
-        if ((t['type'] === 'case') || (t['type'] === 'kcs' && t['resourceOperation'] === ResourceOpEnum.CREATE_KCS.name)) {
-            return S(t['case']['subject']).truncate(50).s;
+    genEntityDescription: function(theTask, theCase) {
+        if ((theTask.type === 'CASE') || (theTask.type === 'KCS' && theTask.resourceOperation === ResourceOpEnum.CREATE_KCS.name)) {
+            return S(theCase.subject).truncate(50).s;
         } else {
             return '';
         }
     },
+    // TODO - ref theTask and theCase everywhere
     genTaskElements: function() {
         var elems,
             tasks,
+            theCase,
+            theTask,
             self = this;
         tasks = _.values(this.state['tasks']);
         tasks.sort((a, b) => b.resource.score - a.resource.score);
         //#(TaskMetaData {task: t, key: 'taskMetaData'}, [])
         elems = _.map(tasks, (t) => {
+            theCase = t.resource.resource.resource;
+            theTask = t.resource;
             return (
                 <div
-                    id={t.resource.externalModelId}
-                    className={self.genTaskClass(t)}
-                    style={self.genTaskStyle(t)}
-                    key={t.resource.externalModelId}
-                    score={t.resource.score}
+                    id={theTask.externalModelId}
+                    className={self.genTaskClass(theTask)}
+                    style={self.genTaskStyle(theTask)}
+                    key={theTask.externalModelId}
+                    score={theTask.score}
                     onClick={self.taskClick.bind(self, t)}>
                     <TaskAction task={t} key='taskAction' absolute={true}></TaskAction>
                     <span className='task-entity-state-icon'>
                         <IconWithTooltip
-                            iconName={self.genEntityStateIcon(t)}
-                            tooltipPrefix={t.resource.type.toUpperCase()}
-                            tooltipText={(t.resource.resource.resource.internalStatus) || null}></IconWithTooltip>
+                            iconName={self.genEntityStateIcon(theTask, theCase)}
+                            tooltipPrefix={theTask.type.toUpperCase()}
+                            tooltipText={theCase.internalStatus || null}></IconWithTooltip>
                     </span>
-                    <span className='task-entity-description'>{self.genEntityDescription(t)}</span>
-                    <span className='task-bid'>{self.genTaskBid(t)}</span>
+                    <span className='task-entity-description'>{self.genEntityDescription(theTask, theCase)}</span>
+                    <span className='task-bid'>{self.genTaskBid(theCase)}</span>
                     <span className='task-stat-icon'>
                         <IconWithTooltip
-                            iconName={self.genTaskStateIcon(t)}
+                            iconName={self.genTaskStateIcon(theTask)}
                             tooltipPrefix="Task"
-                            tooltipText={(TaskIconMapping[t['state']] && TaskIconMapping[t['state']]) || '?'}></IconWithTooltip>
+                            tooltipText={TaskIconMapping[theTask.status] || '?'}></IconWithTooltip>
                     </span>
                </div>
            )

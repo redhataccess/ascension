@@ -3,7 +3,7 @@ var Auth            = require('../../auth/auth.coffee');
 var TaskStateEnum   = require('../../../../../src/com/redhat/ascension/rules/enums/TaskStateEnum.coffee');
 
 var MenuItem        = require('react-bootstrap/MenuItem');
-var DropdownButton  = require('../../bsReactOverrides/DropdownButton.coffee');
+var DropdownButton  = require('../../bsReactOverrides/DropdownButton.js');
 
 var Component = React.createClass({
     displayName: 'TaskState',
@@ -34,46 +34,42 @@ var Component = React.createClass({
         )
     },
     render: function () {
-        var id;
+        var id, theTask;
         if (Auth.getAuthedUser() == null) {
             return null;
         }
         id = Auth.getAuthedUser()['externalModelId'];
-        if (this.props.task.resource.state === TaskStateEnum.UNASSIGNED.name) {
+        theTask = this.props.task.resource;
+        if (theTask.status === TaskStateEnum.UNASSIGNED.name) {
             return (
                 <DropdownButton bsStyle='warning' bsSize='xsmall' title='Unassigned'>
                     <MenuItem key={`assign-${id}`} onClick={this.props.takeOwnership}>
-                        <i className='fa fa-user fw'></i>
-                        Take Ownership
+                        <i className='fa fa-user fw'></i>  Take Ownership
                     </MenuItem>
                     <MenuItem key={`decline-${id}`} onClick={this.props.declineOwnership}>
-                        <i className='fa fa-user fw'></i>
-                        Decline Ownership
+                        <i className='fa fa-user fw'></i>  Decline Ownership
                     </MenuItem>
-                    {Auth.getScopedUser() == null ? null : <MenuItem key="divider" divider={true} ></MenuItem> }
+                    {Auth.getScopedUser() == null ? null : <MenuItem key="divider" divider={true}></MenuItem> }
                     {this.generateScopedOwnershipElem()}
                     {this.generateScopedDeclineElem()}
                 </DropdownButton>
             )
-        } else if (this.props.task.resource.state === TaskStateEnum.ASSIGNED.name) {
+        } else if (theTask.status === TaskStateEnum.ASSIGNED.name) {
             return (
                 <DropdownButton bsStyle='primary' bsSize='xsmall' title='Assigned'>
-                    <MenuItem key={`unassign-${id}`} onClick={this.props.removeOnwership}>
-                        <i className='fa fa-user fw'></i>
-                        Remove Ownership
+                    <MenuItem key={`unassign-${id}`} onClick={this.props.removeOwnership}>
+                        <i className='fa fa-user fw'></i>  Remove Ownership
                     </MenuItem>
                     <MenuItem key={`close-${id}`} onClick={this.props.close}>
-                        <i className='fa fa-user fw'></i>
-                        Close
+                        <i className='fa fa-user fw'></i>  Close
                     </MenuItem>
                 </DropdownButton>
             )
-        } else if (this.props.task.resource.state === TaskStateEnum.CLOSED.name) {
+        } else if (theTask.status === TaskStateEnum.CLOSED.name) {
             return (
                 <DropdownButton bsStyle='success' bsSize='xsmall' title='Closed'>
                     <MenuItem key={`assign-${id}`} onClick={this.props.takeOwnership}>
-                        <i className='fa fa-user fw'></i>
-                        Reopen and Take Ownership
+                        <i className='fa fa-user fw'></i>  Reopen and Take Ownership
                     </MenuItem>
                 </DropdownButton>
             )

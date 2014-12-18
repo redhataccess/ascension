@@ -12,7 +12,7 @@ var Component = React.createClass({
         var classSet;
         classSet = {
             'task-meta-data': this.props.absolute !== true,
-            'task-meta-data-absolute': this.props.absolute !== true
+            'task-meta-data-absolute': this.props.absolute == true
         };
         return cx(classSet);
     },

@@ -1,9 +1,11 @@
 (function() {
-  var path, webpack;
+  var ExtractTextPlugin, path, webpack;
 
   path = require("path");
 
   webpack = require("webpack");
+
+  ExtractTextPlugin = require("extract-text-webpack-plugin");
 
   module.exports = function(grunt) {
     var ascensionConfig, webpackConfig;
@@ -35,6 +37,9 @@
       module: {
         loaders: [
           {
+            test: /\.less$/,
+            loaders: ['style-loader', 'css-loader', 'less-loader']
+          }, {
             test: /\.css$/,
             loader: "style-loader!css-loader"
           }, {
@@ -66,7 +71,9 @@
         modulesDirectories: ['web_modules', './node_modules', './public/js/bower_components']
       },
       plugins: [
-        new webpack.ProvidePlugin({
+        new ExtractTextPlugin("main.css", {
+          allChunks: true
+        }), new webpack.ProvidePlugin({
           jQuery: "jquery",
           $: "jquery"
         })

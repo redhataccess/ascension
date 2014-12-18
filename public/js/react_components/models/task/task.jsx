@@ -27,7 +27,7 @@ var Component = React.createClass({
         // both as it makes for referring to the case much easier
         return {
             'task': void 0,
-            'case': void 0
+            'theCase': void 0
         };
     },
     assignOwnership: function(user, event) {
@@ -51,7 +51,7 @@ var Component = React.createClass({
             .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
             // The returned task will be the latest, update the state
             .then((task) => {
-                self.setState({'task': task, 'case': task.resource.resource.resource});
+                self.setState({'task': task, 'theCase': task.resource.resource.resource});
                 self.props.queryTasks.call(null);
             })
             .catch((err) => console.error("Could not load task: #{err.stack}"))
@@ -77,7 +77,7 @@ var Component = React.createClass({
             .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
             // The returned task will be the latest, update the state
             .then((task) => {
-                self.setState({'task': task, 'case': task.resource.resource.resource});
+                self.setState({'task': task, 'theCase': task.resource.resource.resource});
                 self.props.queryTasks.call(null);
             })
             .catch((err) => console.error(`Could not load task: ${err.stack}`))
@@ -99,7 +99,7 @@ var Component = React.createClass({
             .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
             // The returned task will be the latest, update the state
             .then((task) => {
-                self.setState({'task': task, 'case': task.resource.resource.resource});
+                self.setState({'task': task, 'theCase': task.resource.resource.resource});
                 self.props.queryTasks.call(null);
             })
             .catch((err) => console.error(`Could not load task: ${err.stack}`))
@@ -121,15 +121,15 @@ var Component = React.createClass({
             .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
             // The returned task will be the latest, update the state
             .then((task) => {
-                self.setState({'task': task, 'case': task.resource.resource.resource});
+                self.setState({'task': task, 'theCase': task.resource.resource.resource});
                 self.props.queryTasks.call(null);
             })
             .catch((err) => console.error(`Could not load task: ${err.stack}`))
             .done();
     },
     genEntityContents: function() {
-        if (this.state.task.type === TaskTypeEnum.CASE.name) {
-            return <Case key='taskCase' caseNumber={this.state.task.resource.resource.resource.caseNumber}></Case>;
+        if (this.state.task.resource.type === TaskTypeEnum.CASE.name) {
+            return <Case key='taskCase' caseNumber={this.state.theCase.caseNumber}></Case>;
         }
         return null;
     },
@@ -137,7 +137,7 @@ var Component = React.createClass({
         var taskId = this.getParams()['taskId'],
             self = this;
         this.get({path: `/task/${taskId}`})
-            .then((task) => self.setState({'task': task, 'case': task.resource.resource.resource}))
+            .then((task) => self.setState({'task': task, 'theCase': task.resource.resource.resource}))
             .catch((err) => console.error(`Could not load task: ${taskId}, ${err.stack}`))
             .done();
     },
@@ -180,8 +180,11 @@ var Component = React.createClass({
                                 close={this.close}
                                 key='taskStatus'>
                             </TaskState>
+                            &nbsp;
                             <TaskAction task={this.state.task} key='action'></TaskAction>
+                            &nbsp;
                             <User user={this.state.task.resource.owner} key='user'></User>
+                            &nbsp;
                             <TaskMetaData task={this.state.task} key='metaData'></TaskMetaData>
                         </span>
                         <span className='clearfix'></span>
@@ -202,13 +205,13 @@ var Component = React.createClass({
                             <h3>Case Links</h3>
                             <ul>
                                 <li>
-                                    <a target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.case.caseNumber}`}>
-                                    {`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.case.caseNumber}`}
+                                    <a target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.theCase.caseNumber}`}>
+                                    {`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.theCase.caseNumber}`}
                                     </a>
                                 </li>
                                 <li>
-                                    <a target='_blank' href={`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.case.caseNumber}`}>
-                                    {`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.case.caseNumber}`}
+                                    <a target='_blank' href={`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.theCase.caseNumber}`}>
+                                    {`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.theCase.caseNumber}`}
                                     </a>
                                 </li>
                             </ul>

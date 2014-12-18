@@ -25,7 +25,7 @@ var Component = React.createClass({
                    // TODO test if the div here is really necessary
                    <div>
                        // TODO talk with adam on waht is actually a unique role identification, name or description ?
-                       <Label bsStyle='danger' key={'role' + role['description']}>{role.resource.description}</Label>
+                       <Label bsStyle='danger' key={`role-${role['description']}`}>{role.resource.description}</Label>
                    </div>
                )
             });
@@ -38,7 +38,7 @@ var Component = React.createClass({
               </Popover>
             );
             return (
-                <OverlayTrigger trigger='hover' placement='bottom' overlay={<UserPopover />}>
+                <OverlayTrigger trigger='hover' placement='bottom' overlay={UserPopover}>
                     <Label className='task-meta-data' bsStyle='default' key='label'>{user.fullName}</Label>
                 </OverlayTrigger>
             );

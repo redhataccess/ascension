@@ -13,11 +13,13 @@ var Component = React.createClass({
         return (
             <Accordion>
                 <Panel
+                    eventKey='caseSummary'
                     key='caseSummary'
                     header='Internal Summary'
                     collapsable={true}
-                    defaultExpanded={false}></Panel>
-            {summary}
+                    defaultExpanded={false}>
+                {summary}
+                </Panel>
             </Accordion>
         )
     }

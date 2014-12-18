@@ -61,6 +61,7 @@ var Component = React.createClass({
         return (
             <Accordion>
                 <Panel
+                    eventKey='caseSupportAssociates'
                     key='caseSupportAssociates'
                     header='Support Associates'
                     bsStyle={ownerStyle}

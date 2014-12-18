@@ -1,19 +1,19 @@
 (function() {
   module.exports = {
     UNASSIGNED: {
-      name: 'unassigned',
+      name: 'UNASSIGNED',
       display: 'Unassigned'
     },
     ASSIGNED: {
-      name: 'assigned',
+      name: 'ASSIGNED',
       display: 'Assigned'
     },
     CLOSED: {
-      name: 'closed',
+      name: 'CLOSED',
       display: 'closed'
     },
     ABANDONED: {
-      name: 'abandoned',
+      name: 'ABANDONED',
       display: 'Abandoned'
     }
   };

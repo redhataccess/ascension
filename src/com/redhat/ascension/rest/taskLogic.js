@@ -1,5 +1,5 @@
 (function() {
-  var Q, TaskActionsEnum, TaskLogic, TaskOpEnum, TaskStateEnum, UserLogic, fs, logger, moment, prettyjson, request, settings, _;
+  var Q, ResourceOpEnum, TaskActionsEnum, TaskLogic, TaskOpEnum, TaskStateEnum, TaskTypeEnum, UserLogic, fs, logger, moment, prettyjson, request, settings, _;
 
   fs = require('fs');
 
@@ -15,9 +15,13 @@
 
   Q = require('q');
 
+  ResourceOpEnum = require('../rules/enums/ResourceOpEnum');
+
   TaskActionsEnum = require('./enums/taskActionsEnum');
 
   TaskStateEnum = require('../rules/enums/TaskStateEnum');
+
+  TaskTypeEnum = require('../rules/enums/TaskTypeEnum');
 
   TaskOpEnum = require('../rules/enums/TaskOpEnum');
 
@@ -117,11 +121,11 @@
           },
           "resourceReliability": "Fresh"
         },
-        "resourceOperation": "OWN",
+        "resourceOperation": ResourceOpEnum.TAKE_OWNERSHIP.name,
         "score": score,
-        "status": "UNASSIGNED",
-        "taskOperation": "NOOP",
-        "type": "CASE"
+        "status": TaskStateEnum.UNASSIGNED.name,
+        "taskOperation": TaskOpEnum.NOOP.name,
+        "type": TaskTypeEnum.CASE.name
       }
     };
     return tmp;

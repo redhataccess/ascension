@@ -11,80 +11,80 @@ ResourceOp = {}
 ######################################################
 
 ResourceOp.TAKE_FTS =
-  name: 'fts'
+  name: 'FTS'
   display: 'Take FTS Role on case'
 _.defaults ResourceOp,
-  'fts': ResourceOp.TAKE_FTS
+  'FTS': ResourceOp.TAKE_FTS
 
-ResourceOp.OWN =
-  name: 'takeOwnership'
+ResourceOp.TAKE_OWNERSHIP =
+  name: 'TAKE_OWNERSHIP'
   display: 'Take ownership of case'
 _.defaults ResourceOp,
-  'takeOwnership': ResourceOp.TAKE_FTS
+  'TAKE_OWNERSHIP': ResourceOp.TAKE_OWNERSHIP
 
 ResourceOp.COLLABORATE =
-  name: 'collaborate'
+  name: 'COLLABORATE'
   display: 'Collaborate on case'
 _.defaults ResourceOp,
-  'collaborate': ResourceOp.COLLABORATE
+  'COLLABORATE': ResourceOp.COLLABORATE
 
 ResourceOp.CONTRIBUTE =
-  name: 'contribute'
+  name: 'CONTRIBUTE'
   display: 'Contribute on case'
 _.defaults ResourceOp,
-  'contribute': ResourceOp.CONTRIBUTE
+  'CONTRIBUTE': ResourceOp.CONTRIBUTE
 
 ResourceOp.UPDATE =
-  name: 'update'
+  name: 'UPDATE'
   display: 'Update case'
 _.defaults ResourceOp,
-  'update': ResourceOp.UPDATE
+  'UPDATE': ResourceOp.UPDATE
 
 ResourceOp.SET_SBRS =
-  name: 'setSbrs'
+  name: 'SET_SBRS'
   display: 'Set SBRs on case'
 _.defaults ResourceOp,
-  'setSbrs': ResourceOp.SET_SBRS
+  'SET_SBRS': ResourceOp.SET_SBRS
 
 ResourceOp.SET_TAGS =
-  name: 'setTags'
+  name: 'SET_TAGS'
   display: 'Set tags on case'
 _.defaults ResourceOp,
-  'setTags': ResourceOp.SET_TAGS
+  'SET_TAGS': ResourceOp.SET_TAGS
 
 ResourceOp.TRANSLATE =
-  name: 'translate'
+  name: 'TRANSLATE'
   display: 'Translate case'
 _.defaults ResourceOp,
-  'translate': ResourceOp.TRANSLATE
+  'TRANSLATE': ResourceOp.TRANSLATE
 
 ResourceOp.NOOP =
-  name: 'noop'
+  name: 'NOOP'
   display: 'No action required'
 _.defaults ResourceOp,
-  'noop': ResourceOp.NOOP
+  'NOOP': ResourceOp.NOOP
 
 ResourceOp.FOLLOW_UP_WITH_ENGINEERING =
-  name: 'followUpWithEngineering'
+  name: 'FOLLOW_UP_WITH_ENGINEERING '
   display: 'Follow up with engineering on case'
 _.defaults ResourceOp,
-  'followUpWithEngineering': ResourceOp.FOLLOW_UP_WITH_ENGINEERING
+  'FOLLOW_UP_WITH_ENGINEERING': ResourceOp.FOLLOW_UP_WITH_ENGINEERING
 
 ResourceOp.FOLLOW_UP_WITH_SALES =
-  name: 'followUpWithSales'
+  name: 'FOLLOW_UP_WITH_SALES'
   display: 'Follow up with sales on case'
 _.defaults ResourceOp,
-  'followUpWithSales': ResourceOp.FOLLOW_UP_WITH_SALES
+  'FOLLOW_UP_WITH_SALES': ResourceOp.FOLLOW_UP_WITH_SALES
 
 ######################################################
 # KCS related
 ######################################################
 
 ResourceOp.CREATE_KCS =
-  name: 'createKcsContent'
+  name: 'CREATE_KCS'
   display: 'Create KCS Content for case'
 _.defaults ResourceOp,
-  'createKcsContent': ResourceOp.CREATE_KCS
+  'CREATE_KCS': ResourceOp.CREATE_KCS
 
 # Map case internal status to entity operations
 ResourceOp.getOpFromIntStatus = (intStatus) ->

@@ -43,6 +43,7 @@ var Component = React.createClass({
             timestamp = (
                 <span>
                     <Timestamp text='Created' timestamp={comment.created}></Timestamp>
+                    &nbsp;
                     <Timestamp text='Last modified' timestamp={comment.lastModified}></Timestamp>
                 </span>
             )
@@ -62,6 +63,7 @@ var Component = React.createClass({
             <div className='panel panel-default'>
                 <div className='panel-heading'>
                     <h3 className='panel-title'> {header}</h3>
+                    <div className='clearfix'></div>
                 </div>
                 <div className={this.genPanelBodyClasses(comment)}>
                     <pre className={this.genPreClasses(comment)}>{comment.text}</pre>

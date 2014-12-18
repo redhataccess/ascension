@@ -14,6 +14,7 @@ var Component = React.createClass({
         return (
             <Accordion key='accordion'>
                 <Panel
+                    eventKey='caseDescription'
                     key='caseDescription'
                     header='Customer Description'
                     collapsable={true}

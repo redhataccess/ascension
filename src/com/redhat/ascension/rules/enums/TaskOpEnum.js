@@ -1,15 +1,15 @@
 (function() {
   module.exports = {
     NOOP: {
-      name: 'noop',
+      name: 'NOOP',
       display: 'No Operation'
     },
     OWN_TASK: {
-      name: 'takeTaskOwnership',
+      name: 'OWN',
       display: 'Take Ownership of Task'
     },
     COMPLETE_TASK: {
-      name: 'completeTask',
+      name: 'COMPLETE',
       display: 'Complete task'
     }
   };

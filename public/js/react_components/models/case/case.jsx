@@ -26,49 +26,49 @@ var Component = React.createClass({
         };
     },
     queryCase: function(props) {
-        self = this;
+        var self = this;
         this.setState({
             'loading': true
         });
 
         this.get({path: `/case/${props.caseNumber}`})
             .then((c) => {
-                console.debug("Discovered case: #{c['resource']['caseNumber']}");
-                self.setState({'case': c, 'loading': false});
+                console.debug(`Discovered case: ${c.resource.caseNumber}`);
+                self.setState({'case': c, 'theCase': c.resource, 'loading': false});
             })
             .catch((err) => console.error(`could not load case ${props.caseNumber}: ${err.stack}`))
             .done(() => self.setState({loading: false}));
     },
-    componentWillMount: function() {
+    componentDidMount: function() {
         if (this.props.caseNumber != null) {
             this.queryCase(this.props);
         }
     },
-    componentWillReceiveProps: function(nextProps) {
-        if (this.props.caseNumber !== nextProps.caseNumber) {
-            this.queryCase(nextProps);
-        }
-    },
+    //componentWillReceiveProps: function(nextProps) {
+    //    if ((this.props.caseNumber !== nextProps.caseNumber) || this.state.theCase == null) {
+    //        this.queryCase(nextProps);
+    //    }
+    //},
     render: function() {
         if (this.state.loading === true) {
             return <i className='fa fa-spinner fa-spin'></i>;
         }
-        if (this.state["case"] == null) {
+        if (this.state["theCase"] == null) {
             return <Alert bsStyle='warning' key='alert'>
-                `No case found with case number: ${this.props.caseNumber}`
+            {`No case found with case number: ${this.props.caseNumber}`}
             </Alert>;
         }
         return (
             <div>
-                <CaseHeader case={this.state.case} key='caseHeader'></CaseHeader>
+                <CaseHeader case={this.state.theCase} key='caseHeader'></CaseHeader>
                 <div key='caseMetaData'>
-                    <CaseDescription description={this.state.case.resource.description}></CaseDescription>
-                    <CaseSummary summary={this.state.case.resource.summary}></CaseSummary>
-                    <CaseAssociates owner={this.state.case.resource.owner} associates={this.state.case.resource.caseAssociates}></CaseAssociates>
-                    <CaseResourceLinks resourceLinks={this.state.case.resource.resourceLinks}></CaseResourceLinks>
+                    <CaseDescription description={this.state.theCase.description}></CaseDescription>
+                    <CaseSummary summary={this.state.theCase.summary}></CaseSummary>
+                    <CaseAssociates owner={this.state.theCase.owner} associates={this.state.theCase.caseAssociates}></CaseAssociates>
+                    <CaseResourceLinks resourceLinks={this.state.theCase.resourceLinks}></CaseResourceLinks>
                 </div>
                 <hr />
-                <Comments caseNumber={this.state.case.resource.caseNumber}></Comments>
+                <Comments caseNumber={this.state.theCase.caseNumber}></Comments>
             </div>
         )
     }

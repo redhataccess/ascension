@@ -9,8 +9,10 @@ Q                 = require 'q'
 #mongoose          = require 'mongoose'
 #mongooseQ         = require('mongoose-q')(mongoose)
 #ObjectId          = mongoose.Types.ObjectId
+ResourceOpEnum    = require '../rules/enums/ResourceOpEnum'
 TaskActionsEnum   = require './enums/taskActionsEnum'
 TaskStateEnum     = require '../rules/enums/TaskStateEnum'
+TaskTypeEnum      = require '../rules/enums/TaskTypeEnum'
 TaskOpEnum        = require '../rules/enums/TaskOpEnum'
 request           = require 'request'
 
@@ -105,11 +107,11 @@ TaskLogic.generateExampleTask = (caseNumber, accountNumber) ->
         },
         "resourceReliability" : "Fresh"
       },
-      "resourceOperation" : "OWN",
+      "resourceOperation" : ResourceOpEnum.TAKE_OWNERSHIP.name,
       "score" : score,
-      "status" : "UNASSIGNED",
-      "taskOperation" : "NOOP",
-      "type" : "CASE"
+      "status" : TaskStateEnum.UNASSIGNED.name,
+      "taskOperation" : TaskOpEnum.NOOP.name,
+      "type" : TaskTypeEnum.CASE.name
     }
   }
   tmp

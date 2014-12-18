@@ -15,7 +15,7 @@ Component = React.createClass({
             tableBody = _.map(linkedResources, (link) => {
                 var resourceNumber = null;
                 if (link.resource.resourceType === 'KnowledgeBaseSolution') {
-                    resourceNumber = <a target='_blank' href={`"https://access.redhat.com/solutions/${link.resource.resourceId}`}>{link.resource.resourceId}</a>;
+                    resourceNumber = <a target='_blank' href={`https://access.redhat.com/solutions/${link.resource.resourceId}`}>{link.resource.resourceId}</a>;
                 } else {
                     resourceNumber = <span>{link.resource.resourceId}</span>;
                 }
@@ -49,6 +49,7 @@ Component = React.createClass({
         return (
             <Accordion>
                 <Panel
+                    eventKey='caseDescription'
                     key='caseDescription'
                     header='Linked Resources (KnowledgeBase, Documentation, Support Cases, ...)'
                     collapsable={true}

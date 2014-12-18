@@ -1,6 +1,7 @@
 # See https://github.com/screeley/ember-demo-environment
-path = require("path")
-webpack = require("webpack")
+path              = require("path")
+webpack           = require("webpack")
+ExtractTextPlugin = require("extract-text-webpack-plugin")
 
 module.exports = (grunt) ->
 
@@ -28,7 +29,8 @@ module.exports = (grunt) ->
       reasons: true
     entry: "./public/js/react_components/index.jsx"
     # inline mode, but serves over http which won't work, we'd need https.
-#    entry: ["webpack-dev-server/client?http://localhost:8090", "./public/js/react_components/index.jsx"]
+    # https://github.com/webpack/webpack-dev-server/issues/11
+    # entry: ["webpack-dev-server/client?http://localhost:8090", "./public/js/react_components/index.jsx"]
 
     output:
       path: path.join(__dirname, "public/dist")
@@ -51,6 +53,13 @@ module.exports = (grunt) ->
       #  loader: 'coffee-loader'
       #}]
       loaders: [
+#//require("style!css!less!../../stylesheets/main.less");
+        {
+          test: /\.less$/
+          # https://github.com/webpack/extract-text-webpack-plugin
+#          loader: ExtractTextPlugin.extract("style-loader", "css-loader!less-loader", {publicPath: 'http://localhost:8090/assets/'})
+          loaders: ['style-loader', 'css-loader', 'less-loader']
+        }
         # required to write "require('./style.css')"
         {
           test: /\.css$/
@@ -108,15 +117,19 @@ module.exports = (grunt) ->
       # Don't want to do this with React .12
 #        'react': "react/react"
 
-    plugins: [new webpack.ProvidePlugin(
+    plugins: [
+      new ExtractTextPlugin("main.css", {
+        allChunks: true
+      }),
+      new webpack.ProvidePlugin(
 
-      # Automtically detect jQuery and $ as free var in modules
-      # and inject the jquery library
-      # This is required by many jquery plugins
-      jQuery: "jquery"
-      #jquery: "jquery"
-      $: "jquery"
-    )]
+        # Automtically detect jQuery and $ as free var in modules
+        # and inject the jquery library
+        # This is required by many jquery plugins
+        jQuery: "jquery"
+        #jquery: "jquery"
+        $: "jquery")
+    ]
 
   grunt.initConfig
     ascension: ascensionConfig
