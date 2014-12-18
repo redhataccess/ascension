@@ -10,7 +10,7 @@ TaskUtils         = require '../../utils/taskUtils'
 TaskStateEnum     = require '../enums/TaskStateEnum'
 TaskTypeEnum      = require '../enums/TaskTypeEnum'
 TaskOpEnum        = require '../enums/TaskOpEnum'
-EntityOpEnum        = require '../enums/EntityOpEnum'
+EntityOpEnum        = require '../enums/ResourceOpEnum'
 _                 = require 'lodash'
 moment            = require 'moment'
 MongoOps          = require '../../db/MongoOperations'
@@ -113,10 +113,10 @@ CaseRules.fetchCases = () ->
 CaseRules.intStatus = (c, intStatus) -> c['internalStatus'] is intStatus
 
 CaseRules.taskExistsWithEntityOp = (tasks, intStatus) ->
-  _.find(tasks, (t) -> t['entityOp'] is intStatus) isnt false
+  _.find(tasks, (t) -> t['resourceOp'] is intStatus) isnt false
 
-CaseRules.findTask = (c, tasks, entityOp) ->
-  _.find(tasks, (t) -> t['entityOp'] is entityOp)
+CaseRules.findTask = (c, tasks, resourceOp) ->
+  _.find(tasks, (t) -> t['resourceOp'] is resourceOp)
 
 # Given an existing task, updates the metadata of the task given the case and returns a promise
 CaseRules.updateTaskFromCase = (c, t) ->
@@ -164,99 +164,99 @@ CaseRules.match = (opts) ->
     # Narrow the search space by only passing tasks matching this case
     #######################################################################################################
     if self.intStatus(c, 'Unassigned')
-      entityOp = EntityOpEnum.OWN
+      resourceOp = EntityOpEnum.OWN
       # Represents the task to test the logic against existing unassigned Cases/tasks
-      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], entityOp.name
+      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], resourceOp.name
 
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
         t = TaskUtils.makeTaskFromCase(c)
-        logger.debug("Discovered new Unassigned case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Unassigned case: #{t['bid']} setting the task to #{resourceOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
-        t.entityOp = entityOp.name
+        t.resourceOp = resourceOp.name
         promises.push TaskUtils.saveRuleTask(t)
 
     #######################################################################################################
     # Waiting on Owner tasks
     #######################################################################################################
     else if self.intStatus(c, 'Waiting on Owner')
-      entityOp = EntityOpEnum.UPDATE
+      resourceOp = EntityOpEnum.UPDATE
       # Represents the task to test the logic against existing unassigned Cases/tasks
-      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], entityOp.name
+      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], resourceOp.name
 
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
         t = TaskUtils.makeTaskFromCase(c)
-        logger.debug("Discovered new Waiting on Owner case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Waiting on Owner case: #{t['bid']} setting the task to #{resourceOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
-        t.entityOp = entityOp.name
+        t.resourceOp = resourceOp.name
         promises.push TaskUtils.saveRuleTask(t)
 
     #######################################################################################################
     # Waiting on Contributor tasks
     #######################################################################################################
     else if self.intStatus(c, 'Waiting on Contributor')
-      entityOp = EntityOpEnum.CONTRIBUTE
+      resourceOp = EntityOpEnum.CONTRIBUTE
       # Represents the task to test the logic against existing unassigned Cases/tasks
-      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], entityOp.name
+      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], resourceOp.name
 
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
         t = TaskUtils.makeTaskFromCase(c)
-        logger.debug("Discovered new Waiting on Contributor case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Waiting on Contributor case: #{t['bid']} setting the task to #{resourceOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
-        t.entityOp = entityOp.name
+        t.resourceOp = resourceOp.name
         promises.push TaskUtils.saveRuleTask(t)
 
     #######################################################################################################
     # Waiting on Collaboration tasks
     #######################################################################################################
     else if self.intStatus(c, 'Waiting on Collaboration')
-      entityOp = EntityOpEnum.COLLABORATE
+      resourceOp = EntityOpEnum.COLLABORATE
       # Represents the task to test the logic against existing unassigned Cases/tasks
-      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], entityOp.name
+      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], resourceOp.name
 
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
         t = TaskUtils.makeTaskFromCase(c)
-        logger.debug("Discovered new Waiting on Collaboration case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Waiting on Collaboration case: #{t['bid']} setting the task to #{resourceOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
-        t.entityOp = entityOp.name
+        t.resourceOp = resourceOp.name
         promises.push TaskUtils.saveRuleTask(t)
 
     #######################################################################################################
     # Tasks for this case relating to Waiting on Engineering
     #######################################################################################################
     else if self.intStatus(c, 'Waiting on Engineering')
-      entityOp = EntityOpEnum.FOLLOW_UP_WITH_ENGINEERING
-      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], entityOp.name
+      resourceOp = EntityOpEnum.FOLLOW_UP_WITH_ENGINEERING
+      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], resourceOp.name
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
-        logger.debug("Discovered new Waiting on Engineering case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Waiting on Engineering case: #{t['bid']} setting the task to #{resourceOp.display}.")
         t = TaskUtils.makeTaskFromCase(c)
         t.taskOp = TaskOpEnum.OWN_TASK.name
-        t.entityOp = entityOp.name
+        t.resourceOp = resourceOp.name
         promises.push TaskUtils.saveRuleTask(t)
 
     #######################################################################################################
     # Tasks for this case relating to Waiting on Sales
     #######################################################################################################
     else if self.intStatus(c, 'Waiting on Sales')
-      entityOp = EntityOpEnum.FOLLOW_UP_WITH_SALES
-      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], entityOp.name
+      resourceOp = EntityOpEnum.FOLLOW_UP_WITH_SALES
+      existingTask = self.findTask c, existingTasksByBid[c['caseNumber']], resourceOp.name
 
       if existingTask?
         promises.push self.updateTaskFromCase(c, existingTask)
       else
         t = TaskUtils.makeTaskFromCase(c)
-        logger.debug("Discovered new Waiting on Engineering case: #{t['bid']} setting the task to #{entityOp.display}.")
+        logger.debug("Discovered new Waiting on Engineering case: #{t['bid']} setting the task to #{resourceOp.display}.")
         t.taskOp = TaskOpEnum.OWN_TASK.name
-        t.entityOp = entityOp.name
+        t.resourceOp = resourceOp.name
         promises.push TaskUtils.saveRuleTask(t)
     else
       logger.warn "Did not create task from case: #{prettyjson.render c}"

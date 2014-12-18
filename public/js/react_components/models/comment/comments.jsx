@@ -35,7 +35,7 @@ var Component = React.createClass({
                 })
             })
             .catch((err) => console.error(`Could not load comments: ${err.stack}`))
-            .done(() => this.setState({'loading': false}));
+            .done(() => self.setState({'loading': false}));
 
     },
     componentDidMount: function() {

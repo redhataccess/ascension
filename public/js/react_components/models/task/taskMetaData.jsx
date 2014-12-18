@@ -1,26 +1,29 @@
-var React   = require('react/addons');
-var _       = require('lodash');
-var Label   = React.createFactory(require('react-bootstrap/Label'));
+var React           = require('react/addons');
+var _               = require('lodash');
+var WebUtilsMixin   = require('../../mixins/webUtilsMixin.coffee');
+
+var Label           = require('react-bootstrap/Label');
 
 var Component = React.createClass({
     displayName: 'TaskAction',
-    render: () => {
-        var output, sbrsExist, tagsExist, _ref1, _ref2;
+    mixins: [WebUtilsMixin],
+    render: function () {
+        var output, sbrsExist, tagsExist;
         if (this.props.task == null) {
             return null;
         }
-        sbrsExist = ((_ref1 = this.props.task.sbrs) != null ? _ref1.length : void 0) > 0;
-        tagsExist = ((_ref2 = this.props.task.tags) != null ? _ref2.length : void 0) > 0;
+        sbrsExist = this.isDefined(this, 'props.task.resource.resource.sbrs') && this.props.task.resource.resource.sbrs.length > 0;
+        tagsExist = this.isDefined(this, 'props.task.resource.resource.tags') && this.props.task.resource.resource.tags.length > 0;
         output = [];
         if (sbrsExist) {
             output.push("Pertaining to");
-            output.push(this.props.task.sbrs.join(','));
+            output.push(this.props.task.resource.resource.sbrs.join(','));
         }
         if (tagsExist) {
             if (sbrsExist) {
                 output.push('and');
             }
-            output.push(this.props.task.tags.join(','));
+            output.push(this.props.task.resource.resource.tags.join(','));
         }
 
         return (

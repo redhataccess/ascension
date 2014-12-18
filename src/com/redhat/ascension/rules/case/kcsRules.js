@@ -23,7 +23,7 @@
 
   TaskOpEnum = require('../enums/TaskOpEnum');
 
-  EntityOpEnum = require('../enums/EntityOpEnum');
+  EntityOpEnum = require('../enums/ResourceOpEnum');
 
   _ = require('lodash');
 

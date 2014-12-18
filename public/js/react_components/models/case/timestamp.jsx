@@ -1,5 +1,6 @@
 var React   = require('react');
 var moment  = require('moment');
+
 var Label   = require('react-bootstrap/Label');
 
 var Component = React.createClass({

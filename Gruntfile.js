@@ -63,7 +63,7 @@
       },
       resolve: {
         extensions: ['', '.js'],
-        modulesDirectories: ['./node_modules', './public/js/bower_components']
+        modulesDirectories: ['web_modules', './node_modules', './public/js/bower_components']
       },
       plugins: [
         new webpack.ProvidePlugin({

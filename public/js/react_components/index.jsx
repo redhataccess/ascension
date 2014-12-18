@@ -2,37 +2,42 @@ var React                   = require('react/addons');
 if (typeof window !== 'undefined') {
     window.React = React;
 }
-
 var Router                  = require('react-router/dist/react-router');
 var { Route, Redirect, RouteHandler, Link, NotFoundRoute, DefaultRoute } = Router;
-var ReactTransitionGroup    = React.addons.TransitionGroup;
-var About                   = require('./about.jsx');
+//var ReactTransitionGroup    = React.addons.TransitionGroup;
+//var About                   = require('./about.jsx');
 var Admin                   = require('./admin/admin.coffee');
 var Tasks                   = require('./collections/tasks.jsx');
 var Task                    = require('./models/task/task.jsx');
 var Auth                    = require('./auth/auth.coffee');
 var WebUtilsMixin           = require('./mixins/webUtilsMixin.coffee');
+
 var Alert                   = require('react-bootstrap/Alert');
 
 require("style!css!less!../../stylesheets/main.less");
 
 var Dashboard = React.createClass({
-    getInitialState: function() {
-        return {
-            query: this.props.query,
-            params: this.props.params
-        };
-    },
-    componentWillReceiveProps: function(nextProps) {
-        this.setState({
-            query: nextProps.query,
-            params: nextProps.params
-        });
-    },
+    displayName: 'Dashboard',
+    mixins: [Router.State],
+    //getInitialState: function() {
+    //    return {
+    //        query: this.props.query,
+    //        params: this.props.params
+    //    };
+    //},
+    //componentWillReceiveProps: function(nextProps) {
+    //    this.setState({
+    //        query: nextProps.query,
+    //        params: nextProps.params
+    //    });
+    //},
     render: function() {
+        var { taskId } = this.getParams();
+        console.debug(`Rendering the dashboard with taskId: ${taskId}`);
+        //<Task id='tasksContainer' key='tasks' query={this.state.query} params={this.state.params}></Task>
         return (
             <div key='mainDashboard'>
-                <Task id='tasksContainer' key='tasks' query={this.state.query} params={this.state.params}></Task>
+                <Tasks id='tasksContainer' key='tasks' params={{taskId: taskId}}></Tasks>
             </div>
         )
     }
@@ -40,7 +45,7 @@ var Dashboard = React.createClass({
 
 var App = React.createClass({
     displayName: 'App',
-    mixins: [WebUtilsMixin],
+    mixins: [WebUtilsMixin, Router.State],
     getInitialState: function() {
         return {
             'authedUser': Auth.authedUser,
@@ -82,17 +87,17 @@ var App = React.createClass({
             })
         }
     },
-    componentWillReceiveProps: function(nextProps) {
-        if (!_.isEqual(this.props.query.ssoUsername, nextProps.query.ssoUsername)) {
-            this.queryScopedUser(nextProps.query.ssoUsername);
-        } else if (nextProps.query.ssoUsername === '' || (nextProps.query.ssoUsername == null)) {
-            Auth.setScopedUser(void 0);
-            this.setState({
-                'scopedUser': void 0,
-                'scopedFailed': false
-            });
-        }
-    },
+    //componentWillReceiveProps: function(nextProps) {
+    //    if (!_.isEqual(this.props.query.ssoUsername, nextProps.query.ssoUsername)) {
+    //        this.queryScopedUser(nextProps.query.ssoUsername);
+    //    } else if (nextProps.query.ssoUsername === '' || (nextProps.query.ssoUsername == null)) {
+    //        Auth.setScopedUser(void 0);
+    //        this.setState({
+    //            'scopedUser': void 0,
+    //            'scopedFailed': false
+    //        });
+    //    }
+    //},
     componentDidMount: function() {
         var self, ssoUsername, userPromise;
         self = this;
@@ -135,7 +140,7 @@ var App = React.createClass({
                 'authFailed': true
             });
         }
-        if ((this.props.query.ssoUsername != null) && this.props.query.ssoUsername !== '') {
+        if ((this.getQuery().ssoUsername != null) && this.getQuery().ssoUsername !== '') {
             this.queryScopedUser(this.props.query.ssoUsername);
         } else {
             Auth.setScopedUser(void 0);
@@ -166,17 +171,13 @@ var App = React.createClass({
                 </Alert>
             )
         } else if (this.state.scopedFailed === true) {
-            return Alert({
-                bsStyle: "warning",
-                key: 'alert'
-            }, [""]);
             return (
                 <Alert bsStyle='warning' key='alert'>
                 {`Scoped User failed to load, make sure you typed in the rhn-support-<name> correctly`}
                 </Alert>
             )
         } else {
-            return this.props.activeRouteHandler();
+            return <RouteHandler />
         }
     },
     render: function() {
@@ -206,8 +207,7 @@ var App = React.createClass({
                                 <Link
                                     to='dashboard'
                                     key='linkDashboard'
-                                    query={this.props.query}
-                                    params={{'_id': 'tasks'}}>Dashboard</Link>
+                                    params={{'taskId': 'tasks'}}>Dashboard</Link>
                             </li>
                             <li>
                                 <Link
@@ -228,6 +228,11 @@ var App = React.createClass({
     }
 });
 
+//<Route
+//    key='task'
+//    name='task'
+//    path='task/:taskId'
+//    handler={Task}></Route>
 var routes = (
     <Route
         key='app'
@@ -237,24 +242,19 @@ var routes = (
         <Route
             key='dashboard'
             name='dashboard'
-            path='dashboard/:_id'
+            path='support/:taskId'
             handler={Dashboard}></Route>
         <Route
             key='admin'
             name='admin'
             handler={Admin}></Route>
-        <Route
-            key='task'
-            name='task'
-            path='task/:_id'
-            handler={Task}></Route>
-        <NotFoundRoute key='notFound' handler={Dashboard}></NotFoundRoute >
+        <NotFoundRoute key='notFound' handler={Dashboard}></NotFoundRoute>
         <DefaultRoute key='defaultRoute' handler={Dashboard}></DefaultRoute>
     </Route>
 );
 
-Router.run(routes, (Handler) => {
-   React.render(<Handler />, document.getElementById('content'))
+Router.run(routes, Router.HashLocation, (Handler) => {
+   React.render(<Handler />, document.getElementById('ascension-view'))
 });
 
 module.exports = App;

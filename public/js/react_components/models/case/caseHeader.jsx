@@ -1,8 +1,7 @@
 var React       = require('react');
 var CaseProduct = require('./caseProduct.jsx');
-var Accordion   = React.createFactory(require('react-bootstrap/Accordion'));
-var Panel       = React.createFactory(require('react-bootstrap/Panel'));
-var Well        = React.createFactory(require('react-bootstrap/Well'));
+
+var Well        = require('react-bootstrap/Well');
 
 var Component = React.createClass({
     render: function() {

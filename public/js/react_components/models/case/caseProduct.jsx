@@ -1,6 +1,7 @@
 var React           = require('react/addons');
-var Label           = React.createFactory(require('react-bootstrap/Label'));
 var WebUtilsMixin   = React.createFactory(require('../../mixins/webUtilsMixin.coffee'));
+
+var Label           = require('react-bootstrap/Label');
 
 var Component = React.createClass({
     propTypes: {

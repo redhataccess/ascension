@@ -1,5 +1,6 @@
 var React           = require('react');
 var _               = require('lodash');
+
 var Label           = require('react-bootstrap/Label');
 var Popover         = require('react-bootstrap/Popover');
 var OverlayTrigger  = require('react-bootstrap/OverlayTrigger');
@@ -12,7 +13,7 @@ var Component = React.createClass({
             return null;
         }
         OwnersPopover = <Popover>No potential owners</Popover>;
-        this.props.task['potentialOwners'].sort((a, b) => b.score - a.score);
+        this.props.task['potentialOwners'].sort((a, b) => b.resource.score - a.resource.score);
         potentialOwners = this.props.task['potentialOwners'] == null ? [] : null;
         potentialOwnerCount = potentialOwners  || 0;
         if (potentialOwnerCount  > 0) {

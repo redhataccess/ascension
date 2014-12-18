@@ -27,6 +27,8 @@ module.exports = (grunt) ->
       colors: true
       reasons: true
     entry: "./public/js/react_components/index.jsx"
+    # inline mode, but serves over http which won't work, we'd need https.
+#    entry: ["webpack-dev-server/client?http://localhost:8090", "./public/js/react_components/index.jsx"]
 
     output:
       path: path.join(__dirname, "public/dist")
@@ -96,7 +98,8 @@ module.exports = (grunt) ->
     resolve:
       extensions: ['', '.js']
       #root: path.join(__dirname, "node_modules")
-      modulesDirectories: ['./node_modules', './public/js/bower_components']
+      # https://github.com/webpack/webpack-dev-server/issues/60  'web_modules' required for inline mode
+      modulesDirectories: ['web_modules', './node_modules', './public/js/bower_components']
 #      modulesDirectories: [path.join(__dirname, "node_modules"), path.join(__dirname, 'public/js/bower_components')]
 
 #      alias:

@@ -8,7 +8,7 @@ MongoOperations = require '../db/MongoOperations'
 TaskStateEnum = require './enums/TaskStateEnum'
 TaskTypeEnum = require './enums/TaskTypeEnum'
 TaskOpEnum = require './enums/TaskOpEnum'
-EntityOpEnum = require './enums/EntityOpEnum'
+EntityOpEnum = require './enums/ResourceOpEnum'
 _ = require 'lodash'
 moment = require 'moment'
 mongoose = require 'mongoose'
@@ -84,7 +84,7 @@ TaskRules.noolsDefs = """
 //define ExistingTask {
 //  bid: null,
 //  taskOp: null,
-//  entityOp: null,
+//  resourceOp: null,
 //  owner: null
 //}
 
@@ -101,7 +101,7 @@ define Task {
   closed: null,
   type: null,
   taskOp: null,
-  entityOp: null,
+  resourceOp: null,
   state: 'new',
   'case': {
     AccountId : null,
@@ -162,7 +162,7 @@ rule "noop task/unassigned case" {
     logger.warn('Found unmanaged task: ' + t.bid + ', setting the task to NNO.');
     modify(t, function() {
       this.taskOp = TaskOpEnum.OWN_TASK.name;
-      this.entityOp = EntityOpEnum.OWN.name;
+      this.resourceOp = EntityOpEnum.OWN.name;
     });
     //logger.warn('Sending task to be saved: ' + t.bid);
     retract(t);
@@ -175,12 +175,12 @@ rule "noop task/collab case" {
   when {
     t : Task t.taskOp == TaskOpEnum.NOOP.name && t.case.Internal_Status__c == 'Waiting on Collaboration';
     // Make sure there is no prior task created for this Waiting on Collaboration task
-    not(et: Task et.taskOp != TaskOpEnum.NOOP.name && et.bid == t.bid && et.entityOp == EntityOpEnum.COLLAB.name);
+    not(et: Task et.taskOp != TaskOpEnum.NOOP.name && et.bid == t.bid && et.resourceOp == EntityOpEnum.COLLAB.name);
   }
   then {
     modify(t, function(){
       this.taskOp = TaskOpEnum.OWN_TASK.name;
-      this.entityOp = EntityOpEnum.COLLAB.name;
+      this.resourceOp = EntityOpEnum.COLLAB.name;
     });
     retract(t);
     return saveRuleTask(t);
@@ -191,7 +191,7 @@ rule "noop task/collab case w/exiting task" {
   when {
     t : Task t.taskOp == TaskOpEnum.NOOP.name && t.case.Internal_Status__c == 'Waiting on Collaboration';
     // If there is an existing task that matches this noop task, retract both
-    et: Task et.taskOp != TaskOpEnum.NOOP.name && et.bid == t.bid && et.entityOp == EntityOpEnum.COLLAB.name;
+    et: Task et.taskOp != TaskOpEnum.NOOP.name && et.bid == t.bid && et.resourceOp == EntityOpEnum.COLLAB.name;
   }
   then {
     retract(t);
@@ -208,7 +208,7 @@ rule "noop task/default" {
     //logger.warn('DEFAULT: Found unmanaged task: ' + t.bid + ', setting the task to NNO.');
     //modify(t, function(){
     //  this.taskOp = TaskOpEnum.OWN_TASK.name;
-    //  this.entityOp = EntityOpEnum.OWN.name;
+    //  this.resourceOp = EntityOpEnum.OWN.name;
     //});
     retract(t);
     return saveRuleTask(t);
@@ -239,7 +239,7 @@ TaskRules.getExistingTasks = () ->
   MongoOperations['models']['task']
   .find()
   .where('state').ne(TaskStateEnum.CLOSED)
-  #.select('bid taskOp entityOp owner')
+  #.select('bid taskOp resourceOp owner')
   .execQ()
 
 # Make Mongoose Schema Tasks out of regular js objects
@@ -269,7 +269,7 @@ TaskRules.saveTasks = (tasks) ->
 #  completed: t['score']
 #  type: t['score']
 #  taskOp: t['score']
-#  entityOp: t['score']
+#  resourceOp: t['score']
 #  state: t['score']
 #  'case': t['case']
 
@@ -404,7 +404,7 @@ TaskRules.printSimple = (op, fact) ->
   logger.debug "#{op}: " + prettyjson.render
     bid: fact['bid']
     taskOp: fact['taskOp']
-    entityOp: fact['entityOp']
+    resourceOp: fact['resourceOp']
 
 TaskRules.initSession = (debug = false) ->
   @session = @flow.getSession()

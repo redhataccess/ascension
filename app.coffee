@@ -15,9 +15,19 @@ _               = require 'lodash'
 
 #mongoose        = require 'mongoose'
 #MongoOps        = require './src/com/redhat/ascension/db/MongoOperations'
-#TaskLogic       = require './src/com/redhat/ascension/rest/taskLogic'
+TaskLogic       = require './src/com/redhat/ascension/rest/taskLogic'
 #CaseRules       = require './src/com/redhat/ascension/rules/case/caseRules'
 
+##########################################################
+# TODO -- generating mock tasks right now, this will
+# need to be replaced once the UDS is in place
+##########################################################
+tasks = []
+i = 0
+while i < 20
+  tasks.push TaskLogic.generateExampleTask('01056704', '540155')
+  i++
+TaskLogic.mockTasks = tasks
 
 ##########################################################
 # Handle configuration
@@ -28,8 +38,11 @@ serverStartTime = (new Date()).getTime()
 port = settings.getEnvVar('OPENSHIFT_INTERNAL_PORT') || settings.getEnvVar('OPENSHIFT_NODEDIY_PORT') || settings.getEnvVar('OPENSHIFT_NODEJS_PORT') || 3000
 ipAddress = settings.getEnvVar('OPENSHIFT_NODEJS_IP') || settings.getEnvVar('OPENSHIFT_NODEDIY_IP')  || '127.0.0.1'
 if process.env['OPENSHIFT_DATA_DIR']?
-  logger.info "Env is Openshift/production, ip: #{ipAddress} port: #{port}"
   env = 'production'
+  logger.info "Env is Openshift/#{env}, ip: #{ipAddress} port: #{port}"
+else
+  logger.info "Env is #{env}, ip: #{ipAddress} port: #{port}"
+
 app = express()
 oneDay = 86400000
 #server = http.Server(app)
@@ -126,6 +139,31 @@ app.get "/user", (req, res) ->
   uql = decodeURIComponent(req.query.where)
   uri = new Uri(settings.UDS_URL).setPath('/user').setQuery('where=' + uql)
   req.pipe(request(uri.toString())).pipe(res)
+
+###########################################################
+## Handle the redirections for the Chrome two theme
+###########################################################
+#app.get /^\/(webassets|chrome_themes.*?)/i, (req, res) ->
+#  logger.info "received request: #{req.url}"
+#  logger.info "req.params : #{prettyjson.render req.params}"
+#  #  redirect = /R=?(\d+)?/.test(flags) ? (typeof /R=?(\d+)?/.exec(flags)[1] !== 'undefined' ? /R=?(\d+)?/.exec(flags)[1] : 301) : false,
+#  location = "https://access.redhat.com/#{req.url}"
+#  logger.info "Redirecting to: #{location}"
+#  res.writeHead 302, {
+#    Location : location
+#  }
+#  res.end()
+#  return true
+#
+#app.get /^\/(services.*?)/i, (req, res) ->
+#  logger.info "received request: #{req.url}"
+#  logger.info "req.params : #{prettyjson.render req.params}"
+#  #  redirect = /R=?(\d+)?/.test(flags) ? (typeof /R=?(\d+)?/.exec(flags)[1] !== 'undefined' ? /R=?(\d+)?/.exec(flags)[1] : 301) : false,
+#  location = "https://access.redhat.com/#{req.url}"
+#  #  res.writeHead 200, {
+#  #    Host: 'access.redhat.com'
+#  #  }
+#  request(location).pipe(res)
 
 ##########################################################
 # Handle general HTTP opens/closes/listens

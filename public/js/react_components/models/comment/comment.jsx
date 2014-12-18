@@ -1,7 +1,6 @@
 var React       = require('react/addons');
 var cx          = React.addons.classSet;
-var Accordion   = require('react-bootstrap/Accordion');
-var Panel       = require('react-bootstrap/Panel');
+
 var Timestamp   = require('../case/timestamp.jsx');
 var User        = require('../user/user.jsx');
 

@@ -86,10 +86,28 @@ WebUtilsMixin.isDefined = (obj, path) ->
 
     #store the next property, evaluate and break out if it's undefined
     currentObject = currentObject[props[i]]
-    return false  unless currentObject
+    return false unless currentObject
     ++i
 
   # If the loop did not break until the last path, then the path exists
   true
+
+# Null safe return a deeply nested object
+WebUtilsMixin.getDefined = (obj, path) ->
+  return null unless obj # no object, return false
+
+  # I suggest var per variable for clarity
+  props = path.split(".")
+  currentObject = obj
+  i = 0
+
+  while i < props.length
+
+    #store the next property, evaluate and break out if it's undefined
+    currentObject = currentObject[props[i]]
+    return null unless currentObject
+    ++i
+
+  currentObject
 
 module.exports = WebUtilsMixin

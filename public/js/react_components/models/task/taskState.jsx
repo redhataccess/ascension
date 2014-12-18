@@ -1,9 +1,9 @@
 var React           = require('react/addons');
-var MenuItem        = React.createFactory(require('react-bootstrap/MenuItem'));
-var DropdownButton  = React.createFactory(require('../../bsReactOverrides/DropdownButton.coffee'));
 var Auth            = require('../../auth/auth.coffee');
 var TaskStateEnum   = require('../../../../../src/com/redhat/ascension/rules/enums/TaskStateEnum.coffee');
 
+var MenuItem        = require('react-bootstrap/MenuItem');
+var DropdownButton  = require('../../bsReactOverrides/DropdownButton.coffee');
 
 var Component = React.createClass({
     displayName: 'TaskState',
@@ -20,7 +20,7 @@ var Component = React.createClass({
             </MenuItem>
         )
     },
-    generateScopedDeclineElem: () => {
+    generateScopedDeclineElem: function () {
         var id;
         if (Auth.getScopedUser() == null) {
             return null;
@@ -33,13 +33,13 @@ var Component = React.createClass({
             </MenuItem>
         )
     },
-    render: () => {
+    render: function () {
         var id;
         if (Auth.getAuthedUser() == null) {
             return null;
         }
         id = Auth.getAuthedUser()['externalModelId'];
-        if (this.props.task.state === TaskStateEnum.UNASSIGNED.name) {
+        if (this.props.task.resource.state === TaskStateEnum.UNASSIGNED.name) {
             return (
                 <DropdownButton bsStyle='warning' bsSize='xsmall' title='Unassigned'>
                     <MenuItem key={`assign-${id}`} onClick={this.props.takeOwnership}>
@@ -55,7 +55,7 @@ var Component = React.createClass({
                     {this.generateScopedDeclineElem()}
                 </DropdownButton>
             )
-        } else if (this.props.task.state === TaskStateEnum.ASSIGNED.name) {
+        } else if (this.props.task.resource.state === TaskStateEnum.ASSIGNED.name) {
             return (
                 <DropdownButton bsStyle='primary' bsSize='xsmall' title='Assigned'>
                     <MenuItem key={`unassign-${id}`} onClick={this.props.removeOnwership}>
@@ -68,7 +68,7 @@ var Component = React.createClass({
                     </MenuItem>
                 </DropdownButton>
             )
-        } else if (this.props.task.state === TaskStateEnum.CLOSED.name) {
+        } else if (this.props.task.resource.state === TaskStateEnum.CLOSED.name) {
             return (
                 <DropdownButton bsStyle='success' bsSize='xsmall' title='Closed'>
                     <MenuItem key={`assign-${id}`} onClick={this.props.takeOwnership}>

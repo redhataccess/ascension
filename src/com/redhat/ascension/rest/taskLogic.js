@@ -1,5 +1,5 @@
 (function() {
-  var MongoOps, ObjectId, Q, TaskActionsEnum, TaskLogic, TaskOpEnum, TaskStateEnum, UserLogic, fs, logger, moment, mongoose, mongooseQ, prettyjson, request, settings, _;
+  var Q, TaskActionsEnum, TaskLogic, TaskOpEnum, TaskStateEnum, UserLogic, fs, logger, moment, prettyjson, request, settings, _;
 
   fs = require('fs');
 
@@ -15,12 +15,6 @@
 
   Q = require('q');
 
-  MongoOps = require('../db/MongoOperations');
-
-  mongoose = require('mongoose');
-
-  mongooseQ = require('mongoose-q')(mongoose);
-
   TaskActionsEnum = require('./enums/taskActionsEnum');
 
   TaskStateEnum = require('../rules/enums/TaskStateEnum');
@@ -29,166 +23,133 @@
 
   request = require('request');
 
-  ObjectId = mongoose.Types.ObjectId;
-
   UserLogic = require('./userLogic');
 
   TaskLogic = {};
 
+  TaskLogic.mockTasks = [];
+
+  TaskLogic.makeSfId = function() {
+    var i, possible, text;
+    text = "";
+    possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    i = 0;
+    while (i < 18) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length)).toUpperCase();
+      i++;
+    }
+    return text;
+  };
+
+  TaskLogic.generateExampleTask = function(caseNumber, accountNumber) {
+    var accountSfId, caseSfId, createdBySfId, ownerSfId, score, taskId, tmp;
+    score = Math.floor((Math.random() * 2000) + 1000);
+    createdBySfId = TaskLogic.makeSfId();
+    ownerSfId = TaskLogic.makeSfId();
+    accountSfId = TaskLogic.makeSfId();
+    caseSfId = TaskLogic.makeSfId();
+    taskId = TaskLogic.makeSfId();
+    tmp = {
+      "resource": {
+        "externalModelId": taskId,
+        "closed": "2014-12-16T12:01:11.000Z",
+        "created": "2014-10-30T14:55:11.000Z",
+        "createdBy": {
+          "externalModelId": createdBySfId
+        },
+        "lastModified": "2014-12-16T12:01:11.000Z",
+        "resource": {
+          "externalModelId": caseSfId,
+          "resource": {
+            "account": {
+              "externalModelId": accountSfId,
+              "resource": {
+                "accountName": "Acme Foo",
+                "accountNumber": accountNumber,
+                "hasSRM": true,
+                "hasTAM": true,
+                "isActive": true,
+                "specialHandlingRequired": true,
+                "strategic": true,
+                "superRegion": "NA"
+              },
+              "resourceReliability": "Fresh"
+            },
+            "caseNumber": caseNumber,
+            "collaborationScore": score,
+            "created": "2014-10-30T14:55:11.000Z",
+            "internalPriority": "1 (Urgent)",
+            "internalStatus": "Waiting on Owner",
+            "isFTSCase": false,
+            "isTAMCase": false,
+            "lastModified": "2014-12-16T12:01:11.000Z",
+            "owner": {
+              "externalModelId": ownerSfId,
+              "resourceReliability": "Fresh"
+            },
+            "product": {
+              "externalModelId": null,
+              "resource": {
+                "line": {
+                  "externalModelId": 1462,
+                  "resource": {
+                    "name": "Red Hat Storage Server"
+                  },
+                  "resourceReliability": "Fresh"
+                },
+                "version": {
+                  "externalModelId": 17838,
+                  "resource": {
+                    "name": "3.0"
+                  },
+                  "resourceReliability": "Fresh"
+                }
+              },
+              "resourceReliability": "Fresh"
+            },
+            "sbrs": ["Filesystem"],
+            "sbt": Math.floor((Math.random() * 100) + 1),
+            "severity": "1 (Urgent)",
+            "status": "Waiting on Red Hat",
+            "subject": "Example case",
+            "summary": "example summary",
+            "tags": ["gluster"]
+          },
+          "resourceReliability": "Fresh"
+        },
+        "resourceOperation": "OWN",
+        "score": score,
+        "status": "UNASSIGNED",
+        "taskOperation": "NOOP",
+        "type": "CASE"
+      }
+    };
+    return tmp;
+  };
+
   TaskLogic.fetchTasks = function(opts) {
-    var deferred, findClause, uql;
+    var deferred;
     if (((opts != null ? opts.ssoUsername : void 0) != null) && (opts != null ? opts.ssoUsername : void 0) !== '') {
       deferred = Q.defer();
-      uql = {
-        where: "SSO is \"" + opts.ssoUsername + "\""
-      };
-      UserLogic.fetchUserUql(uql).then(function(user) {
-        var nonOwnerFindClause, nonOwnerTasksPromise, ownerFindClause, ownerTasksPromise;
-        ownerFindClause = {
-          'owner.id': user.id,
-          'state': {
-            '$ne': 'closed'
-          },
-          'declinedUsers.id': {
-            '$ne': user.id
-          }
-        };
-        nonOwnerFindClause = {
-          '$and': [
-            {
-              'state': {
-                '$ne': 'closed'
-              }
-            }, user.sbrs !== void 0 ? {
-              'sbrs': {
-                '$in': user.sbrs
-              }
-            } : void 0, {
-              'owner.id': {
-                '$ne': user.id
-              }
-            }, {
-              'declinedUsers.id': {
-                '$ne': user.id
-              }
-            }
-          ]
-        };
-        logger.debug("Searching mongo with ownerFindClause: " + (JSON.stringify(ownerFindClause)));
-        logger.debug("Searching mongo with nonOwnerFindClause: " + (JSON.stringify(nonOwnerFindClause)));
-        ownerTasksPromise = MongoOps['models']['task'].find().where(ownerFindClause).limit(_.parseInt(opts.limit)).sort('-score').execQ();
-        nonOwnerTasksPromise = MongoOps['models']['task'].find().where(nonOwnerFindClause).limit(_.parseInt(opts.limit)).sort('-score').execQ();
-        return [ownerTasksPromise, nonOwnerTasksPromise];
-      }).spread(function(ownerTasks, nonOwnerTasks) {
-        var finalTasks;
-        logger.debug("Discovered: " + ownerTasks.length + " owner tasks, and " + nonOwnerTasks.length + " non-owner tasks");
-        finalTasks = [];
-        if (ownerTasks.length > 7) {
-          return deferred.resolve(ownerTasks.slice(0, 7));
-        } else {
-          logger.debug("Discovered: " + ownerTasks.length + " owner tasks and " + nonOwnerTasks.length + " non-owner tasks.");
-          _.each(ownerTasks, function(t) {
-            return finalTasks.push(t);
-          });
-          _.each(nonOwnerTasks, function(t) {
-            return finalTasks.push(t);
-          });
-          return deferred.resolve(finalTasks.slice(0, 7));
-        }
-      })["catch"](function(err) {
-        return deferred.reject(err);
-      }).done();
+      deferred.resolve(TaskLogic.mockTasks);
       return deferred.promise;
-    } else {
-      findClause = {
-        'state': {
-          '$ne': 'closed'
-        }
-      };
-      return MongoOps['models']['task'].find().where(findClause).limit(_.parseInt(opts.limit)).execQ();
     }
   };
 
   TaskLogic.fetchTask = function(opts) {
-    return MongoOps['models']['task'].findById(opts['_id']).execQ();
+    var deferred;
+    deferred = Q.defer();
+    deferred.resolve(_.find(TaskLogic.mockTasks, function(t) {
+      var _ref, _ref1;
+      return ((_ref = t.resource) != null ? (_ref1 = _ref.resource) != null ? _ref1.caseNumber : void 0 : void 0) === opts.caseNumber;
+    }));
+    return deferred.promise;
   };
 
   TaskLogic.updateTask = function(opts) {
-    var $set, deferred;
+    var deferred;
     deferred = Q.defer();
-    if (opts.action === TaskActionsEnum.ASSIGN.name && (opts.userInput != null)) {
-      UserLogic.fetchUser(opts).then(function(user) {
-        var $set;
-        $set = {
-          $set: {
-            state: TaskStateEnum.ASSIGNED.name,
-            taskOp: TaskOpEnum.COMPLETE_TASK.name,
-            owner: user
-          }
-        };
-        return MongoOps['models']['task'].findOneAndUpdate({
-          _id: new ObjectId(opts['_id'])
-        }, $set).execQ();
-      }).then(function() {
-        return deferred.resolve();
-      })["catch"](function(err) {
-        return deferred.reject(err);
-      }).done();
-    } else if (opts.action === TaskActionsEnum.DECLINE.name) {
-      UserLogic.fetchUser(opts).then(function(user) {
-        var $update;
-        $update = {
-          $push: {
-            declinedUsers: {
-              id: user['id'],
-              sso: user['sso'],
-              fullName: user['fullName'],
-              declinedOn: new Date()
-            }
-          }
-        };
-        logger.debug("Declining the event with " + (prettyjson.render($update)));
-        return MongoOps['models']['task'].findOneAndUpdate({
-          _id: new ObjectId(opts['_id'])
-        }, $update).execQ();
-      }).then(function() {
-        return deferred.resolve();
-      })["catch"](function(err) {
-        return deferred.reject(err);
-      }).done();
-    } else if (opts.action === TaskActionsEnum.UNASSIGN.name) {
-      $set = {
-        $set: {
-          state: TaskStateEnum.UNASSIGNED.name,
-          taskOp: TaskOpEnum.OWN_TASK.name,
-          owner: null
-        }
-      };
-      MongoOps['models']['task'].findOneAndUpdate({
-        _id: new ObjectId(opts['_id'])
-      }, $set).execQ().then(function() {
-        return deferred.resolve();
-      })["catch"](function(err) {
-        return deferred.reject(err);
-      }).done();
-    } else if (opts.action === TaskActionsEnum.CLOSE.name) {
-      $set = {
-        $set: {
-          state: TaskStateEnum.CLOSED.name,
-          taskOp: TaskOpEnum.NOOP.name,
-          closed: new Date()
-        }
-      };
-      MongoOps['models']['task'].findOneAndUpdate({
-        _id: new ObjectId(opts['_id'])
-      }, $set).execQ().then(function() {
-        return deferred.resolve();
-      })["catch"](function(err) {
-        return deferred.reject(err);
-      }).done();
-    } else {
-      deferred.reject("" + opts.action + " is not a known action");
-    }
+    deferred.resolve(void 0);
     return deferred.promise;
   };
 

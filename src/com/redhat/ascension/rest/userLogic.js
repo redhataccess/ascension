@@ -1,5 +1,5 @@
 (function() {
-  var MongoOps, Q, TaskActionsEnum, Uri, UserLogic, Utils, fs, logger, moment, mongoose, mongooseQ, prettyjson, request, settings, _;
+  var Q, TaskActionsEnum, Uri, UserLogic, Utils, fs, logger, moment, prettyjson, request, settings, _;
 
   fs = require('fs');
 
@@ -16,12 +16,6 @@
   moment = require('moment');
 
   Q = require('q');
-
-  MongoOps = require('../db/MongoOperations');
-
-  mongoose = require('mongoose');
-
-  mongooseQ = require('mongoose-q')(mongoose);
 
   TaskActionsEnum = require('./enums/taskActionsEnum');
 

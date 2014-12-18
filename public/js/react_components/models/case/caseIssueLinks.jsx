@@ -1,6 +1,7 @@
-var React = require('react');
-var Accordion = require('react-bootstrap/Accordion');
-var Table = require('react-bootstrap/Table');
+var React       = require('react');
+
+var Accordion   = require('react-bootstrap/Accordion');
+var Table       = require('react-bootstrap/Table');
 
 var Component = React.createClass({
     render: function() {

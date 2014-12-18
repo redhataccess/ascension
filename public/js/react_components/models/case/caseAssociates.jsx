@@ -1,11 +1,11 @@
 var React               = require('react');
-var AjaxMixin           = require('../../mixins/ajaxMixin.coffee');
-var Spacer              = require('../../utils/spacer.coffee');
+//var AjaxMixin           = require('../../mixins/ajaxMixin.coffee');
+var Spacer              = require('../../utils/spacer.jsx');
 var User                = require('../user/user.jsx');
-var Auth                = require('../../auth/auth.coffee');
+//var Auth                = require('../../auth/auth.coffee');
 var TaskActionsEnum     = require('../../../../../src/com/redhat/ascension/rest/enums/taskActionsEnum.coffee');
 var TaskTypeEnum        = require('../../../../../src/com/redhat/ascension/rules/enums/TaskTypeEnum.coffee');
-var PanelGroup          = require('react-bootstrap/PanelGroup');
+
 var Accordion           = require('react-bootstrap/Accordion');
 var Panel               = require('react-bootstrap/Panel');
 var Table               = require('react-bootstrap/Table');
@@ -26,7 +26,7 @@ var Component = React.createClass({
         }
     },
     render: function() {
-        var associates, associatesUI, owner, associateElements;
+        var associates, associatesUI, owner, ownerStyle, associateElements;
         owner = this.props.owner;
         associates = this.props.associates;
 

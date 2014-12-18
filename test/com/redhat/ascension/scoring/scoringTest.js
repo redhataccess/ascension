@@ -45,7 +45,7 @@
 
   TaskOpEnum = require('../../../../../src/com/redhat/ascension/rules/enums/TaskOpEnum');
 
-  EntityOpEnum = require('../../../../../src/com/redhat/ascension/rules/enums/EntityOpEnum');
+  EntityOpEnum = require('../../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum');
 
   TaskStateEnum = require('../../../../../src/com/redhat/ascension/rules/enums/TaskStateEnum');
 

@@ -1,16 +1,10 @@
 var React               = require('react/addons');
 var AjaxMixin           = require('../../mixins/ajaxMixin.coffee');
-var Spacer              = require('../../utils/spacer.coffee');
+var Spacer              = require('../../utils/spacer.jsx');
 var User                = require('../user/user.jsx');
 var Auth                = require('../../auth/auth.coffee');
 var TaskActionsEnum     = require('../../../../../src/com/redhat/ascension/rest/enums/taskActionsEnum.coffee');
 var TaskTypeEnum        = require('../../../../../src/com/redhat/ascension/rules/enums/TaskTypeEnum.coffee');
-var Well                = require('react-bootstrap/Well');
-var Alert               = require('react-bootstrap/Alert');
-var Accordion           = require('react-bootstrap/Accordion');
-var Grid                = require('react-bootstrap/Grid');
-var Row                 = require('react-bootstrap/Row');
-var Col                 = require('react-bootstrap/Col');
 var CaseHeader          = require('./caseHeader.jsx');
 var CaseDescription     = require('./caseDescription.jsx');
 var CaseSummary         = require('./caseSummary.jsx');
@@ -18,6 +12,9 @@ var CaseAssociates      = require('./caseAssociates.jsx');
 var CaseIssueLinks      = require('./caseIssueLinks.jsx');
 var CaseResourceLinks   = require('./caseResourceLinks.jsx');
 var Comments            = require('../comment/comments.jsx');
+
+var Alert               = require('react-bootstrap/Alert');
+var Grid                = require('react-bootstrap/Grid');
 
 var Component = React.createClass({
     displayName: 'Case',

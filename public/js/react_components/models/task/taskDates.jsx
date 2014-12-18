@@ -1,8 +1,10 @@
 var React           = require('react/addons');
 var moment          = require('moment/moment');
 var TaskStateEnum   = require('../../../../../src/com/redhat/ascension/rules/enums/TaskStateEnum.coffee');
-var Label           = React.createFactory(require('react-bootstrap/Label'));
 var format          = 'YYYY/MM/DD HH:mm:ss';
+
+//var Label           = React.createFactory(require('react-bootstrap/Label'));
+var Label           = require('react-bootstrap/Label');
 
 var Component = React.createClass({
     displayName: 'TaskDates',
@@ -11,11 +13,11 @@ var Component = React.createClass({
         if (this.props.task == null) {
             return null;
         }
-        created = moment(this.props.task.created);
+        created = moment(this.props.task.resource.created);
         elapsed = moment().diff(created);
         dur = moment.duration(elapsed);
         durHuman = dur.humanize();
-        closed = this.props.task.closed != null ? moment(this.props.task.closed) : void 0;
+        closed = this.props.task.resource.closed != null ? moment(this.props.task.resource.closed) : void 0;
         createdClosedDur = void 0;
         createdClosedDurHuman = void 0;
         if ((closed != null) && (created != null)) {
@@ -23,7 +25,7 @@ var Component = React.createClass({
             createdClosedDur = moment.duration(createdClosedElapsed);
             createdClosedDurHuman = createdClosedDur.humanize();
         }
-        if (this.props.task.state !== TaskStateEnum.CLOSED.name) {
+        if (this.props.task.resource.state !== TaskStateEnum.CLOSED.name) {
             return (
                 <div>
                     <span>Task Created on</span>
@@ -32,7 +34,7 @@ var Component = React.createClass({
                     <Label className='task-meta-data' bsStyle='primary' key='duration'>{durHuman}</Label>
                 </div>
             )
-        } else if (this.props.task.state === TaskStateEnum.CLOSED.name) {
+        } else if (this.props.task.resource.state === TaskStateEnum.CLOSED.name) {
             return (
                 <div>
                     <span>Task Created on</span>

@@ -17,7 +17,7 @@ MongoOperations   = require '../../../../../src/com/redhat/ascension/db/MongoOpe
 TaskUtils         = require '../../../../../src/com/redhat/ascension/utils/taskUtils'
 TaskRules         = require '../../../../../src/com/redhat/ascension/rules/taskRules'
 TaskOpEnum        = require '../../../../../src/com/redhat/ascension/rules/enums/TaskOpEnum'
-EntityOpEnum      = require '../../../../../src/com/redhat/ascension/rules/enums/EntityOpEnum'
+EntityOpEnum      = require '../../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum'
 TaskStateEnum     = require '../../../../../src/com/redhat/ascension/rules/enums/TaskStateEnum'
 TaskTypeEnum      = require '../../../../../src/com/redhat/ascension/rules/enums/TaskTypeEnum'
 
@@ -134,7 +134,7 @@ describe "Case rules", ->
         existingTasksPromise = TaskRules.getExistingTasks()
         existingTasksPromise.done((existingTasks) ->
           existingTasks.length.should.equal 1
-          existingTasks[0]['entityOp'].should.equal EntityOpEnum.COLLABORATE.name
+          existingTasks[0]['resourceOp'].should.equal EntityOpEnum.COLLABORATE.name
           fetchExisting.resolve existingTasks
         , errorHandler)
       , errorHandler)
@@ -173,7 +173,7 @@ describe "Case rules", ->
           existingTasksPromise = TaskRules.getExistingTasks()
           existingTasksPromise.done((existingTasks) ->
             existingTasks.length.should.equal 1
-            existingTasks[0]['entityOp'].should.equal EntityOpEnum.COLLABORATE.name
+            existingTasks[0]['resourceOp'].should.equal EntityOpEnum.COLLABORATE.name
             done()
           , errorHandler)
         , errorHandler)

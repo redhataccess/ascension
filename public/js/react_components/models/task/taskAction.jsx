@@ -1,8 +1,10 @@
 var React           = require('react/addons');
 var cx              = React.addons.classSet;
 var TaskOpEnum      = require('../../../../../src/com/redhat/ascension/rules/enums/TaskOpEnum.coffee');
-var EntityOpEnum    = require('../../../../../src/com/redhat/ascension/rules/enums/EntityOpEnum.coffee');
-var Label           = React.createFactory(require('react-bootstrap/Label'));
+var EntityOpEnum    = require('../../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum.coffee');
+
+//var Label           = React.createFactory(require('react-bootstrap/Label'));
+var Label           = require('react-bootstrap/Label');
 
 var Component = React.createClass({
     displayName: 'TaskAction',
@@ -15,13 +17,13 @@ var Component = React.createClass({
         return cx(classSet);
     },
     render: function() {
-        var entityOp;
+        var resourceOp;
         if (this.props.task == null) {
             return null;
         }
-        entityOp = EntityOpEnum[this.props.task.entityOp];
+        resourceOp = EntityOpEnum[this.props.task.resource.resourceOperation];
         return (
-            <Label className={this.genClasses()} bsStyle='primary'>{entityOp.display}</Label>
+            <Label className={this.genClasses()} bsStyle='primary'>{resourceOp.display}</Label>
         )
     }
 });

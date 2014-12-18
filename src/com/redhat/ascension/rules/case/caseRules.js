@@ -23,7 +23,7 @@
 
   TaskOpEnum = require('../enums/TaskOpEnum');
 
-  EntityOpEnum = require('../enums/EntityOpEnum');
+  EntityOpEnum = require('../enums/ResourceOpEnum');
 
   _ = require('lodash');
 
@@ -84,13 +84,13 @@
 
   CaseRules.taskExistsWithEntityOp = function(tasks, intStatus) {
     return _.find(tasks, function(t) {
-      return t['entityOp'] === intStatus;
+      return t['resourceOp'] === intStatus;
     }) !== false;
   };
 
-  CaseRules.findTask = function(c, tasks, entityOp) {
+  CaseRules.findTask = function(c, tasks, resourceOp) {
     return _.find(tasks, function(t) {
-      return t['entityOp'] === entityOp;
+      return t['resourceOp'] === resourceOp;
     });
   };
 
@@ -133,78 +133,78 @@
     });
     logger.debug("Matching " + cases.length + " cases");
     _.each(cases, function(c) {
-      var entityOp, existingTask, t;
+      var existingTask, resourceOp, t;
       logger.debug("Attempting to match case: " + (c['caseNumber'] || c['CaseNumber']) + ", intStatus: " + c['internalStatus']);
       if (self.intStatus(c, 'Unassigned')) {
-        entityOp = EntityOpEnum.OWN;
-        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], entityOp.name);
+        resourceOp = EntityOpEnum.OWN;
+        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], resourceOp.name);
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
           t = TaskUtils.makeTaskFromCase(c);
-          logger.debug("Discovered new Unassigned case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Unassigned case: " + t['bid'] + " setting the task to " + resourceOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
-          t.entityOp = entityOp.name;
+          t.resourceOp = resourceOp.name;
           return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else if (self.intStatus(c, 'Waiting on Owner')) {
-        entityOp = EntityOpEnum.UPDATE;
-        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], entityOp.name);
+        resourceOp = EntityOpEnum.UPDATE;
+        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], resourceOp.name);
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
           t = TaskUtils.makeTaskFromCase(c);
-          logger.debug("Discovered new Waiting on Owner case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Waiting on Owner case: " + t['bid'] + " setting the task to " + resourceOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
-          t.entityOp = entityOp.name;
+          t.resourceOp = resourceOp.name;
           return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else if (self.intStatus(c, 'Waiting on Contributor')) {
-        entityOp = EntityOpEnum.CONTRIBUTE;
-        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], entityOp.name);
+        resourceOp = EntityOpEnum.CONTRIBUTE;
+        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], resourceOp.name);
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
           t = TaskUtils.makeTaskFromCase(c);
-          logger.debug("Discovered new Waiting on Contributor case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Waiting on Contributor case: " + t['bid'] + " setting the task to " + resourceOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
-          t.entityOp = entityOp.name;
+          t.resourceOp = resourceOp.name;
           return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else if (self.intStatus(c, 'Waiting on Collaboration')) {
-        entityOp = EntityOpEnum.COLLABORATE;
-        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], entityOp.name);
+        resourceOp = EntityOpEnum.COLLABORATE;
+        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], resourceOp.name);
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
           t = TaskUtils.makeTaskFromCase(c);
-          logger.debug("Discovered new Waiting on Collaboration case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Waiting on Collaboration case: " + t['bid'] + " setting the task to " + resourceOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
-          t.entityOp = entityOp.name;
+          t.resourceOp = resourceOp.name;
           return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else if (self.intStatus(c, 'Waiting on Engineering')) {
-        entityOp = EntityOpEnum.FOLLOW_UP_WITH_ENGINEERING;
-        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], entityOp.name);
+        resourceOp = EntityOpEnum.FOLLOW_UP_WITH_ENGINEERING;
+        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], resourceOp.name);
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
-          logger.debug("Discovered new Waiting on Engineering case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Waiting on Engineering case: " + t['bid'] + " setting the task to " + resourceOp.display + ".");
           t = TaskUtils.makeTaskFromCase(c);
           t.taskOp = TaskOpEnum.OWN_TASK.name;
-          t.entityOp = entityOp.name;
+          t.resourceOp = resourceOp.name;
           return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else if (self.intStatus(c, 'Waiting on Sales')) {
-        entityOp = EntityOpEnum.FOLLOW_UP_WITH_SALES;
-        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], entityOp.name);
+        resourceOp = EntityOpEnum.FOLLOW_UP_WITH_SALES;
+        existingTask = self.findTask(c, existingTasksByBid[c['caseNumber']], resourceOp.name);
         if (existingTask != null) {
           return promises.push(self.updateTaskFromCase(c, existingTask));
         } else {
           t = TaskUtils.makeTaskFromCase(c);
-          logger.debug("Discovered new Waiting on Engineering case: " + t['bid'] + " setting the task to " + entityOp.display + ".");
+          logger.debug("Discovered new Waiting on Engineering case: " + t['bid'] + " setting the task to " + resourceOp.display + ".");
           t.taskOp = TaskOpEnum.OWN_TASK.name;
-          t.entityOp = entityOp.name;
+          t.resourceOp = resourceOp.name;
           return promises.push(TaskUtils.saveRuleTask(t));
         }
       } else {

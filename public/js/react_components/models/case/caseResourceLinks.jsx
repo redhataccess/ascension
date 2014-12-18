@@ -1,18 +1,19 @@
 var React       = require('react');
 var _           = require('lodash');
+var Timestamp   = require('./timestamp.jsx');
+
 var Accordion   = require('react-bootstrap/Accordion');
 var Panel       = require('react-bootstrap/Panel');
 var Table       = require('react-bootstrap/Table');
-var Timestamp   = require('./timestamp.jsx');
 
 Component = React.createClass({
     render: function() {
-        var linkedResources, resourcesUI, self, tableBody;
+        var linkedResources, resourcesUI, tableBody;
         linkedResources = _.filter(this.props.resourceLinks, (link) => link.resource.resourceStatus === 'Linked');
         resourcesUI = <span>No external resources attached.</span>;
         if (linkedResources.length > 0) {
             tableBody = _.map(linkedResources, (link) => {
-                let resourceNumber = null;
+                var resourceNumber = null;
                 if (link.resource.resourceType === 'KnowledgeBaseSolution') {
                     resourceNumber = <a target='_blank' href={`"https://access.redhat.com/solutions/${link.resource.resourceId}`}>{link.resource.resourceId}</a>;
                 } else {

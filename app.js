@@ -1,5 +1,5 @@
 (function() {
-  var Uri, app, bodyParser, compression, cookieParser, env, express, favicon, http, ipAddress, logger, morgan, oneDay, path, port, request, server, serverStartTime, settings, _;
+  var TaskLogic, Uri, app, bodyParser, compression, cookieParser, env, express, favicon, http, i, ipAddress, logger, morgan, oneDay, path, port, request, server, serverStartTime, settings, tasks, _;
 
   express = require('express');
 
@@ -29,6 +29,19 @@
 
   _ = require('lodash');
 
+  TaskLogic = require('./src/com/redhat/ascension/rest/taskLogic');
+
+  tasks = [];
+
+  i = 0;
+
+  while (i < 20) {
+    tasks.push(TaskLogic.generateExampleTask('01056704', '540155'));
+    i++;
+  }
+
+  TaskLogic.mockTasks = tasks;
+
   env = 'development';
 
   serverStartTime = (new Date()).getTime();
@@ -38,8 +51,10 @@
   ipAddress = settings.getEnvVar('OPENSHIFT_NODEJS_IP') || settings.getEnvVar('OPENSHIFT_NODEDIY_IP') || '127.0.0.1';
 
   if (process.env['OPENSHIFT_DATA_DIR'] != null) {
-    logger.info("Env is Openshift/production, ip: " + ipAddress + " port: " + port);
     env = 'production';
+    logger.info("Env is Openshift/" + env + ", ip: " + ipAddress + " port: " + port);
+  } else {
+    logger.info("Env is " + env + ", ip: " + ipAddress + " port: " + port);
   }
 
   app = express();

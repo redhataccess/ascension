@@ -1,9 +1,9 @@
 var React           = require('react/addons');
 var _               = require('lodash');
 
-var Label           = React.createFactory(require('react-bootstrap/Label'));
-var Popover         = React.createFactory(require('react-bootstrap/Popover'));
-var OverlayTrigger  = React.createFactory(require('react-bootstrap/OverlayTrigger'));
+var Label           = require('react-bootstrap/Label');
+var Popover         = require('react-bootstrap/Popover');
+var OverlayTrigger  = require('react-bootstrap/OverlayTrigger');
 
 var Component = React.createClass({
     displayName: 'TaskAction',
@@ -25,7 +25,7 @@ var Component = React.createClass({
         }
         return (
             <OverlayTrigger trigger='hover' placement='bottom' overlay={UsersPopover} key='overlay'>
-                <Label bsStyle='default' key='label'>`${declinedUserCount} Declined User(s)`</Label>
+                <Label bsStyle='default' key='label'>{`${declinedUserCount} Declined User(s)`}</Label>
             </OverlayTrigger>
         )
     }

@@ -2,7 +2,6 @@ var React                   = require('react/addons');
 //var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 //var ReactTransitionGroup    = React.addons.TransitionGroup;
 var Router                  = require('react-router/dist/react-router');
-//var ActiveState             = Router.ActiveState;
 var AjaxMixin               = require('../mixins/ajaxMixin.coffee');
 //var WebUtilsMixin           = require('../mixins/webUtilsMixin.coffee');
 var cx                      = React.addons.classSet;
@@ -13,18 +12,19 @@ var Task                    = require('../models/task/task.jsx');
 var TaskIconMapping         = require('../utils/taskIconMapping.coffee');
 var TaskTypeEnum            = require('../../../../src/com/redhat/ascension/rules/enums/TaskTypeEnum.coffee');
 var TaskActionsEnum         = require('../../../../src/com/redhat/ascension/rest/enums/taskActionsEnum.coffee');
-var EntityOpEnum            = require('../../../../src/com/redhat/ascension/rules/enums/EntityOpEnum.coffee');
+var ResourceOpEnum            = require('../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum.coffee');
 var TaskStateEnum           = require('../../../../src/com/redhat/ascension/rules/enums/TaskStateEnum.coffee');
 var Auth                    = require('../auth/auth.coffee');
 var TaskAction              = require('../models/task/taskAction.jsx');
 //var TaskMetaData            = require('../models/task/taskMetaData.jsx');
 var TaskState               = require('../models/task/taskState.jsx');
-var Spacer                  = require('../utils/spacer.coffee');
-var IconWithTooltip         = require('../utils/iconWithTooltip.coffee');
+var Spacer                  = require('../utils/spacer.jsx');
+var IconWithTooltip         = require('../utils/iconWithTooltip.jsx');
+
 
 var Component = React.createClass({
     displayName: 'Tasks',
-    mixins: [AjaxMixin],
+    mixins: [AjaxMixin, Router.State, Router.Navigation],
     getInitialState: function() {
         return {
             'loading': false,
@@ -33,8 +33,6 @@ var Component = React.createClass({
             'maxScore': 0,
             'layoutMode': this.props.layoutMode || 'masonry',
             'sortBy': this.props.sortBy || 'score',
-            'query': this.props.query,
-            'params': this.props.params,
             'items': [{}, {}]
         };
     },
@@ -58,20 +56,20 @@ var Component = React.createClass({
     },
     genTaskStyle: function(t) {
         return {
-            opacity: this.scoreOpacityScale(t.score)
+            opacity: this.scoreOpacityScale(t.resource.score)
         };
     },
     taskClick: function(t, event) {
         var params, queryParams;
         event.preventDefault();
         params = {
-            _id: t['_id']
+            taskId: t.resource.externalModelId
         };
         queryParams = {
-            ssoUsername: this.props.query.ssoUsername,
-            admin: this.props.query.admin
+            ssoUsername: this.getParams().ssoUsername,
+            admin: this.getQuery().admin
         };
-        return Router.transitionTo("dashboard", params, queryParams);
+        this.transitionTo("dashboard", params, queryParams);
     },
     genTaskIconClass: function(t) {
         var tmp, _ref1;
@@ -107,33 +105,34 @@ var Component = React.createClass({
         return ((_ref1 = TaskIconMapping[t['state']]) != null ? _ref1.icon : void 0) || 'fa-medkit';
     },
     genEntityDescription: function(t) {
-        if ((t['type'] === 'case') || (t['type'] === 'kcs' && t['entityOp'] === EntityOpEnum.CREATE_KCS.name)) {
+        if ((t['type'] === 'case') || (t['type'] === 'kcs' && t['resourceOperation'] === ResourceOpEnum.CREATE_KCS.name)) {
             return S(t['case']['subject']).truncate(50).s;
         } else {
             return '';
         }
     },
     genTaskElements: function() {
-        var elems, tasks;
-        var self = this;
+        var elems,
+            tasks,
+            self = this;
         tasks = _.values(this.state['tasks']);
-        tasks.sort((a, b) => b.score - a.score);
+        tasks.sort((a, b) => b.resource.score - a.resource.score);
         //#(TaskMetaData {task: t, key: 'taskMetaData'}, [])
         elems = _.map(tasks, (t) => {
             return (
                 <div
-                    id={t._id}
+                    id={t.resource.externalModelId}
                     className={self.genTaskClass(t)}
                     style={self.genTaskStyle(t)}
-                    key={t._id}
-                    score={t.score}
-                    onclick={self.taskClick.bind(self, t)}>
+                    key={t.resource.externalModelId}
+                    score={t.resource.score}
+                    onClick={self.taskClick.bind(self, t)}>
                     <TaskAction task={t} key='taskAction' absolute={true}></TaskAction>
                     <span className='task-entity-state-icon'>
                         <IconWithTooltip
                             iconName={self.genEntityStateIcon(t)}
-                            tooltipPrefix={t.type.toUpperCase()}
-                            tooltipText={(t.case && t.case.internalStatus) || null}></IconWithTooltip>
+                            tooltipPrefix={t.resource.type.toUpperCase()}
+                            tooltipText={(t.resource.resource.resource.internalStatus) || null}></IconWithTooltip>
                     </span>
                     <span className='task-entity-description'>{self.genEntityDescription(t)}</span>
                     <span className='task-bid'>{self.genTaskBid(t)}</span>
@@ -228,14 +227,14 @@ var Component = React.createClass({
     //},
     setScoreScale: function(min, max) {
         this.scoreScale = d3.scale.quantize().domain([min, max]).range([100, 200, 300]);
-        return this.scoreOpacityScale = d3.scale.linear().domain([min, max]).range([.25, 1]);
+        this.scoreOpacityScale = d3.scale.linear().domain([min, max]).range([.25, 1]);
     },
-    queryTasks: function(props) {
+    queryTasks: function() {
         var opts, ssoUsername, _ref1, _ref2;
         var self = this;
         ssoUsername = void 0;
-        if (props.query.ssoUsername != null) {
-            ssoUsername = props.query.ssoUsername;
+        if (this.getQuery().ssoUsername != null) {
+            ssoUsername = this.getQuery().ssoUsername;
         } else if (((_ref1 = Auth.getScopedUser()) != null ? _ref1.resource : void 0) != null) {
             ssoUsername = Auth.getScopedUser().resource.sso[0];
         } else if (((_ref2 = Auth.getAuthedUser()) != null ? _ref2.resource : void 0) != null) {
@@ -253,7 +252,7 @@ var Component = React.createClass({
                     value: ssoUsername
                 }, {
                     name: 'admin',
-                    value: props.query['admin']
+                    value: this.getQuery()['admin']
                 }, {
                     name: 'limit',
                     value: 7
@@ -263,52 +262,52 @@ var Component = React.createClass({
         this.get(opts)
             .then((tasks) => {
                 var max, min, params, queryParams, stateHash;
-                self.tasksById = _.zipObject(_.map(tasks, (t) => [t['_id'], t]));
-                min = _.chain(tasks).pluck('score').min().value();
-                max = _.chain(tasks).pluck('score').max().value();
+                self.tasksById = _.zipObject(_.map(tasks, (t) => [t['resource']['resourceId'], t]));
+                min = _.chain(tasks).pluck('resource').pluck('score').min().value();
+                max = _.chain(tasks).pluck('resource').pluck('score').max().value();
                 self.setScoreScale(min, max);
                 stateHash = {
-                    'tasks': _.object(_.map(tasks, (t) => [t['_id'], t] )),
+                    'tasks': _.object(_.map(tasks, (t) => [t['resource']['externalModelId'], t] )),
                     'minScore': min,
                     'maxScore': max
                 };
                 self.setState(stateHash);
-                if ((props.params._id === '' || (props.params._id == null)) && tasks.length > 0) {
+                if ((self.getParams()['taskId'] === '' || (self.getParams()['taskId'] == null)) && tasks.length > 0) {
                     params = {
-                        _id: tasks[0]['_id']
+                        taskId: tasks[0]['resource']['externalModelId']
                     };
                     queryParams = {
-                        ssoUsername: self.props.query.ssoUsername,
-                        admin: self.props.query.admin
+                        ssoUsername: self.getQuery().ssoUsername,
+                        admin: self.getQuery().admin
                     };
-                    return Router.transitionTo("dashboard", params, queryParams);
+                    this.transitionTo("dashboard", params, queryParams);
                 }
             })
             .catch((err) => console.error(`Could not load tasks: ${err.stack}`))
             .done();
     },
     componentDidMount: function() {
-        this.queryTasks(this.props);
+        this.queryTasks();
     },
-    componentWillReceiveProps: function(nextProps) {
-        if ((!_.isEqual(this.props.query.ssoUsername, nextProps.query.ssoUsername))
-            || (!_.isEqual(this.props.params._id, nextProps.params._id))) {
-            this.setState({
-                query: nextProps.query,
-                params: nextProps.params
-            });
-            return this.queryTasks(nextProps);
-        }
-    },
-    handleAdd: function() {
-        var items;
-        items = this.state.items;
-        items.push({});
-        this.setState({
-            items: items
-        });
-        console.debug("State now has: " + this.state.items.length + " items");
-    },
+    //componentWillReceiveProps: function(nextProps) {
+    //    if ((!_.isEqual(this.props.query.ssoUsername, nextProps.query.ssoUsername))
+    //        || (!_.isEqual(this.props.params._id, nextProps.params._id))) {
+    //        this.setState({
+    //            query: nextProps.query,
+    //            params: nextProps.params
+    //        });
+    //        return this.queryTasks(nextProps);
+    //    }
+    //},
+    //handleAdd: function() {
+    //    var items;
+    //    items = this.state.items;
+    //    items.push({});
+    //    this.setState({
+    //        items: items
+    //    });
+    //    console.debug("State now has: " + this.state.items.length + " items");
+    //},
     render: function() {
         return (
             <div className='row'>

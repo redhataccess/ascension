@@ -1,20 +1,18 @@
 var React            = require('react/addons');
 
-//# Bootstrap imports
-var MenuItem         = React.createFactory(require('react-bootstrap/MenuItem'));
-var OverlayTrigger   = React.createFactory(require('react-bootstrap/OverlayTrigger'));
-var Popover          = React.createFactory(require('react-bootstrap/Popover'));
-var Button           = React.createFactory(require('react-bootstrap/Button'));
-//var SplitButton      = require('react-bootstrap/SplitButton');
-var Label            = React.createFactory(require('react-bootstrap/Label'));
-
 //# Custom Components
 var Timezone         = require('./timezone.jsx');
 var Geo              = require('./geo.jsx');
 
+//# Bootstrap imports
+var MenuItem         = require('react-bootstrap/MenuItem');
+var OverlayTrigger   = require('react-bootstrap/OverlayTrigger');
+var Popover          = require('react-bootstrap/Popover');
+var Button           = require('react-bootstrap/Button');
+var Label            = require('react-bootstrap/Label');
 
 var Component = React.createClass({
-    render: () => {
+    render: function () {
         var user = this.props.user;
         if(user == null) {
             return null;

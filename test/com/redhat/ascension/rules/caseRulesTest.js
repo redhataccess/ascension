@@ -37,7 +37,7 @@
 
   TaskOpEnum = require('../../../../../src/com/redhat/ascension/rules/enums/TaskOpEnum');
 
-  EntityOpEnum = require('../../../../../src/com/redhat/ascension/rules/enums/EntityOpEnum');
+  EntityOpEnum = require('../../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum');
 
   TaskStateEnum = require('../../../../../src/com/redhat/ascension/rules/enums/TaskStateEnum');
 
@@ -158,7 +158,7 @@
           existingTasksPromise = TaskRules.getExistingTasks();
           return existingTasksPromise.done(function(existingTasks) {
             existingTasks.length.should.equal(1);
-            existingTasks[0]['entityOp'].should.equal(EntityOpEnum.COLLABORATE.name);
+            existingTasks[0]['resourceOp'].should.equal(EntityOpEnum.COLLABORATE.name);
             return fetchExisting.resolve(existingTasks);
           }, errorHandler);
         }, errorHandler);
@@ -192,7 +192,7 @@
             existingTasksPromise = TaskRules.getExistingTasks();
             return existingTasksPromise.done(function(existingTasks) {
               existingTasks.length.should.equal(1);
-              existingTasks[0]['entityOp'].should.equal(EntityOpEnum.COLLABORATE.name);
+              existingTasks[0]['resourceOp'].should.equal(EntityOpEnum.COLLABORATE.name);
               return done();
             }, errorHandler);
           }, errorHandler);

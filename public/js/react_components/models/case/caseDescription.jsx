@@ -1,11 +1,13 @@
 var React       = require('react');
+
 var Accordion   = require('react-bootstrap/Accordion');
 var Panel       = require('react-bootstrap/Panel');
 
 var Component = React.createClass({
+    displayName: 'CaseDescription',
     render: function() {
         var description;
-        description = <span>No description available.</span>
+        description = <span>No description available.</span>;
         if (this.props.description != null) {
             description = <pre className='case description paneled'>{this.props.description}</pre>;
         }
