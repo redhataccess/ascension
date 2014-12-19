@@ -183,7 +183,7 @@ var Component = React.createClass({
                             &nbsp;
                             <TaskAction task={this.state.task} key='action'></TaskAction>
                             &nbsp;
-                            <User user={this.state.task.resource.owner} key='user'></User>
+                            <User resource={this.state.task.resource.owner} key='user'></User>
                             &nbsp;
                             <TaskMetaData task={this.state.task} key='metaData'></TaskMetaData>
                         </span>

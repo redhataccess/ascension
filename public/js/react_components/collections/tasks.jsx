@@ -19,7 +19,8 @@ var TaskAction              = require('../models/task/taskAction.jsx');
 //var TaskMetaData            = require('../models/task/taskMetaData.jsx');
 var TaskState               = require('../models/task/taskState.jsx');
 var Spacer                  = require('../utils/spacer.jsx');
-var IconWithTooltip         = require('../utils/iconWithTooltip.jsx');
+//var IconWithTooltip         = require('../utils/iconWithTooltip.jsx');
+var IconWithTooltip         = require('react-redhat/IconWithTooltip');
 
 
 var Component = React.createClass({
@@ -75,9 +76,9 @@ var Component = React.createClass({
         var tmp, _ref1;
         tmp = void 0;
         if (t['type'] === TaskTypeEnum.CASE.name) {
-            tmp = ((_ref1 = TaskIconMapping[t['case']['internalStatus']]) != null ? _ref1.icon : void 0) || tmp;
+            tmp = ((_ref1 = TaskIconMapping[t['case']['internalStatus']]) != null ? `fa ${_ref1.icon}` : void 0) || tmp;
         }
-        return tmp || 'fa-medkit';
+        return tmp || 'fa fa-medkit';
     },
     genTaskBid: function(theCase) {
         return theCase.caseNumber;
@@ -85,7 +86,7 @@ var Component = React.createClass({
     genEntityStateIcon: function(theTask, theCase) {
         var _ref1;
         if (theTask.type === TaskTypeEnum.CASE.name) {
-            return ((_ref1 = TaskIconMapping[theCase.internalStatus]) != null ? _ref1.icon : void 0) || 'fa-medkit';
+            return ((_ref1 = TaskIconMapping[theCase.internalStatus]) != null ? `fa ${_ref1.icon}` : void 0) || 'fa fa-medkit';
         } else {
             return null;
         }

@@ -20,7 +20,7 @@ var Component = React.createClass({
                 'default',
                 <tr key={owner.resource.externalModelId}>
                     <td>Owner</td>
-                    <td><User user={owner.resource}></User></td>
+                    <td><User resource={owner.resource}></User></td>
                 </tr>
             ];
         }
@@ -32,16 +32,17 @@ var Component = React.createClass({
 
         var [ownerStyle, ownerElement] = this.displayOwner(owner);
 
-        associateElements = _.map(associates, (associate) => {
+        associateElements = _.map(associates, function (associate) {
             return (
                 <tr>
                     <td>{associate.resource.role}</td>
-                    <td><User user={associate.resource}></User></td>
+                    <td><User resource={associate.resource.associate}></User></td>
                 </tr>
             )
         });
 
-        associatesUI = <span>No Red Hat Associates are assigned to this Case.</span>
+        console.debug(`Discovered ${associateElements.length} associate elements`);
+        associatesUI = <span>No Red Hat Associates are assigned to this Case.</span>;
         if ((associates != null) || (ownerElement != null)) {
             associatesUI = (
                 <Table responsive={true}>

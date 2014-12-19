@@ -20,6 +20,7 @@ var Alert                   = require('react-bootstrap/Alert');
 // Just load the less which we have bound to the extract-text plusin
 require("../../stylesheets/main.less");
 
+
 var Dashboard = React.createClass({
     displayName: 'Dashboard',
     mixins: [Router.State],

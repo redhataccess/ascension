@@ -235,18 +235,23 @@
           }
         }
       },
+      bump: {
+        options: {
+          files: ['package.json']
+        }
+      },
       shell: {
         npmpublish: {
           command: ['cd cjs', 'npm publish'].join('&&')
         }
       }
     });
-    grunt(registerTask("release-minor", "Releases a new minor version, pushes, and published", function(target) {
+    grunt.registerTask("release", "Releases a new minor version, pushes, and published", function(target) {
       if (!target) {
         target = "minor";
       }
       return grunt.task.run("bump-only:" + target, "build", 'bump-commit', 'shell:npmpublish');
-    }));
+    });
     grunt.registerTask("dev", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', 'watch']);
     grunt.registerTask("devui", ['webpack-dev-server:start']);
     grunt.registerTask("prod", ['coffee:compileGrunt', 'coffee:compileSrc', 'coffee:compileTest', 'coffee:compileApp', "webpack:build-prod"]);

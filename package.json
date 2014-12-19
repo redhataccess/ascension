@@ -1,6 +1,6 @@
 {
   "name": "Ascension",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "node app.js"
@@ -41,6 +41,7 @@
     "q": "^1.0.1",
     "react": "~0.12.1",
     "react-bootstrap": "~0.13.0",
+    "react-redhat": "0.0.3",
     "request": "~2.44.0",
     "serve-favicon": "~2.1.4",
     "string": "~2.1.0",
@@ -55,6 +56,7 @@
     "6to5-loader": "~0.2.4",
     "chai": "~1.9.1",
     "fs": "0.0.2",
+    "grunt-bump": "0.0.16",
     "hiredis": "~0.1.17",
     "mocha": "~1.21.4",
     "net": "~1.0.2",

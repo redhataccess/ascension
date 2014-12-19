@@ -297,6 +297,10 @@ module.exports = (grunt) ->
           runtime: 'inline'
           preserve_dirs: true
 
+    bump:
+      options:
+        files: ['package.json']
+
     shell:
       npmpublish:
         command: [
@@ -304,7 +308,7 @@ module.exports = (grunt) ->
           'npm publish'
         ].join('&&')
 
-  grunt registerTask "release-minor", "Releases a new minor version, pushes, and published", (target) ->
+  grunt.registerTask "release", "Releases a new minor version, pushes, and published", (target) ->
     target = "minor" unless target
     grunt.task.run "bump-only:#{target}", "build", 'bump-commit', 'shell:npmpublish'
 

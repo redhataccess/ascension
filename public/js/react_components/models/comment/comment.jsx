@@ -34,7 +34,7 @@ var Component = React.createClass({
         return cx(classSet);
     },
     render: function() {
-        var comment, commentResource, header, timestamp, user;
+        var comment, commentResource, header, timestamp;
         commentResource = this.props.comment;
         comment = commentResource.resource || null;
         if (comment.created === comment.lastModified) {
@@ -48,11 +48,10 @@ var Component = React.createClass({
                 </span>
             )
         }
-        user = comment && comment['createdBy'] && comment['createdBy']['resource'];
         header = (
             <span>
                 <div className='pull-left'>
-                    <User user={user}></User>
+                    <User resource={comment.createdBy}></User>
                 </div>
                 <div className='pull-right'>
                 {timestamp}
