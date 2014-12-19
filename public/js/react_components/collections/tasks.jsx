@@ -50,7 +50,7 @@ var Component = React.createClass({
             'task100': true,
             'task-own': this.isOwner(theTask),
             'case': theTask['type'] === 'CASE',
-            'kcs': theTask['type'] === 'KCS'
+            'kcs': theTask['type'] === ''
         };
         return cx(classSet);
     },
@@ -102,7 +102,7 @@ var Component = React.createClass({
     },
     genTaskStateIcon: function(theTask) {
         var iconMapping = TaskIconMapping[theTask.status];
-        return (iconMapping != null ? iconMapping.icon : void 0) || 'fa-medkit';
+        return 'fa ' + (iconMapping != null ? iconMapping.icon : void 0) || 'fa-medkit';
     },
     genEntityDescription: function(theTask, theCase) {
         if ((theTask.type === 'CASE') || (theTask.type === 'KCS' && theTask.resourceOperation === ResourceOpEnum.CREATE_KCS.name)) {

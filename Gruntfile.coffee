@@ -53,7 +53,7 @@ module.exports = (grunt) ->
       #  loader: 'coffee-loader'
       #}]
       loaders: [
-#//require("style!css!less!../../stylesheets/main.less");
+        #//require("style!css!less!../../stylesheets/main.less");
         {
           test: /\.less$/
           # https://github.com/webpack/extract-text-webpack-plugin
@@ -296,6 +296,17 @@ module.exports = (grunt) ->
         options:
           runtime: 'inline'
           preserve_dirs: true
+
+    shell:
+      npmpublish:
+        command: [
+          'cd cjs'
+          'npm publish'
+        ].join('&&')
+
+  grunt registerTask "release-minor", "Releases a new minor version, pushes, and published", (target) ->
+    target = "minor" unless target
+    grunt.task.run "bump-only:#{target}", "build", 'bump-commit', 'shell:npmpublish'
 
   #grunt.registerTask "default", ["less",  "coffee"]
   #grunt.registerTask "prod", ["less", "coffee"]

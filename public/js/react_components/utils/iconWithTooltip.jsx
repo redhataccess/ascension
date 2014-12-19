@@ -22,7 +22,7 @@ var Component = React.createClass({
         tooltip = <Tooltip>{this.genTooltipPrefix() + this.props.tooltipText}</Tooltip>;
         return (
             <OverlayTrigger trigger='hover' placement='right' overlay={tooltip}>
-                <i className={`fa ${this.props.iconName} icon-with-tooltip`} title={this.props.tooltipText}></i>
+                <i className={`fa ${this.props.iconName}`} title={this.props.tooltipText}></i>
             </OverlayTrigger>
         )
     }
