@@ -18,7 +18,7 @@ var Auth                    = require('../auth/auth.coffee');
 var TaskAction              = require('../models/task/taskAction.jsx');
 //var TaskMetaData            = require('../models/task/taskMetaData.jsx');
 var TaskState               = require('../models/task/taskState.jsx');
-var Spacer                  = require('../utils/spacer.jsx');
+var Spacer                  = require('react-redhat/Spacer');
 //var IconWithTooltip         = require('../utils/iconWithTooltip.jsx');
 var IconWithTooltip         = require('react-redhat/IconWithTooltip');
 

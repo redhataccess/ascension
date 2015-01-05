@@ -5,8 +5,7 @@ var Panel       = require('react-bootstrap/Panel');
 
 var Component = React.createClass({
     render: function() {
-        var summary;
-        summary = <span>No internal summary available.</span>;
+        var summary = <span>No internal summary available.</span>;
         if (this.props.summary != null) {
             summary = <pre className='case description paneled'>{this.props.summary}</pre>;
         }

@@ -2,7 +2,7 @@ var React       = require('react/addons');
 var cx          = React.addons.classSet;
 
 var Timestamp   = require('../case/timestamp.jsx');
-var User        = require('../user/user.jsx');
+var User        = require('react-redhat/user/User');
 
 var Component = React.createClass({
     displayName: 'Comment',
