@@ -1,5 +1,5 @@
 (function() {
-  var MongoOperations, TaskRules, TaskTypeEnum, TaskUtils, logger, moment, prettyjson, settings, _,
+  var MongoOperations, TaskOpEnum, TaskRules, TaskStateEnum, TaskTypeEnum, TaskUtils, logger, moment, prettyjson, settings, _,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   _ = require('lodash');
@@ -17,6 +17,10 @@
   MongoOperations = require('../db/MongoOperations');
 
   TaskTypeEnum = require('../rules/enums/TaskTypeEnum');
+
+  TaskOpEnum = require('../rules/enums/TaskOpEnum');
+
+  TaskStateEnum = require('../rules/enums/TaskStateEnum');
 
   TaskUtils = {};
 

@@ -6,6 +6,8 @@ prettyjson  = require 'prettyjson'
 TaskRules   = require '../rules/taskRules'
 MongoOperations   = require '../db/MongoOperations'
 TaskTypeEnum = require '../rules/enums/TaskTypeEnum'
+TaskOpEnum   = require '../rules/enums/TaskOpEnum'
+TaskStateEnum   = require '../rules/enums/TaskStateEnum'
 
 
 TaskUtils = {}
