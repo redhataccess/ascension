@@ -19,8 +19,9 @@ var TasksDashboard = React.createClass({
     //    });
     //},
     render: function() {
-        var { userId, taskId } = this.getParams();
-        console.debug(`Rendering the tasks dashboard with userId: ${userId}`);
+        var { taskId } = this.getParams();
+        var { userId } = this.getQuery();
+        console.debug(`Rendering the tasksDashboard.jsx with userId: ${userId} and taskId: ${taskId}`);
         //<Task id='tasksContainer' key='tasks' query={this.state.query} params={this.state.params}></Task>
         return (
             <div key='tasksDashboard'>

@@ -70,7 +70,7 @@ var Component = React.createClass({
             ssoUsername: this.getParams().ssoUsername,
             admin: this.getQuery().admin
         };
-        this.transitionTo("task", params, queryParams);
+        this.transitionTo("tasks", params, queryParams);
     },
     genTaskIconClass: function(t) {
         var tmp, _ref1;
@@ -268,6 +268,7 @@ var Component = React.createClass({
         this.get(opts)
             .then((tasks) => {
                 var max, min, params, queryParams, stateHash;
+                var {taskId} = self.getParams()
                 self.tasksById = _.zipObject(_.map(tasks, (t) => [t['resource']['resourceId'], t]));
                 min = _.chain(tasks).pluck('resource').pluck('score').min().value();
                 max = _.chain(tasks).pluck('resource').pluck('score').max().value();
@@ -278,7 +279,8 @@ var Component = React.createClass({
                     'maxScore': max
                 };
                 self.setState(stateHash);
-                if ((self.getParams()['taskId'] === '' || (self.getParams()['taskId'] == null)) && tasks.length > 0) {
+
+                if ((taskId == '' || (taskId == null) || (taskId == 'list')) && tasks.length > 0) {
                     params = {
                         taskId: tasks[0]['resource']['externalModelId']
                     };
@@ -286,7 +288,8 @@ var Component = React.createClass({
                         ssoUsername: self.getQuery().ssoUsername,
                         admin: self.getQuery().admin
                     };
-                    this.transitionTo("task", params, queryParams);
+                    console.debug(`transitioning to task with params: ${JSON.stringify(params)}`);
+                    this.transitionTo("tasks", params, queryParams);
                 }
             })
             .catch((err) => console.error(`Could not load tasks: ${err.stack}`))
@@ -315,7 +318,9 @@ var Component = React.createClass({
     //    console.debug("State now has: " + this.state.items.length + " items");
     //},
     render: function() {
-        console.debug('render tasks.jsx');
+        var { taskId } = this.getParams();
+        var { userId } = this.getQuery();
+        console.debug(`Rendering the tasks.jsx with userId: ${userId} and taskId: ${taskId}`);
         return (
             <div className='row'>
                 <div className='col-md-3'>{this.genTaskElements()}</div>

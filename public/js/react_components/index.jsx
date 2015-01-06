@@ -63,8 +63,9 @@ var App = React.createClass({
                 'scopedFailed': false
             });
             params = {
-                userId: user.resource.sso[0]
+                //userId: user.resource.sso[0]
                 //userId: user.externalModelId
+                taskId: self.getParams().taskId || 'list'
             };
             queryParams = {
                 ssoUsername: self.getParams().ssoUsername,
@@ -113,7 +114,6 @@ var App = React.createClass({
         }
     },
     render: function() {
-        var userId = this.getDefined(Auth.getAuthedUser(), 'externalModelId') || 'undefined';
         return (
             <div>
                 <div className='navbar navbar-default' role='navigation' key='navigation'>
@@ -137,18 +137,10 @@ var App = React.createClass({
                         key='navCollapse'>
                         <ul className='nav navbar-nav' key='navbarNav'>
                             <li key='task'>
-                            {/*
                              <Link
-                             to='tasks'
-                             key='linkTask'>Tasks</Link>
-                             params={{'userId': null, 'taskId': 'tasks'}}>Tasks</Link>
-                             */}
-                            {/*
-                                <Link
-                                    to='tasks'
-                                    key='linkTask'
-                                    params={{'userId': userId}}>Tasks</Link>
-                             */}
+                                 to='tasks'
+                                 key='linkTask'
+                                 params={{'taskId': 'list'}}>Tasks</Link>
                             </li>
                             <li>
                                 <Link
@@ -178,14 +170,8 @@ var routes = (
             <Route
                 key='tasks'
                 name='tasks'
-                path='tasks'
-                handler={TasksDashboard}>
-                <Route
-                    key='task'
-                    name='task'
-                    path=':taskId'
-                    handler={TasksDashboard}></Route>
-        </Route>
+                path='/tasks/:taskId'
+                handler={TasksDashboard}></Route>
         <Route
             key='admin'
             name='admin'
