@@ -18,10 +18,14 @@ var Component = React.createClass({
     },
     render: function() {
         var resourceOp;
-        if (this.props.task == null) {
+        if (this.props.task != null) {
+            resourceOp = EntityOpEnum[this.props.task.resource.resourceOperation];
+        } else if (this.props.case != null) {
+            resourceOp = EntityOpEnum.getOpFromIntStatus(this.props.case.resource.internalStatus)
+        } else {
             return null;
         }
-        resourceOp = EntityOpEnum[this.props.task.resource.resourceOperation];
+
         return (
             <Label className={this.genClasses()} bsStyle='primary'>{resourceOp.display}</Label>
         )
