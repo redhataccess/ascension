@@ -70,7 +70,7 @@ var Component = React.createClass({
             ssoUsername: this.getParams().ssoUsername,
             admin: this.getQuery().admin
         };
-        this.transitionTo("dashboard", params, queryParams);
+        this.transitionTo("task", params, queryParams);
     },
     genTaskIconClass: function(t) {
         var tmp, _ref1;
@@ -286,7 +286,7 @@ var Component = React.createClass({
                         ssoUsername: self.getQuery().ssoUsername,
                         admin: self.getQuery().admin
                     };
-                    this.transitionTo("dashboard", params, queryParams);
+                    this.transitionTo("task", params, queryParams);
                 }
             })
             .catch((err) => console.error(`Could not load tasks: ${err.stack}`))
@@ -315,6 +315,7 @@ var Component = React.createClass({
     //    console.debug("State now has: " + this.state.items.length + " items");
     //},
     render: function() {
+        console.debug('render tasks.jsx');
         return (
             <div className='row'>
                 <div className='col-md-3'>{this.genTaskElements()}</div>

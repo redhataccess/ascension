@@ -1,5 +1,5 @@
 var React       = require('react');
-var Spacer      = require('../../utils/spacer.jsx');
+var Spacer      = require('react-redhat/Spacer');
 
 var ProgressBar = require('react-bootstrap/ProgressBar');
 var Panel       = require('react-bootstrap/Panel');

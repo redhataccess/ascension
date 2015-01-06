@@ -3,14 +3,16 @@ if (typeof window !== 'undefined') {
     window.React = React;
 }
 var Router                  = require('react-router/dist/react-router');
-var { Route, Redirect, RouteHandler, Link, NotFoundRoute, DefaultRoute } = Router;
+var { Route, Redirect, RouteHandler, Link, NotFoundRoute, DefaultRoute} = Router;
 //var ReactTransitionGroup    = React.addons.TransitionGroup;
 //var About                   = require('./about.jsx');
 var Admin                   = require('./admin/admin.coffee');
-var Tasks                   = require('./collections/tasks.jsx');
 var Task                    = require('./models/task/task.jsx');
 var Auth                    = require('./auth/auth.coffee');
 var WebUtilsMixin           = require('./mixins/webUtilsMixin.coffee');
+var AuthUtilsMixin          = require('./mixins/authUtilsMixin.coffee');
+var TasksDashboard          = require('./dashboards/tasksDashboard.jsx');
+var UserDashboard           = require('./dashboards/userDashboard.jsx');
 
 var Alert                   = require('react-bootstrap/Alert');
 
@@ -20,37 +22,16 @@ var Alert                   = require('react-bootstrap/Alert');
 // Just load the less which we have bound to the extract-text plusin
 require("../../stylesheets/main.less");
 
-
-var Dashboard = React.createClass({
-    displayName: 'Dashboard',
-    mixins: [Router.State],
-    //getInitialState: function() {
-    //    return {
-    //        query: this.props.query,
-    //        params: this.props.params
-    //    };
-    //},
-    //componentWillReceiveProps: function(nextProps) {
-    //    this.setState({
-    //        query: nextProps.query,
-    //        params: nextProps.params
-    //    });
-    //},
+var NotFoundHandler = React.createClass({
+    displayName: 'NotFoundHandler',
     render: function() {
-        var { taskId } = this.getParams();
-        console.debug(`Rendering the dashboard with taskId: ${taskId}`);
-        //<Task id='tasksContainer' key='tasks' query={this.state.query} params={this.state.params}></Task>
-        return (
-            <div key='mainDashboard'>
-                <Tasks id='tasksContainer' key='tasks' params={{taskId: taskId}}></Tasks>
-            </div>
-        )
+        return <span>Page not found!</span>
     }
 });
 
 var App = React.createClass({
     displayName: 'App',
-    mixins: [WebUtilsMixin, Router.State],
+    mixins: [AuthUtilsMixin, WebUtilsMixin, Router.State, Router.Navigation],
     getInitialState: function() {
         return {
             'authedUser': Auth.authedUser,
@@ -58,39 +39,6 @@ var App = React.createClass({
             'authFailed': false,
             'scopedFailed': false
         };
-    },
-    queryScopedUser: function(ssoUsername) {
-        var self, userPromise;
-        self = this;
-        userPromise = this.getUser(ssoUsername);
-        if (userPromise != null) {
-            userPromise.done((user) => {
-                if (_.isArray(user)) {
-                    user = user[0];
-                }
-                if ((user != null ? user['externalModelId'] : void 0) != null) {
-                    console.debug("Setting scoped user to: " + user['resource']['firstName']);
-                    Auth.setScopedUser(user);
-                    self.setState({
-                        'scopedUser': user,
-                        'scopedFailed': false
-                    });
-                } else {
-                    Auth.setScopedUser(void 0);
-                    self.setState({
-                        'scopedUser': user,
-                        'scopedFailed': true
-                    });
-                    console.error(`User ${JSON.stringify(user, null, ' ')} has no id`);
-                }
-            }, (err) => {
-                Auth.setScopedUser(void 0);
-                self.setState({
-                    'scopedUser': void 0,
-                    'scopedFailed': true
-                });
-            })
-        }
     },
     //componentWillReceiveProps: function(nextProps) {
     //    if (!_.isEqual(this.props.query.ssoUsername, nextProps.query.ssoUsername)) {
@@ -104,56 +52,35 @@ var App = React.createClass({
     //    }
     //},
     componentDidMount: function() {
-        var self, ssoUsername, userPromise;
+        var self, ssoUsername, userPromise, params, queryParams;
         self = this;
-        ssoUsername = this.getRhUserCookie();
-        if (ssoUsername != null) {
-            userPromise = this.getUser(ssoUsername);
-            if (userPromise != null) {
-                userPromise.done(function(user) {
-                    if (_.isArray(user)) {
-                        user = user[0];
-                    }
-                    if ((user != null ? user['externalModelId'] : void 0) != null) {
-                        console.debug("Setting authed user to: " + user['resource']['firstName']);
-                        Auth.setAuthedUser(user);
-                        self.setState({
-                            'authedUser': user,
-                            'authFailed': false
-                        });
-                    } else {
-                        Auth.setAuthedUser(void 0);
-                        self.setState({
-                            'authedUser': void 0,
-                            'authFailed': true
-                        });
-                        console.error("User: " + (JSON.stringify(user, null, ' ')) + " has no id");
-                    }
-                }, function(err) {
-                    Auth.setAuthedUser(void 0);
-                    self.setState({
-                        'authedUser': void 0,
-                        'authFailed': true
-                    });
-                    console.error(err);
-                });
-            }
-        } else {
+        ssoUsername = this.getRhUserCookie() || this.props.query.ssoUsername;
+        userPromise = this.queryUser(ssoUsername);
+        userPromise.then(function(user) {
+            Auth.setAuthedUser(user);
+            self.setState({
+                'scopedUser': user,
+                'scopedFailed': false
+            });
+            params = {
+                userId: user.resource.sso[0]
+                //userId: user.externalModelId
+            };
+            queryParams = {
+                ssoUsername: self.getParams().ssoUsername,
+                admin: self.getQuery().admin
+            };
+            self.transitionTo("tasks", params, queryParams);
+        })
+        .catch(function(err) {
             Auth.setAuthedUser(void 0);
             self.setState({
                 'authedUser': void 0,
                 'authFailed': true
             });
-        }
-        if ((this.getQuery().ssoUsername != null) && this.getQuery().ssoUsername !== '') {
-            this.queryScopedUser(this.props.query.ssoUsername);
-        } else {
-            Auth.setScopedUser(void 0);
-            self.setState({
-                'scopedUser': void 0,
-                'scopedFailed': false
-            });
-        }
+            console.error(err);
+        })
+        .done();
     },
     genAuthenticationElement: function() {
         if (Auth.getAuthedUser() != null) {
@@ -182,10 +109,11 @@ var App = React.createClass({
                 </Alert>
             )
         } else {
-            return <RouteHandler />
+            return <RouteHandler />;
         }
     },
     render: function() {
+        var userId = this.getDefined(Auth.getAuthedUser(), 'externalModelId') || 'undefined';
         return (
             <div>
                 <div className='navbar navbar-default' role='navigation' key='navigation'>
@@ -208,11 +136,19 @@ var App = React.createClass({
                         id='bs-example-navbar-collapse-1'
                         key='navCollapse'>
                         <ul className='nav navbar-nav' key='navbarNav'>
-                            <li key='dashboard'>
+                            <li key='task'>
+                            {/*
+                             <Link
+                             to='tasks'
+                             key='linkTask'>Tasks</Link>
+                             params={{'userId': null, 'taskId': 'tasks'}}>Tasks</Link>
+                             */}
+                            {/*
                                 <Link
-                                    to='dashboard'
-                                    key='linkDashboard'
-                                    params={{'taskId': 'tasks'}}>Dashboard</Link>
+                                    to='tasks'
+                                    key='linkTask'
+                                    params={{'userId': userId}}>Tasks</Link>
+                             */}
                             </li>
                             <li>
                                 <Link
@@ -233,28 +169,29 @@ var App = React.createClass({
     }
 });
 
-//<Route
-//    key='task'
-//    name='task'
-//    path='task/:taskId'
-//    handler={Task}></Route>
 var routes = (
     <Route
         key='app'
         name='app'
         path='/'
         handler={App}>
-        <Route
-            key='dashboard'
-            name='dashboard'
-            path='support/:taskId'
-            handler={Dashboard}></Route>
+            <Route
+                key='tasks'
+                name='tasks'
+                path='tasks'
+                handler={TasksDashboard}>
+                <Route
+                    key='task'
+                    name='task'
+                    path=':taskId'
+                    handler={TasksDashboard}></Route>
+        </Route>
         <Route
             key='admin'
             name='admin'
             handler={Admin}></Route>
-        <NotFoundRoute key='notFound' handler={Dashboard}></NotFoundRoute>
-        <DefaultRoute key='defaultRoute' handler={Dashboard}></DefaultRoute>
+        <NotFoundRoute key='notFound' handler={NotFoundHandler}></NotFoundRoute>
+        <DefaultRoute key='defaultRoute' handler={App}></DefaultRoute>
     </Route>
 );
 
