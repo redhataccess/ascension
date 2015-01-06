@@ -16,6 +16,7 @@ _               = require 'lodash'
 #mongoose        = require 'mongoose'
 #MongoOps        = require './src/com/redhat/ascension/db/MongoOperations'
 TaskLogic       = require './src/com/redhat/ascension/rest/taskLogic'
+CaseLogic       = require './src/com/redhat/ascension/rest/caseLogic'
 #CaseRules       = require './src/com/redhat/ascension/rules/case/caseRules'
 
 ##########################################################
@@ -104,6 +105,19 @@ app.get "/tasks", (req, res) ->
   , (err) ->
     res.send(err)
   )
+app.get "/cases", (req, res) ->
+  opts =
+    # Opt param, fetches tasks based on this user [sbrs, ect.]
+    ssoUsername: req.query['ssoUsername']
+    limit: _.parseInt(req.query['limit']) || 100
+
+  CaseLogic.fetchCases(opts).then((data) ->
+    res.send(data)
+  ).catch((err) ->
+    res.status(500);
+    res.send({error: err.message})
+  ).done()
+
 app.get "/task/:_id", (req, res) ->
   opts =
     _id: req.params['_id']

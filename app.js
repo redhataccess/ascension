@@ -1,5 +1,5 @@
 (function() {
-  var TaskLogic, Uri, app, bodyParser, compression, cookieParser, env, express, favicon, http, i, ipAddress, logger, morgan, oneDay, path, port, request, server, serverStartTime, settings, tasks, _;
+  var CaseLogic, TaskLogic, Uri, app, bodyParser, compression, cookieParser, env, express, favicon, http, i, ipAddress, logger, morgan, oneDay, path, port, request, server, serverStartTime, settings, tasks, _;
 
   express = require('express');
 
@@ -30,6 +30,8 @@
   _ = require('lodash');
 
   TaskLogic = require('./src/com/redhat/ascension/rest/taskLogic');
+
+  CaseLogic = require('./src/com/redhat/ascension/rest/caseLogic');
 
   tasks = [];
 
@@ -127,6 +129,22 @@
     }, function(err) {
       return res.send(err);
     });
+  });
+
+  app.get("/cases", function(req, res) {
+    var opts;
+    opts = {
+      ssoUsername: req.query['ssoUsername'],
+      limit: _.parseInt(req.query['limit']) || 100
+    };
+    return CaseLogic.fetchCases(opts).then(function(data) {
+      return res.send(data);
+    })["catch"](function(err) {
+      res.status(500);
+      return res.send({
+        error: err.message
+      });
+    }).done();
   });
 
   app.get("/task/:_id", function(req, res) {
