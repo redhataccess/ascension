@@ -21,9 +21,13 @@ var Component = React.createClass({
         if (this.props.task != null) {
             resourceOp = EntityOpEnum[this.props.task.resource.resourceOperation];
         } else if (this.props.case != null) {
-            resourceOp = EntityOpEnum.getOpFromIntStatus(this.props.case.resource.internalStatus)
+            resourceOp = EntityOpEnum.getOpFromIntStatus(this.props.case.resource.internalStatus);
         } else {
             return null;
+        }
+
+        if (resourceOp == null && this.props.case != null) {
+            console.error(`No resourceOp, case.resource.internalStatus: ${this.props.case.resource.internalStatus}`)
         }
 
         return (

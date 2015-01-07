@@ -28,50 +28,39 @@ var Alert                       = require('react-bootstrap/Alert');
 // The TaskCase represents a UDS case resource as a virtual task.
 var Component = React.createClass({
     displayName: 'TaskCase',
-    mixins: [AjaxMixin, WebUtilsMixin, Router.State],
-    getInitialState: function() {
-        // task and case are part of the same object, but due to the nested natureG of UDS, I am defining both and setting
-        // both as it makes for referring to the case much easier
-        return {
-            'task': void 0,
-            'theCase': void 0
-        };
-    },
+    mixins: [AjaxMixin, WebUtilsMixin, Router.State, Router.Navigation],
     genEntityContents: function() {
-        if (this.state.task.resource.type === TaskTypeEnum.CASE.name) {
-            return <Case key='taskCase' caseNumber={this.state.theCase.caseNumber}></Case>;
-        }
-        return null;
+        return <Case key='taskCase' caseNumber={this.props.case.resource.caseNumber}></Case>;
     },
     // CS FTW -- would just be one line -- 'task-own': Auth.getAuthedUser()? and (t['owner']?['id'] is Auth.getAuthedUser()?['externalModelId'])
-    isOwner: (theCase) => {
+    isOwner: (c) => {
         if (Auth.getAuthedUser() != null
-            && theCase && theCase['resource'] && theCase['resource']['owner'] && theCase['resource']['owner']['externalModelId']
-            && theCase['resource']['owner']['owner.externalModelId'] == Auth.getAuthedUser()['externalModelId']) {
+            && c && c['resource'] && c['resource']['owner'] && c['resource']['owner']['externalModelId']
+            && c['resource']['owner']['owner.externalModelId'] == Auth.getAuthedUser()['externalModelId']) {
             return true;
         }
         return false;
     },
-    genTaskClass: function(theCase) {
+    genTaskClass: function(c) {
         var classSet = {
             'task': true,
             'task100': true,
-            'task-own': this.isOwner(theCase),
+            'task-own': this.isOwner(c),
             'case': true,
             'kcs': false
         };
         return cx(classSet);
     },
-    genTaskStyle: function(theCase) {
+    genTaskStyle: function(c) {
         return {
-            opacity: this.props.scoreOpacityScale(theCase.resource.collaborationScore)
+            opacity: this.props.scoreOpacityScale(c.resource.collaborationScore)
         };
     },
-    taskClick: function(t, event) {
+    taskClick: function(c, event) {
         var params, queryParams;
         event.preventDefault();
         params = {
-            taskId: t.resource.externalModelId
+            taskId: c.resource.caseNumber
         };
         queryParams = {
             ssoUsername: this.getParams().ssoUsername,
@@ -113,37 +102,14 @@ var Component = React.createClass({
         return 'fa ' + (iconMapping != null ? iconMapping.icon : void 0) || 'fa-medkit';
     },
     genEntityDescription: function(theCase) {
-        return S(theCase.resource.subject).truncate(50).s;
-    },
-    queryTask: function () {
-        var taskId = this.getParams()['taskId'],
-            self = this;
-        this.get({path: `/task/${taskId}`})
-            .then((task) => self.setState({'task': task, 'theCase': task.resource.resource.resource}))
-            .catch((err) => console.error(`Could not load task: ${taskId}, ${err.stack}`))
-            .done();
-    },
-    componentWillReceiveProps: function(nextProps) {
-        var newTaskId = this.getParams()['taskId'],
-            currentTaskId = WebUtilsMixin.getDefined(this, 'state.task.resource.externalModelId');
-        if (newTaskId != currentTaskId && newTaskId != 'tasks') {
-            this.queryTask();
-        }
-    },
-    // Refactor this to the more elegant advanced form in scorecard
-    componentDidMount: function() {
-        if (this.getParams()['taskId'] == 'list') {
-            console.warn('/tasks/list received, not fetching task.');
-            return;
-        }
-        this.queryTask();
+        return S(theCase.resource.subject).truncate(40).s;
     },
     render: function() {
         var { taskId } = this.getParams();
-        if (this.state.task === '') {
-            return <Alert bsStyle='danger' key='alert'>`Error fetching task with id: ${taskId}`</Alert>
+        if (this.props.case === '') {
+            return <Alert bsStyle='danger' key='alert'>`Error fetching case with id: ${taskId}`</Alert>
         }
-        if (this.state['task'] == null) {
+        if (this.props.case == null) {
             return null;
         }
  //       {/*

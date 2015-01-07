@@ -40,7 +40,6 @@ var Component = React.createClass({
             )
         });
 
-        console.debug(`Discovered ${associateElements.length} associate elements`);
         associatesUI = <span>No Red Hat Associates are assigned to this Case.</span>;
         if ((associates != null) || (ownerElement != null)) {
             associatesUI = (

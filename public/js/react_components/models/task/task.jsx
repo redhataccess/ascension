@@ -27,7 +27,8 @@ var Component = React.createClass({
         // both as it makes for referring to the case much easier
         return {
             'task': void 0,
-            'theCase': void 0
+            'case': void 0,
+            'caseLoading': true
         };
     },
     assignOwnership: function(user, event) {
@@ -40,7 +41,8 @@ var Component = React.createClass({
             {
                 name: 'action',
                 value: TaskActionsEnum.ASSIGN.name
-            }, {
+            },
+            {
                 name: 'userInput',
                 value: user['externalModelId']
             }
@@ -51,7 +53,7 @@ var Component = React.createClass({
             .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
             // The returned task will be the latest, update the state
             .then((task) => {
-                self.setState({'task': task, 'theCase': task.resource.resource.resource});
+                self.setState({'task': task, 'case': task.resource.resource.resource});
                 self.props.queryTasks.call(null);
             })
             .catch((err) => console.error("Could not load task: #{err.stack}"))
@@ -77,7 +79,7 @@ var Component = React.createClass({
             .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
             // The returned task will be the latest, update the state
             .then((task) => {
-                self.setState({'task': task, 'theCase': task.resource.resource.resource});
+                self.setState({'task': task, 'case': task.resource.resource.resource});
                 self.props.queryTasks.call(null);
             })
             .catch((err) => console.error(`Could not load task: ${err.stack}`))
@@ -99,7 +101,7 @@ var Component = React.createClass({
             .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
             // The returned task will be the latest, update the state
             .then((task) => {
-                self.setState({'task': task, 'theCase': task.resource.resource.resource});
+                self.setState({'task': task, 'case': task.resource.resource.resource});
                 self.props.queryTasks.call(null);
             })
             .catch((err) => console.error(`Could not load task: ${err.stack}`))
@@ -121,57 +123,67 @@ var Component = React.createClass({
             .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
             // The returned task will be the latest, update the state
             .then((task) => {
-                self.setState({'task': task, 'theCase': task.resource.resource.resource});
+                self.setState({'task': task, 'case': task.resource.resource.resource});
                 self.props.queryTasks.call(null);
             })
             .catch((err) => console.error(`Could not load task: ${err.stack}`))
             .done();
     },
+    //genEntityContents: function() {
+    //    if (this.state.task.resource.type === TaskTypeEnum.CASE.name) {
+    //        return <Case key='taskCase' caseNumber={this.state.case.resource.caseNumber}></Case>;
+    //    }
+    //    return null;
+    //},
     genEntityContents: function() {
-        if (this.state.task.resource.type === TaskTypeEnum.CASE.name) {
-            return <Case key='taskCase' caseNumber={this.state.theCase.caseNumber}></Case>;
+        //return <Case key='taskCase' caseNumber={this.state.case.resource.caseNumber}></Case>;
+        if (this.state.caseLoading == true) {
+            return <i className='fa fa-spinner fa-spin'></i>;
+        } else {
+            return <Case key='taskCase' case={this.state.case}></Case>;
         }
-        return null;
     },
-    queryTask: function () {
-        var taskId = this.getParams()['taskId'],
-            self = this;
-        this.get({path: `/task/${taskId}`})
-            .then((task) => self.setState({'task': task, 'theCase': task.resource.resource.resource}))
-            .catch((err) => console.error(`Could not load task: ${taskId}, ${err.stack}`))
-            .done();
+    queryCase: function (caseNumber) {
+        this.setState({caseLoading: true});
+        var self = this;
+        this.get({path: `/case/${caseNumber}`})
+            .then((task) => self.setState({'case': task}))
+            .catch((err) => console.error(`Could not load case: ${caseNumber}, ${err.stack}`))
+            .done(() => self.setState({caseLoading: false}));
     },
     componentWillReceiveProps: function(nextProps) {
-        var newTaskId = this.getParams()['taskId'],
-            currentTaskId = WebUtilsMixin.getDefined(this, 'state.task.resource.externalModelId');
-        if (newTaskId != currentTaskId && newTaskId != 'tasks') {
-            this.queryTask();
+        if (!_.isEqual(this.props.caseNumber, nextProps.caseNumber)) {
+            this.queryCase(nextProps.caseNumber);
         }
+
+            //currentTaskId = WebUtilsMixin.getDefined(this, 'state.case.resource.caseNumber');
+        //if (`${taskId}` != `${currentTaskId}` && `${taskId}` != 'list') {
+        //}
     },
     // Refactor this to the more elegant advanced form in scorecard
     componentDidMount: function() {
-        if (this.getParams()['taskId'] == 'tasks') {
-            console.warn('/task/tasks received, not fetching task.');
+        if (this.props.caseNumber == 'list') {
+            console.warn('/tasks/list received, not fetching task.');
             return;
         }
-        this.queryTask();
+        this.queryCase(this.props.caseNumber);
     },
     render: function() {
-        var taskId = this.getParams()['taskId'];
-        if (this.state.task === '') {
-            return <Alert bsStyle='danger' key='alert'>`Error fetching task with id: ${taskId}`</Alert>
+        var caseNumber = this.props.caseNumber;
+        if (this.state.caseLoading == true) {
+            return <i className='fa fa-spinner fa-spin'></i>;
         }
-        if (this.state['task'] == null) {
-            return null;
+        if (this.state.case == null && this.state.caseLoading == false) {
+            return <Alert bsStyle='danger' key='alert'>`Error fetching case: ${caseNumber}`</Alert>
         }
         return (
-            <div key='mainContainer'>
+            <div key={`task-container-${caseNumber}`}>
                 <div key='taskContainer' className='row'>
                     <div className='col-md-6' key='containerLeft'>
-                        <TaskHeader task={this.state.task} key='header'></TaskHeader>
+                        <TaskHeader task={this.state.case} key='header'></TaskHeader>
                         <span key='metaDataContainer'>
                             <TaskState
-                                task={this.state.task}
+                                task={this.state.case}
                                 takeOwnership={this.assignOwnership.bind(this, Auth.getAuthedUser())}
                                 declineOwnership={this.declineOwnership.bind(this, Auth.getAuthedUser())}
                                 assignScopedOwnership={this.assignOwnership.bind(this, Auth.getScopedUser())}
@@ -181,21 +193,21 @@ var Component = React.createClass({
                                 key='taskStatus'>
                             </TaskState>
                             &nbsp;
-                            <TaskAction task={this.state.task} key='action'></TaskAction>
+                            <TaskAction case={this.state.case} key='action'></TaskAction>
                             &nbsp;
-                            <User resource={this.state.task.resource.owner} key='user'></User>
+                            <User resource={this.state.case.resource.owner} key='user'></User>
                             &nbsp;
-                            <TaskMetaData task={this.state.task} key='metaData'></TaskMetaData>
+                            <TaskMetaData task={this.state.case} key='metaData'></TaskMetaData>
                         </span>
                         <span className='clearfix'></span>
                         <Spacer />
                         <span key='datesContainer'>
-                            <TaskDates task={this.state.task} key='dates'></TaskDates>
+                            <TaskDates task={this.state.case} key='dates'></TaskDates>
                         </span>
                         <span className='clearfix'></span>
                         <Spacer />
-                        <DeclinedUsers task={this.state.task}></DeclinedUsers>
-                        {/*<PotentialOwners task={this.state.task}></PotentialOwners>*/}
+                        <DeclinedUsers task={this.state.case}></DeclinedUsers>
+                        {/*<PotentialOwners task={this.state.case}></PotentialOwners>*/}
                     </div>
                     {/*/////////////////////////////////////////////////////////////////////////////////*/}
                     {/*Top Right*/}
@@ -205,13 +217,13 @@ var Component = React.createClass({
                             <h3>Case Links</h3>
                             <ul>
                                 <li>
-                                    <a target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.theCase.caseNumber}`}>
-                                    {`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.theCase.caseNumber}`}
+                                    <a target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.case.resource.caseNumber}`}>
+                                    {`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.case.resource.caseNumber}`}
                                     </a>
                                 </li>
                                 <li>
-                                    <a target='_blank' href={`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.theCase.caseNumber}`}>
-                                    {`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.theCase.caseNumber}`}
+                                    <a target='_blank' href={`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.case.resource.caseNumber}`}>
+                                    {`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.case.resource.caseNumber}`}
                                     </a>
                                 </li>
                             </ul>

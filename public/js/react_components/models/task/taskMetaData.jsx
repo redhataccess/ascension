@@ -12,18 +12,18 @@ var Component = React.createClass({
         if (this.props.task == null) {
             return null;
         }
-        sbrsExist = this.isDefined(this, 'props.task.resource.resource.sbrs') && this.props.task.resource.resource.sbrs.length > 0;
-        tagsExist = this.isDefined(this, 'props.task.resource.resource.tags') && this.props.task.resource.resource.tags.length > 0;
+        sbrsExist = this.isDefined(this, 'props.task.resource.sbrs') && this.props.task.resource.sbrs.length > 0;
+        tagsExist = this.isDefined(this, 'props.task.resource.tags') && this.props.task.resource.tags.length > 0;
         output = [];
         if (sbrsExist) {
             output.push("Pertaining to");
-            output.push(this.props.task.resource.resource.sbrs.join(','));
+            output.push(this.props.task.resource.sbrs.join(','));
         }
         if (tagsExist) {
             if (sbrsExist) {
                 output.push('and');
             }
-            output.push(this.props.task.resource.resource.tags.join(','));
+            output.push(this.props.task.resource.tags.join(','));
         }
 
         return (

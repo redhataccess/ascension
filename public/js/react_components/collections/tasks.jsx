@@ -41,7 +41,7 @@ var Component = React.createClass({
     genTaskElements: function() {
         var tasks = _.values(this.state['tasks']);
         var self = this;
-        tasks.sort((a, b) => b.resource.score - a.resource.score);
+        tasks.sort((a, b) => b.resource.collaborationScore - a.resource.collaborationScore);
         return _.map(tasks, (c) => {
             return <TaskCase case={c} scoreOpacityScale={self.scoreOpacityScale} />
         });
@@ -58,66 +58,6 @@ var Component = React.createClass({
         this.scoreScale = d3.scale.quantize().domain([min, max]).range([100, 200, 300]);
         this.scoreOpacityScale = d3.scale.linear().domain([min, max]).range([.25, 1]);
     },
-    //queryTasks: function() {
-    //    var opts, ssoUsername, _ref1, _ref2;
-    //    var self = this;
-    //    ssoUsername = void 0;
-    //    if (this.getQuery().ssoUsername != null) {
-    //        ssoUsername = this.getQuery().ssoUsername;
-    //    } else if (((_ref1 = Auth.getScopedUser()) != null ? _ref1.resource : void 0) != null) {
-    //        ssoUsername = Auth.getScopedUser().resource.sso[0];
-    //    } else if (((_ref2 = Auth.getAuthedUser()) != null ? _ref2.resource : void 0) != null) {
-    //        ssoUsername = Auth.getAuthedUser().resource.sso[0];
-    //    }
-    //    if (ssoUsername === void 0) {
-    //        return;
-    //    }
-    //    ssoUsername = S(ssoUsername).replaceAll('"', '').s;
-    //    opts = {
-    //        path: '/tasks',
-    //        queryParams: [
-    //            {
-    //                name: 'ssoUsername',
-    //                value: ssoUsername
-    //            }, {
-    //                name: 'admin',
-    //                value: this.getQuery()['admin']
-    //            }, {
-    //                name: 'limit',
-    //                value: 7
-    //            }
-    //        ]
-    //    };
-    //    this.get(opts)
-    //        .then((tasks) => {
-    //            var max, min, params, queryParams, stateHash;
-    //            var {taskId} = self.getParams();
-    //            self.tasksById = _.zipObject(_.map(tasks, (t) => [t['resource']['resourceId'], t]));
-    //            min = _.chain(tasks).pluck('resource').pluck('score').min().value();
-    //            max = _.chain(tasks).pluck('resource').pluck('score').max().value();
-    //            self.setScoreScale(min, max);
-    //            stateHash = {
-    //                'tasks': _.object(_.map(tasks, (t) => [t['resource']['externalModelId'], t] )),
-    //                'minScore': min,
-    //                'maxScore': max
-    //            };
-    //            self.setState(stateHash);
-    //
-    //            if ((taskId == '' || (taskId == null) || (taskId == 'list')) && tasks.length > 0) {
-    //                params = {
-    //                    taskId: tasks[0]['resource']['externalModelId']
-    //                };
-    //                queryParams = {
-    //                    ssoUsername: self.getQuery().ssoUsername,
-    //                    admin: self.getQuery().admin
-    //                };
-    //                console.debug(`transitioning to task with params: ${JSON.stringify(params)}`);
-    //                this.transitionTo("tasks", params, queryParams);
-    //            }
-    //        })
-    //        .catch((err) => console.error(`Could not load tasks: ${err.stack}`))
-    //        .done();
-    //},
     queryCases: function() {
         var opts, ssoUsername, _ref1, _ref2;
         var self = this;
@@ -155,12 +95,13 @@ var Component = React.createClass({
         this.get(opts)
             .then((cases) => {
                 var max, min, params, queryParams, stateHash;
-                self.casesById = _.zipObject(_.map(cases, (c) => [c['resource']['resourceId'], c]));
+                //self.casesById = _.zipObject(_.map(cases, (c) => [c['resource']['resourceId'], c]));
                 min = _.chain(cases).pluck('resource').pluck('collaborationScore').min().value();
                 max = _.chain(cases).pluck('resource').pluck('collaborationScore').max().value();
                 self.setScoreScale(min, max);
                 stateHash = {
-                    'tasks': _.object(_.map(cases, (c) => [c['resource']['externalModelId'], c] )),
+                    //'tasks': _.object(_.map(cases, (c) => [c['resource']['externalModelId'], c] )),
+                    'tasks': cases,
                     'minScore': min,
                     'maxScore': max
                 };
@@ -208,12 +149,11 @@ var Component = React.createClass({
     render: function() {
         var { taskId } = this.getParams();
         var { userId } = this.getQuery();
-        console.debug(`Rendering the tasks.jsx with userId: ${userId} and taskId: ${taskId}`);
         return (
             <div className='row'>
                 <div className='col-md-3'>{this.genTaskElements()}</div>
                 <div className='col-md-9'>
-                    <Task params={this.params} queryTasks={this.queryCases.bind(this, this.props)}></Task>
+                    <Task caseNumber={taskId} queryTasks={this.queryCases.bind(this, this.props)}></Task>
                 </div>
             </div>
         )

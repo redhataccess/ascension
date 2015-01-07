@@ -12,25 +12,25 @@ ResourceOp = {}
 
 ResourceOp.TAKE_FTS =
   name: 'FTS'
-  display: 'Take FTS Role on case'
+  display: 'Take FTS Role'
 _.defaults ResourceOp,
   'FTS': ResourceOp.TAKE_FTS
 
 ResourceOp.TAKE_OWNERSHIP =
   name: 'TAKE_OWNERSHIP'
-  display: 'Take ownership of case'
+  display: 'Take ownership'
 _.defaults ResourceOp,
   'TAKE_OWNERSHIP': ResourceOp.TAKE_OWNERSHIP
 
 ResourceOp.COLLABORATE =
   name: 'COLLABORATE'
-  display: 'Collaborate on case'
+  display: 'Collaborate'
 _.defaults ResourceOp,
   'COLLABORATE': ResourceOp.COLLABORATE
 
 ResourceOp.CONTRIBUTE =
   name: 'CONTRIBUTE'
-  display: 'Contribute on case'
+  display: 'Contribute'
 _.defaults ResourceOp,
   'CONTRIBUTE': ResourceOp.CONTRIBUTE
 
@@ -42,19 +42,19 @@ _.defaults ResourceOp,
 
 ResourceOp.SET_SBRS =
   name: 'SET_SBRS'
-  display: 'Set SBRs on case'
+  display: 'Set SBRs'
 _.defaults ResourceOp,
   'SET_SBRS': ResourceOp.SET_SBRS
 
 ResourceOp.SET_TAGS =
   name: 'SET_TAGS'
-  display: 'Set tags on case'
+  display: 'Set tags'
 _.defaults ResourceOp,
   'SET_TAGS': ResourceOp.SET_TAGS
 
 ResourceOp.TRANSLATE =
   name: 'TRANSLATE'
-  display: 'Translate case'
+  display: 'Translate'
 _.defaults ResourceOp,
   'TRANSLATE': ResourceOp.TRANSLATE
 
@@ -66,13 +66,13 @@ _.defaults ResourceOp,
 
 ResourceOp.FOLLOW_UP_WITH_ENGINEERING =
   name: 'FOLLOW_UP_WITH_ENGINEERING '
-  display: 'Follow up with engineering on case'
+  display: 'Follow up with engineering'
 _.defaults ResourceOp,
   'FOLLOW_UP_WITH_ENGINEERING': ResourceOp.FOLLOW_UP_WITH_ENGINEERING
 
 ResourceOp.FOLLOW_UP_WITH_SALES =
   name: 'FOLLOW_UP_WITH_SALES'
-  display: 'Follow up with sales on case'
+  display: 'Follow up with sales'
 _.defaults ResourceOp,
   'FOLLOW_UP_WITH_SALES': ResourceOp.FOLLOW_UP_WITH_SALES
 
@@ -93,7 +93,7 @@ ResourceOp.getOpFromIntStatus = (intStatus) ->
     when 'Waiting on Owner' then ResourceOp.UPDATE
     when 'Waiting on Engineering' then ResourceOp.FOLLOW_UP_WITH_ENGINEERING
     when 'Waiting on Customer' then ResourceOp.NOOP
-    when 'Unassigned' then ResourceOp.OWN
+    when 'Unassigned' then ResourceOp.TAKE_OWNERSHIP
     when 'Waiting on PM' then ResourceOp.NOOP
     when 'Waiting on QA' then ResourceOp.UPDATE
     when 'Waiting on Contributor' then ResourceOp.CONTRIBUTE

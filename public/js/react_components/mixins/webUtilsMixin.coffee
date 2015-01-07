@@ -8,10 +8,13 @@ WebUtilsMixin = {}
 
 WebUtilsMixin.calculateSpinnerClass = (loading) -> if loading is true then 'fa-spinner fa-spin' else ''
 
+# Given [1, 2] this returns false, go figure
 # Where x = [[var1, var2], [var3, var4], ect..]
-WebUtilsMixin.isEqual = (x) ->
-  _.each x, (group) -> if not _.isEqual(group[0], group[1]) then return false
-  return true
+#WebUtilsMixin.isEqual = (groups) ->
+#  _.each groups, (g) ->
+#    if not _.isEqual(g[0], g[1])
+#      return false
+#  return true
 
 WebUtilsMixin.trim = (str) ->
   newstr = str.replace(/^\s*/, "").replace(/\s*$/, "")

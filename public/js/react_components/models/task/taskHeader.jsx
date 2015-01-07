@@ -8,7 +8,8 @@ var Component = React.createClass({
         if (this.props.task == null) {
             return null;
         }
-        taskType = TaskTypeEnum[this.props.task.resource.type.toUpperCase()];
+        //taskType = TaskTypeEnum[this.props.task.resource.type.toUpperCase()];
+        taskType = TaskTypeEnum.CASE;
         return (
             <h1>
                 <span key={taskType.name} className={`${taskType.name}-text-color`}> Task</span>

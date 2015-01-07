@@ -34,13 +34,13 @@ var Component = React.createClass({
         )
     },
     render: function () {
-        var id, theTask;
+        var id, task;
         if (Auth.getAuthedUser() == null) {
             return null;
         }
         id = Auth.getAuthedUser()['externalModelId'];
-        theTask = this.props.task.resource;
-        if (theTask.status === TaskStateEnum.UNASSIGNED.name) {
+        task = this.props.task.resource;
+        if (task.internalStatus === TaskStateEnum.UNASSIGNED.name) {
             return (
                 <DropdownButton bsStyle='warning' bsSize='xsmall' title='Unassigned'>
                     <MenuItem key={`assign-${id}`} onClick={this.props.takeOwnership}>
@@ -54,7 +54,7 @@ var Component = React.createClass({
                     {this.generateScopedDeclineElem()}
                 </DropdownButton>
             )
-        } else if (theTask.status === TaskStateEnum.ASSIGNED.name) {
+        } else if (task.internalStatus === TaskStateEnum.ASSIGNED.name) {
             return (
                 <DropdownButton bsStyle='primary' bsSize='xsmall' title='Assigned'>
                     <MenuItem key={`unassign-${id}`} onClick={this.props.removeOwnership}>
@@ -65,7 +65,7 @@ var Component = React.createClass({
                     </MenuItem>
                 </DropdownButton>
             )
-        } else if (theTask.status === TaskStateEnum.CLOSED.name) {
+        } else if (task.internalStatus === TaskStateEnum.CLOSED.name) {
             return (
                 <DropdownButton bsStyle='success' bsSize='xsmall' title='Closed'>
                     <MenuItem key={`assign-${id}`} onClick={this.props.takeOwnership}>
