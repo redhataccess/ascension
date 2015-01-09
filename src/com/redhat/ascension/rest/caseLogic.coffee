@@ -53,41 +53,32 @@ CaseLogic.fetchCases = (opts) ->
       where: "SSO is \"#{opts.ssoUsername}\""
     UserLogic.fetchUserUql(userUql).then((user) ->
 
-      statusCond = UQL.cond('status', 'is', """\"Waiting on Red Hat\"""")
-      #sbrConds = _.map(user.sbrs, (s) -> UQL.cond('sbrGroup', 'is', """\"#{encodeURIComponent(s)}\""""))
-      sbrConds = _.map(user.sbrs, (s) -> UQL.cond('sbrGroup', 'is', """\"#{s}\""""))
-
-      # Fetch cases based on the SBRs
-      sbrsUql =
-        #where: "status is \"Waiting on Red Hat\" #{uqlSbrs}"
-        where: if sbrConds?.length > 0 then UQL.and(UQL.or.apply(null, sbrConds), statusCond) else statusCond
-        #limit: 7
-        #resourceProjection: 'Minimal'
-
-      # Fetch cases based on the owner
-      ownerCond = UQL.cond('ownerId', 'is', """\"#{user.id}\"""")
-      # TODO -- this should be where status is WoRH or internalStatus is WoOwner
-      ownerUql =
-        where: UQL.and(statusCond, ownerCond)
-
-      if not user.id?
-        throw Error("Could not generate owner UQL for owner: #{user.id}")
-
       finalUql =
         where: undefined
 
-      if sbrConds?.length > 0
-        # This needs to change to (sbr conds and status) or (ownerCond and status)
-        finalUql.where = UQL.or(UQL.and(ownerCond, statusCond), UQL.and(UQL.or.apply(null, sbrConds), statusCond))
+      ######################################################
+      # The url query params should override any user roles
+      ######################################################
+      if opts.roles?.length > 0
+        logger.debug("Discovered roles from the query parms: #{opts.roles}")
+        uqlParts = _.map(opts.roles, (r) -> RoutingRoles[r](user))
+        uqlFormatted = uqlParts.join(' or ')
+        finalUql.where = uqlFormatted
+      ######################################################
+      # Next fall through to the user defined roles from UDS
+      ######################################################
+      else if user.roles?.length > 0
+        undefined
+      ######################################################
+      # Finally just show the standard plate for the user
+      # Based on the my plate logic
+      ######################################################
       else
-        finalUql.where = UQL.and(statusCond, ownerCond)
+        uqlParts = [RoutingRoles.COLLABORATION(user), RoutingRoles.OWNED_CASES(user), RoutingRoles.FTS(user)]
+        uqlFormatted = uqlParts.join(' or ')
+        finalUql.where = uqlFormatted
 
-      logger.debug("Discovered roles: #{opts.roles}")
-      uqlParts = _.map(opts.roles, (r) -> RoutingRoles[r](user))
-      uqlFormatted = uqlParts.join(' or ')
-      finalUql.where = uqlFormatted
       logger.debug("Generated UQL: #{finalUql.where}")
-
       # Returns a promise for the next then in the chain
       #[CaseLogic.fetchCasesUql(sbrsUql), CaseLogic.fetchCasesUql(ownerUql)]
       CaseLogic.fetchCasesUql(finalUql)

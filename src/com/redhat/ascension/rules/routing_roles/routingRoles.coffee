@@ -15,6 +15,12 @@ RoutingRoles = {}
 #  TAM case not equal to "TRUE"(This is for EMEA only.  Americas, India, and APAC in the TAM 6/1 workflow no longer exclude TAM cases)
 #  SBR Group includes "<group1>,<group2>"(Matches users current SBRs)
 # TODO -- this can't be completed until the UDS has isTAM included
+
+RoutingRoles._makeSbrConds = (user) ->
+  # Use with UQL.or.apply(null, sbrConds)
+  sbrConds = _.map(user.sbrs, (s) -> UQL.cond('sbrGroup', 'is', """\"#{s}\""""))
+  UQL.or.apply(null, sbrConds)
+
 RoutingRoles.COLLABORATION = (user) ->
   #if super_region is 'EMEA'
   #  undefined
@@ -30,11 +36,9 @@ RoutingRoles.COLLABORATION = (user) ->
   closedCond = UQL.cond('status', 'ne', 'Closed')
   worhCond = UQL.cond('status', 'is', '"Waiting on Red Hat"')
 
-  # Use with UQL.or.apply(null, sbrConds)
-  sbrConds = _.map(user.sbrs, (s) -> UQL.cond('sbrGroup', 'is', """\"#{s}\""""))
 
-  """(#{wocCond} and #{UQL.or.apply(null, sbrConds)})"""
-  UQL.and(wocCond, UQL.or.apply(null, sbrConds))
+  """(#{wocCond} and #{this._makeSbrConds(user)})"""
+  UQL.and(wocCond, this._makeSbrConds(user))
 
 #TODO need filter logic and contributors field
 RoutingRoles.OWNED_CASES = (user) ->
@@ -48,19 +52,33 @@ RoutingRoles.OWNED_CASES = (user) ->
   ftsCond = UQL.cond('isFTS', 'is', true)
   ftsRoleCond = UQL.cond('ftsRole', 'like', """\"#{user.kerberos}\"""")
 
-#  #language=SQL
-#  example = """
-#(
-#  OwnerId = '{owner_id}'
-#  AND (
-#      (Status = 'Waiting on Red Hat' OR FTS__c = TRUE)
-#      OR
-#      (Status = 'Waiting on Customer' AND Internal_Status__c = 'Waiting on Owner')
-#  )
-#)
-#OR
-#(FTS_Role__c LIKE '%{kerberos}%' AND FTS__c = TRUE)
-#  """
+
+  #  #language=SQL
+  #  example = """
+  #(
+  #  OwnerId = '{owner_id}'
+  #  AND (
+  #      (Status = 'Waiting on Red Hat' OR FTS__c = TRUE)
+  #      OR
+  #      (Status = 'Waiting on Customer' AND Internal_Status__c = 'Waiting on Owner')
+  #  )
+  #)
+  #OR
+  #(FTS_Role__c LIKE '%{kerberos}%' AND FTS__c = TRUE)
+  #  """
   """(#{ownerCond} and ((#{worhCond} or #{ftsCond}) or (#{wocCond} and #{wooCond}))) or (#{ftsRoleCond} and #{ftsCond})"""
+
+RoutingRoles.FTS = (user) ->
+
+  """
+  Filters
+  No owner/role for User's current Geo on ticket
+  24x7 equals "TRUE"
+  SBR Group includes "<group1>,<group2>"(Matches users current SBRs)
+  """
+
+  ftsCond = UQL.cond('isFTS', 'is', true)
+  ftsRoleCond = UQL.cond('ftsRole', 'is', '""')
+  """(#{ftsCond} and #{ftsRoleCond} and #{this._makeSbrConds(user)})"""
 
 module.exports = RoutingRoles
