@@ -76,8 +76,6 @@
         }), new webpack.ProvidePlugin({
           jQuery: "jquery",
           $: "jquery"
-        }), new webpack.DefinePlugin({
-          ENVIRONMENT: JSON.stringify('development')
         })
       ]
     };
@@ -116,7 +114,7 @@
         },
         "build-prod": {
           devtool: "sourcemap",
-          debug: true,
+          debug: false,
           plugins: webpackConfig.plugins.concat(new webpack.DefinePlugin({
             ENVIRONMENT: JSON.stringify('production')
           }), new webpack.optimize.DedupePlugin(), new webpack.optimize.UglifyJsPlugin())
@@ -138,7 +136,10 @@
           keepAlive: true,
           webpack: {
             devtool: "eval",
-            debug: true
+            debug: true,
+            plugins: webpackConfig.plugins.concat(new webpack.DefinePlugin({
+              ENVIRONMENT: JSON.stringify('development')
+            }))
           }
         }
       },

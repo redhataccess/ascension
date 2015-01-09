@@ -129,8 +129,8 @@ module.exports = (grunt) ->
         jQuery: "jquery"
         #jquery: "jquery"
         $: "jquery")
-      new webpack.DefinePlugin
-        ENVIRONMENT: JSON.stringify('development')
+      #new webpack.DefinePlugin
+      #  ENVIRONMENT: JSON.stringify('development')
     ]
 
   grunt.initConfig
@@ -197,7 +197,7 @@ module.exports = (grunt) ->
         #)
       "build-prod":
         devtool: "sourcemap"
-        debug: true
+        debug: false
         plugins: webpackConfig.plugins.concat(
             new webpack.DefinePlugin
               ENVIRONMENT: JSON.stringify('production')
@@ -219,6 +219,10 @@ module.exports = (grunt) ->
         webpack:
           devtool: "eval"
           debug: true
+          plugins: webpackConfig.plugins.concat(
+            new webpack.DefinePlugin
+              ENVIRONMENT: JSON.stringify('development')
+          )
 
     less:
       dist:
