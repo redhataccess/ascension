@@ -129,6 +129,8 @@ module.exports = (grunt) ->
         jQuery: "jquery"
         #jquery: "jquery"
         $: "jquery")
+      new webpack.DefinePlugin
+        ENVIRONMENT: JSON.stringify('production')
     ]
 
   grunt.initConfig
@@ -198,9 +200,8 @@ module.exports = (grunt) ->
         debug: true
         plugins: webpackConfig.plugins.concat(
             new webpack.DefinePlugin
-              "process.env":
-                "NODE_ENV": JSON.stringify("production")
-            new webpack.optimize.DedupePlugin(),
+              ENVIRONMENT: 'production'
+            new webpack.optimize.DedupePlugin()
             new webpack.optimize.UglifyJsPlugin()
         )
 
@@ -208,8 +209,8 @@ module.exports = (grunt) ->
       options:
         webpack: webpackConfig
         publicPath: webpackConfig.output.publicPath
-      #publicPath: "/assets"
-      #publicPath: "/assets/"
+        #publicPath: "/assets"
+        #publicPath: "/assets/"
         port: 8090
         headers: { "X-Custom-Header": "yes" }
         stats: { colors: true }

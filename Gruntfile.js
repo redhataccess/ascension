@@ -76,6 +76,8 @@
         }), new webpack.ProvidePlugin({
           jQuery: "jquery",
           $: "jquery"
+        }), new webpack.DefinePlugin({
+          ENVIRONMENT: JSON.stringify('production')
         })
       ]
     };
@@ -116,9 +118,7 @@
           devtool: "sourcemap",
           debug: true,
           plugins: webpackConfig.plugins.concat(new webpack.DefinePlugin({
-            "process.env": {
-              "NODE_ENV": JSON.stringify("production")
-            }
+            ENVIRONMENT: 'production'
           }), new webpack.optimize.DedupePlugin(), new webpack.optimize.UglifyJsPlugin())
         }
       },

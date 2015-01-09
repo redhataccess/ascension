@@ -3,6 +3,7 @@ _         = require 'lodash'
 Uri       = require 'jsUri'
 Q         = require 'q/q'
 
+urlPrefix = '/etc/os1/ascension'
 
 Mixin =
 
@@ -16,7 +17,10 @@ Mixin =
       cache: true
 
     uri = new Uri()
-    uri.setPath "#{opts.path}"
+    if 'production' is ENVIRONMENT
+      uri.setPath "#{opts.path}"
+    else
+      uri.setPath "#{urlPrefix}#{opts.path}"
     #uri.addQueryParam('accountIds', accountIds.join(','))
     #uri.addQueryParam('beginDate', opts.beginDate) if opts.beginDate?
     #uri.addQueryParam('endDate', opts.endDate) if opts.endDate?
@@ -40,7 +44,10 @@ Mixin =
       type: 'POST'
 
     uri = new Uri()
-    uri.setPath "#{opts.path}"
+    if ENVIRONMENT is 'production'
+      uri.setPath "#{opts.path}"
+    else
+      uri.setPath "#{urlPrefix}#{opts.path}"
 
     _.each opts['queryParams'], (queryParam) ->
       uri.addQueryParam(queryParam['name'], queryParam['value'])
