@@ -5,6 +5,7 @@ Q             = require 'q/q'
 Q.longStackSupport = true
 S   = require 'string'
 WebUtilsMixin = require './webUtilsMixin.coffee'
+AjaxMixin     = require './ajaxMixin.coffee'
 
 Mixin =
 
@@ -41,21 +42,19 @@ Mixin =
 
       #url = "/user/#{ssoUsername}"
       ssoUsername = S(ssoUsername).replaceAll('"', '').s
-      url = "/user?where=SSO is \"#{ssoUsername}\" and (isActive is true)"
+      path = "/user?where=SSO is \"#{ssoUsername}\" and (isActive is true)"
 
-      config =
-        url: url
-        type: 'GET'
-        timeout: 60000  # 30s
-        success: ((result, textStatus, jqXHR) ->
-          deferred.resolve result
-        ).bind(this)
-        error: ((jqXHR, textStatus, errorThrown) ->
-          console.error("Error while retrieving user: #{ssoUsername}")
-          deferred.reject "Error while retrieving user: #{ssoUsername}"
-        ).bind(this)
-
-      $.ajax config
+      AjaxMixin.get({path: path})
+      .then((user) =>
+        deferred.resolve(user)
+      )
+      .catch((err) =>
+        console.error("Error while retrieving user: #{ssoUsername}, #{err.stack}")
+        deferred.reject "Error while retrieving user: #{ssoUsername}"
+      )
+      .done()
+    else
+      deferred.reject "No ssoUsername specified"
 
     deferred.promise
 
@@ -74,47 +73,47 @@ Mixin =
     ).done()
     deferred.promise
 
-  get: (opts) ->
-
-    metricsConfig =
-      data: {}
-      xhrFields:
-        withCredentials: true
-      timeout: 60000  # 30s
-      cache: true
-
-    uri = new Uri()
-    uri.setPath "#{opts.path}"
-    #uri.addQueryParam('accountIds', accountIds.join(','))
-    #uri.addQueryParam('beginDate', opts.beginDate) if opts.beginDate?
-    #uri.addQueryParam('endDate', opts.endDate) if opts.endDate?
-    _.each opts['queryParams'], (queryParam) ->
-      uri.addQueryParam(queryParam['name'], queryParam['value'])
-
-    #console.debug "getMetrics: #{JSON.stringify(config.data)}"
-    callConfig = _.defaults(_.clone(metricsConfig), {url: uri.toString()})
-
-    # Ensure the ajax promise is A+ promise compatible
-    Q($.ajax(callConfig))
-
-  post: (opts) ->
-
-    metricsConfig =
-      data: {}
-      xhrFields:
-        withCredentials: true
-      timeout: 60000  # 30s
-      cache: true
-      type: 'POST'
-
-    uri = new Uri()
-    uri.setPath "#{opts.path}"
-
-    _.each opts['queryParams'], (queryParam) ->
-      uri.addQueryParam(queryParam['name'], queryParam['value'])
-
-    callConfig = _.defaults(_.clone(metricsConfig), {url: uri.toString()})
-
-    Q($.ajax(callConfig))
+#  get: (opts) ->
+#
+#    metricsConfig =
+#      data: {}
+#      xhrFields:
+#        withCredentials: true
+#      timeout: 60000  # 30s
+#      cache: true
+#
+#    uri = new Uri()
+#    uri.setPath "#{opts.path}"
+#    #uri.addQueryParam('accountIds', accountIds.join(','))
+#    #uri.addQueryParam('beginDate', opts.beginDate) if opts.beginDate?
+#    #uri.addQueryParam('endDate', opts.endDate) if opts.endDate?
+#    _.each opts['queryParams'], (queryParam) ->
+#      uri.addQueryParam(queryParam['name'], queryParam['value'])
+#
+#    #console.debug "getMetrics: #{JSON.stringify(config.data)}"
+#    callConfig = _.defaults(_.clone(metricsConfig), {url: uri.toString()})
+#
+#    # Ensure the ajax promise is A+ promise compatible
+#    Q($.ajax(callConfig))
+#
+#  post: (opts) ->
+#
+#    metricsConfig =
+#      data: {}
+#      xhrFields:
+#        withCredentials: true
+#      timeout: 60000  # 30s
+#      cache: true
+#      type: 'POST'
+#
+#    uri = new Uri()
+#    uri.setPath "#{opts.path}"
+#
+#    _.each opts['queryParams'], (queryParam) ->
+#      uri.addQueryParam(queryParam['name'], queryParam['value'])
+#
+#    callConfig = _.defaults(_.clone(metricsConfig), {url: uri.toString()})
+#
+#    Q($.ajax(callConfig))
 
 module.exports = Mixin

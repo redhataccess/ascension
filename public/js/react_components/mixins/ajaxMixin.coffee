@@ -17,12 +17,9 @@ Mixin =
       cache: true
 
     uri = new Uri()
-    console.debug("get: ENVIRONMENT: #{ENVIRONMENT}")
     if ENVIRONMENT is 'development'
-      console.debug("dev prefix")
       uri.setPath "#{opts.path}"
     else
-      console.debug("prod prefix: #{urlPrefix}")
       uri.setPath "#{urlPrefix}#{opts.path}"
 
     #uri.addQueryParam('accountIds', accountIds.join(','))
@@ -48,12 +45,9 @@ Mixin =
       type: 'POST'
 
     uri = new Uri()
-    console.debug("post: ENVIRONMENT: #{ENVIRONMENT}")
     if ENVIRONMENT is 'development'
-      console.debug("dev prefix")
       uri.setPath "#{opts.path}"
     else
-      console.debug("prod prefix: #{urlPrefix}")
       uri.setPath "#{urlPrefix}#{opts.path}"
 
     _.each opts['queryParams'], (queryParam) ->
