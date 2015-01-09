@@ -110,6 +110,10 @@ app.get "/cases", (req, res) ->
     # Opt param, fetches tasks based on this user [sbrs, ect.]
     ssoUsername: req.query['ssoUsername']
     limit: _.parseInt(req.query['limit']) || 100
+    #roles: req.query.roles?.split(',') || 100
+    roles: _.map(req.query['roles']?.split(','), (r) -> r.toUpperCase()) || []
+
+  logger.debug("Discovered roles: #{req.query['roles']}")
 
   CaseLogic.fetchCases(opts).then((data) ->
     res.send(data)

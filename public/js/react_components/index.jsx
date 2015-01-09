@@ -67,11 +67,7 @@ var App = React.createClass({
                 //userId: user.externalModelId
                 taskId: self.getParams().taskId || 'list'
             };
-            queryParams = {
-                ssoUsername: self.getParams().ssoUsername,
-                admin: self.getQuery().admin
-            };
-            self.transitionTo("tasks", params, queryParams);
+            self.transitionTo("tasks", params, self.getQuery());
         })
         .catch(function(err) {
             Auth.setAuthedUser(void 0);

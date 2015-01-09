@@ -28,6 +28,10 @@ var Component = React.createClass({
     mixins: [AjaxMixin, Router.State, Router.Navigation],
     getInitialState: function() {
         return {
+            // This will allow the cases pulled to be overridden from the Auth.getAuthedUser()
+            'ssoUsername': null,
+            // This will allow roles to be overridden from what is in the UDS user
+            'roles': null,
             'loading': false,
             'tasks': [],
             'minScore': 0,
@@ -39,12 +43,14 @@ var Component = React.createClass({
     },
     // TODO - ref theTask and theCase everywhere
     genTaskElements: function() {
-        var tasks = _.values(this.state['tasks']);
         var self = this;
-        tasks.sort((a, b) => b.resource.collaborationScore - a.resource.collaborationScore);
-        return _.map(tasks, (c) => {
-            return <TaskCase case={c} scoreOpacityScale={self.scoreOpacityScale} />
-        });
+        if (this.state.loading == true) {
+            return <i className='fa fa-spinner fa-spin'></i>;
+        } else {
+            return _.map(this.state.tasks, (c) => {
+                return <TaskCase case={c} scoreOpacityScale={self.scoreOpacityScale} />
+            });
+        }
     },
     genBtnGroupClass: function(opts) {
         var classSet = {
@@ -58,50 +64,46 @@ var Component = React.createClass({
         this.scoreScale = d3.scale.quantize().domain([min, max]).range([100, 200, 300]);
         this.scoreOpacityScale = d3.scale.linear().domain([min, max]).range([.25, 1]);
     },
-    queryCases: function() {
-        var opts, ssoUsername, _ref1, _ref2;
+    queryCases: function(args) {
+        this.setState({loading: true});
+        var opts, ssoUsername, _ref2;
         var self = this;
         // For loading cases and simulating tasks, taskId is really just the caseNumber for now
         var {taskId} = self.getParams();
-        ssoUsername = void 0;
-        if (this.getQuery().ssoUsername != null) {
-            ssoUsername = this.getQuery().ssoUsername;
-        } else if (((_ref1 = Auth.getScopedUser()) != null ? _ref1.resource : void 0) != null) {
-            ssoUsername = Auth.getScopedUser().resource.sso[0];
-        } else if (((_ref2 = Auth.getAuthedUser()) != null ? _ref2.resource : void 0) != null) {
+        ssoUsername = args.ssoUsername;
+        if ((ssoUsername == null) && ((_ref2 = Auth.getAuthedUser()) != null ? _ref2.resource : null) != null) {
             ssoUsername = Auth.getAuthedUser().resource.sso[0];
         }
-        if (ssoUsername === void 0) {
+        if (ssoUsername == null) {
             return;
         }
         ssoUsername = S(ssoUsername).replaceAll('"', '').s;
         opts = {
             path: '/cases',
             queryParams: [
-                {
-                    name: 'ssoUsername',
-                    value: ssoUsername
-                },
-                {
-                    name: 'admin',
-                    value: this.getQuery()['admin']
-                },
-                {
-                    name: 'limit',
-                    value: 7
-                }
+                { name: 'ssoUsername', value: ssoUsername },
+                { name: 'roles', value: args.roles },
+                { name: 'admin', value: this.getQuery()['admin'] }
+                //{ name: 'limit', value: 7 }
             ]
         };
         this.get(opts)
             .then((cases) => {
-                var max, min, params, queryParams, stateHash;
+                var max, min, params, stateHash;
+                _.each(cases, (c) => {
+                    if(c.resource == null) {
+                        console.error(JSON.stringify(c, null, ' '));
+                    }
+                });
                 //self.casesById = _.zipObject(_.map(cases, (c) => [c['resource']['resourceId'], c]));
-                min = _.chain(cases).pluck('resource').pluck('collaborationScore').min().value();
-                max = _.chain(cases).pluck('resource').pluck('collaborationScore').max().value();
+                min = _.chain(cases).pluck('resource').pluck('collaborationScore').without(null).min().value();
+                max = _.chain(cases).pluck('resource').pluck('collaborationScore').without(null).max().value();
                 self.setScoreScale(min, max);
+
+                cases.sort((a, b) => b.resource.collaborationScore - a.resource.collaborationScore);
                 stateHash = {
                     //'tasks': _.object(_.map(cases, (c) => [c['resource']['externalModelId'], c] )),
-                    'tasks': cases,
+                    'tasks': cases.slice(0, 7),
                     'minScore': min,
                     'maxScore': max
                 };
@@ -113,42 +115,36 @@ var Component = React.createClass({
                         //taskId: cases[0]['resource']['externalModelId']
                         taskId: cases[0]['resource']['caseNumber']
                     };
-                    queryParams = {
-                        ssoUsername: self.getQuery().ssoUsername,
-                        admin: self.getQuery().admin
-                    };
-                    console.debug(`transitioning to case with params: ${JSON.stringify(params)}`);
-                    this.transitionTo("tasks", params, queryParams);
+                    this.transitionTo("tasks", params, self.getQuery());
                 }
             })
             .catch((err) => console.error(`Could not load cases: ${err.stack}`))
-            .done();
+            .done(() => self.setState({loading: false}));
     },
+    // http://javascript.tutorialhorizon.com/2014/09/13/execution-sequence-of-a-react-components-lifecycle-methods/
     componentDidMount: function() {
-        this.queryCases();
+        var stateHash;
+        stateHash = {
+            ssoUsername: this.getQuery()['ssoUsername'],
+            roles: this.getQuery()['roles']
+        };
+        this.setState(stateHash);
+        this.queryCases(stateHash);
     },
-    //componentWillReceiveProps: function(nextProps) {
-    //    if ((!_.isEqual(this.props.query.ssoUsername, nextProps.query.ssoUsername))
-    //        || (!_.isEqual(this.props.params._id, nextProps.params._id))) {
-    //        this.setState({
-    //            query: nextProps.query,
-    //            params: nextProps.params
-    //        });
-    //        return this.queryTasks(nextProps);
-    //    }
-    //},
-    //handleAdd: function() {
-    //    var items;
-    //    items = this.state.items;
-    //    items.push({});
-    //    this.setState({
-    //        items: items
-    //    });
-    //    console.debug("State now has: " + this.state.items.length + " items");
-    //},
+    componentWillReceiveProps: function(nextProps) {
+        var stateHash;
+        if (this.getQuery()['ssoUsername'] != this.state.ssoUsername
+            || this.getQuery()['roles'] != this.state.roles) {
+            stateHash = {
+                ssoUsername: this.getQuery()['ssoUsername'],
+                roles: this.getQuery()['roles']
+            };
+            this.setState(stateHash);
+            this.queryCases(stateHash);
+        }
+    },
     render: function() {
         var { taskId } = this.getParams();
-        var { userId } = this.getQuery();
         return (
             <div className='row'>
                 <div className='col-md-3'>{this.genTaskElements()}</div>

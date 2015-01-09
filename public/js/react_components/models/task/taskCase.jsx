@@ -62,11 +62,7 @@ var Component = React.createClass({
         params = {
             taskId: c.resource.caseNumber
         };
-        queryParams = {
-            ssoUsername: this.getParams().ssoUsername,
-            admin: this.getQuery().admin
-        };
-        this.transitionTo("tasks", params, queryParams);
+        this.transitionTo("tasks", params, this.getQuery());
     },
     genTaskIconClass: function(t) {
         var tmp, _ref1;

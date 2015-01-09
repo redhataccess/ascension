@@ -132,11 +132,15 @@
   });
 
   app.get("/cases", function(req, res) {
-    var opts;
+    var opts, _ref;
     opts = {
       ssoUsername: req.query['ssoUsername'],
-      limit: _.parseInt(req.query['limit']) || 100
+      limit: _.parseInt(req.query['limit']) || 100,
+      roles: _.map((_ref = req.query['roles']) != null ? _ref.split(',') : void 0, function(r) {
+        return r.toUpperCase();
+      }) || []
     };
+    logger.debug("Discovered roles: " + req.query['roles']);
     return CaseLogic.fetchCases(opts).then(function(data) {
       return res.send(data);
     })["catch"](function(err) {

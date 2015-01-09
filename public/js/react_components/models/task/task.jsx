@@ -177,7 +177,7 @@ var Component = React.createClass({
             return <Alert bsStyle='danger' key='alert'>`Error fetching case: ${caseNumber}`</Alert>
         }
         return (
-            <div key={`task-container-${caseNumber}`}>
+            <div>
                 <div key='taskContainer' className='row'>
                     <div className='col-md-6' key='containerLeft'>
                         <TaskHeader task={this.state.case} key='header'></TaskHeader>
