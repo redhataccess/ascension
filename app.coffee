@@ -106,12 +106,15 @@ app.get "/tasks", (req, res) ->
     res.send(err)
   )
 app.get "/cases", (req, res) ->
+  roles = null
+  if _.isArray(roles) and roles isnt ''
+    roles = _.map(req.query['roles']?.split(','), (r) -> r.toUpperCase()) || []
+
   opts =
     # Opt param, fetches tasks based on this user [sbrs, ect.]
     ssoUsername: req.query['ssoUsername']
     limit: _.parseInt(req.query['limit']) || 100
-    #roles: req.query.roles?.split(',') || 100
-    roles: _.map(req.query['roles']?.split(','), (r) -> r.toUpperCase()) || []
+    roles: roles
 
   logger.debug("Discovered roles: #{req.query['roles']}")
 

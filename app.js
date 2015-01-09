@@ -132,13 +132,17 @@
   });
 
   app.get("/cases", function(req, res) {
-    var opts, _ref;
+    var opts, roles, _ref;
+    roles = null;
+    if (_.isArray(roles) && roles !== '') {
+      roles = _.map((_ref = req.query['roles']) != null ? _ref.split(',') : void 0, function(r) {
+        return r.toUpperCase();
+      }) || [];
+    }
     opts = {
       ssoUsername: req.query['ssoUsername'],
       limit: _.parseInt(req.query['limit']) || 100,
-      roles: _.map((_ref = req.query['roles']) != null ? _ref.split(',') : void 0, function(r) {
-        return r.toUpperCase();
-      }) || []
+      roles: roles
     };
     logger.debug("Discovered roles: " + req.query['roles']);
     return CaseLogic.fetchCases(opts).then(function(data) {

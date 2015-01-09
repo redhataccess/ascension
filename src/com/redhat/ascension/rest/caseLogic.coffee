@@ -5,6 +5,7 @@ prettyjson        = require 'prettyjson'
 _                 = require 'lodash'
 moment            = require 'moment'
 Q                 = require 'q'
+S                 = require 'string'
 Q.longStackSupport = true
 ResourceOpEnum    = require '../rules/enums/ResourceOpEnum'
 TaskActionsEnum   = require './enums/taskActionsEnum'
@@ -66,8 +67,9 @@ CaseLogic.fetchCases = (opts) ->
         finalUql.where = uqlFormatted
       ######################################################
       # Next fall through to the user defined roles from UDS
+      # TODO -- this is yet to be implemented in UDS
       ######################################################
-      else if user.roles?.length > 0
+      else if user.routingRoles?.length > 0
         undefined
       ######################################################
       # Finally just show the standard plate for the user
@@ -84,7 +86,7 @@ CaseLogic.fetchCases = (opts) ->
       CaseLogic.fetchCasesUql(finalUql)
     )
     .then((cases) ->
-      deferred.resolve _.chain([cases || []]).flatten().uniq((c) -> c.externalModelId).value()
+      deferred.resolve _.chain([cases || []]).flatten().uniq((c) -> c.externalModelId).each((c) -> c.resource.caseNumber = S(c.resource.caseNumber).padLeft(8, '0').s).value()
     )
 #    .spread((sbrCases, ownerCases) ->
 #      logger.debug("Found #{sbrCases.length} sbrCases and #{ownerCases} ownerCases")
@@ -93,6 +95,7 @@ CaseLogic.fetchCases = (opts) ->
 #      deferred.resolve finalCases
 #    )
     .catch((err) ->
+      logger.error(err.message)
       deferred.reject err
     ).done()
   else

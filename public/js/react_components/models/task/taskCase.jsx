@@ -67,31 +67,18 @@ var Component = React.createClass({
     genTaskIconClass: function(t) {
         var tmp, _ref1;
         tmp = void 0;
-        if (t['type'] === TaskTypeEnum.CASE.name) {
-            tmp = ((_ref1 = TaskIconMapping[t['case']['internalStatus']]) != null ? `fa ${_ref1.icon}` : void 0) || tmp;
-        }
+        tmp = ((_ref1 = TaskIconMapping[t.resource.internalStatus]) != null ? `fa ${_ref1.icon}` : void 0) || tmp;
         return tmp || 'fa fa-medkit';
     },
     genTaskBid: function(theCase) {
         return theCase.resource.caseNumber;
     },
-    genEntityStateIcon: function(theTask, theCase) {
+    genEntityStateIcon: function(theCase) {
         var _ref1;
-        if (theTask.type === TaskTypeEnum.CASE.name) {
-            return ((_ref1 = TaskIconMapping[theCase.internalStatus]) != null ? `fa ${_ref1.icon}` : void 0) || 'fa fa-medkit';
-        } else {
-            return null;
-        }
+        return ((_ref1 = TaskIconMapping[theCase.resource.internalStatus]) != null ? `fa ${_ref1.icon}` : void 0) || 'fa fa-medkit';
     },
     genTaskSymbol: function(t) {
-        var sym;
-        sym = void 0;
-        if (t['type'] === TaskTypeEnum.CASE.name) {
-            sym = "Case";
-        } else if (t['type'] === TaskTypeEnum.KCS.name) {
-            sym = "KCS";
-        }
-        return sym || 'Task';
+        return "Case";
     },
     genTaskStateIcon: function(theCase) {
         var iconMapping = TaskIconMapping[theCase.resource.status];
