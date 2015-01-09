@@ -77,7 +77,7 @@
           jQuery: "jquery",
           $: "jquery"
         }), new webpack.DefinePlugin({
-          ENVIRONMENT: JSON.stringify('production')
+          ENVIRONMENT: JSON.stringify('development')
         })
       ]
     };
@@ -118,7 +118,7 @@
           devtool: "sourcemap",
           debug: true,
           plugins: webpackConfig.plugins.concat(new webpack.DefinePlugin({
-            ENVIRONMENT: 'production'
+            ENVIRONMENT: JSON.stringify('development')
           }), new webpack.optimize.DedupePlugin(), new webpack.optimize.UglifyJsPlugin())
         }
       },

@@ -17,7 +17,7 @@ Mixin =
       cache: true
 
     uri = new Uri()
-    if 'production' is ENVIRONMENT
+    if 'development' is ENVIRONMENT
       uri.setPath "#{opts.path}"
     else
       uri.setPath "#{urlPrefix}#{opts.path}"
