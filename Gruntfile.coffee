@@ -200,7 +200,7 @@ module.exports = (grunt) ->
         debug: true
         plugins: webpackConfig.plugins.concat(
             new webpack.DefinePlugin
-              ENVIRONMENT: JSON.stringify('development')
+              ENVIRONMENT: JSON.stringify('production')
             new webpack.optimize.DedupePlugin()
             new webpack.optimize.UglifyJsPlugin()
         )
