@@ -20,17 +20,6 @@ CaseLogic       = require './src/com/redhat/ascension/rest/caseLogic'
 #CaseRules       = require './src/com/redhat/ascension/rules/case/caseRules'
 
 ##########################################################
-# TODO -- generating mock tasks right now, this will
-# need to be replaced once the UDS is in place
-##########################################################
-tasks = []
-i = 0
-while i < 20
-  tasks.push TaskLogic.generateExampleTask('01056704', '540155')
-  i++
-TaskLogic.mockTasks = tasks
-
-##########################################################
 # Handle configuration
 ##########################################################
 # Load the config file either locally or in openshift if the OPENSHIFT_DATA_DIR variable exists

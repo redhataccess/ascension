@@ -1,5 +1,5 @@
 (function() {
-  var CaseLogic, TaskLogic, Uri, app, bodyParser, compression, cookieParser, env, express, favicon, http, i, ipAddress, logger, morgan, oneDay, path, port, request, server, serverStartTime, settings, tasks, _;
+  var CaseLogic, TaskLogic, Uri, app, bodyParser, compression, cookieParser, env, express, favicon, http, ipAddress, logger, morgan, oneDay, path, port, request, server, serverStartTime, settings, _;
 
   express = require('express');
 
@@ -32,17 +32,6 @@
   TaskLogic = require('./src/com/redhat/ascension/rest/taskLogic');
 
   CaseLogic = require('./src/com/redhat/ascension/rest/caseLogic');
-
-  tasks = [];
-
-  i = 0;
-
-  while (i < 20) {
-    tasks.push(TaskLogic.generateExampleTask('01056704', '540155'));
-    i++;
-  }
-
-  TaskLogic.mockTasks = tasks;
 
   env = 'development';
 
