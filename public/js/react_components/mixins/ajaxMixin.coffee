@@ -17,10 +17,10 @@ Mixin =
       cache: true
 
     uri = new Uri()
-    if ENVIRONMENT is 'production'
-      uri.setPath "#{urlPrefix}#{opts.path}"
-    else
+    if ENVIRONMENT is 'development'
       uri.setPath "#{opts.path}"
+    else
+      uri.setPath "#{urlPrefix}#{opts.path}"
 
     #uri.addQueryParam('accountIds', accountIds.join(','))
     #uri.addQueryParam('beginDate', opts.beginDate) if opts.beginDate?
@@ -45,10 +45,10 @@ Mixin =
       type: 'POST'
 
     uri = new Uri()
-    if ENVIRONMENT is 'production'
-      uri.setPath "#{urlPrefix}#{opts.path}"
-    else
+    if ENVIRONMENT is 'development'
       uri.setPath "#{opts.path}"
+    else
+      uri.setPath "#{urlPrefix}#{opts.path}"
 
     _.each opts['queryParams'], (queryParam) ->
       uri.addQueryParam(queryParam['name'], queryParam['value'])
