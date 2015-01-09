@@ -59,6 +59,7 @@ html.chrometwo.legacyfalse
           //require.s.contexts._.config.urlArgs = "bust=#{uid}";
           var script = document.createElement('script');
           script.type = 'text/javascript';
-          script.src = '/dist/main.js' + '?bust=' + #{uid};
+          //script.src = '/dist/main.js' + '?bust=' + #{uid};
+          script.src = '/etc/os1/ascension/dist/main.js' + '?bust=' + #{uid};
           document.body.appendChild(script);
         });

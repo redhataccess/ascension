@@ -164,18 +164,24 @@ app.get "/user", (req, res) ->
 ###########################################################
 ## Handle the redirections for the Chrome two theme
 ###########################################################
-#app.get /^\/(webassets|chrome_themes.*?)/i, (req, res) ->
-#  logger.info "received request: #{req.url}"
-#  logger.info "req.params : #{prettyjson.render req.params}"
-#  #  redirect = /R=?(\d+)?/.test(flags) ? (typeof /R=?(\d+)?/.exec(flags)[1] !== 'undefined' ? /R=?(\d+)?/.exec(flags)[1] : 301) : false,
-#  location = "https://access.redhat.com/#{req.url}"
-#  logger.info "Redirecting to: #{location}"
-#  res.writeHead 302, {
-#    Location : location
-#  }
-#  res.end()
-#  return true
-#
+#if env is 'production'
+  #location ~ ^/(chrome_themes|webassets|services|click|suggest)/.*$ {
+  #   proxy_pass_header Server;
+  #   proxy_set_header Host "access.redhat.com";
+  #   proxy_pass https://access;
+  #}
+
+#  app.get /^\/(chrome_themes|webassets|services|click|suggest)\/.*$/i, (req, res) ->
+#    logger.info "proxy, received request: #{req.url}"
+#    logger.info "proxy, req.params : #{prettyjson.render req.params}"
+#    #  redirect = /R=?(\d+)?/.test(flags) ? (typeof /R=?(\d+)?/.exec(flags)[1] !== 'undefined' ? /R=?(\d+)?/.exec(flags)[1] : 301) : false,
+#    location = "https://access.redhat.com/#{req.url}"
+#    logger.info "Redirecting to: #{location}"
+#    res.writeHead 302, {
+#      Location : location
+#    }
+#    res.end()
+
 #app.get /^\/(services.*?)/i, (req, res) ->
 #  logger.info "received request: #{req.url}"
 #  logger.info "req.params : #{prettyjson.render req.params}"
