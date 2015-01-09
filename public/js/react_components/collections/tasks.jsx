@@ -61,7 +61,7 @@ var Component = React.createClass({
         return cx(classSet);
     },
     setScoreScale: function(min, max) {
-        this.scoreScale = d3.scale.quantize().domain([min, max]).range([100, 200, 300]);
+        //this.scoreScale = d3.scale.quantize().domain([min, max]).range([100, 200, 300]);
         this.scoreOpacityScale = d3.scale.linear().domain([min, max]).range([.25, 1]);
     },
     queryCases: function(args) {
@@ -96,11 +96,11 @@ var Component = React.createClass({
                     }
                 });
                 //self.casesById = _.zipObject(_.map(cases, (c) => [c['resource']['resourceId'], c]));
-                min = _.chain(cases).pluck('resource').pluck('collaborationScore').without(null).min().value();
-                max = _.chain(cases).pluck('resource').pluck('collaborationScore').without(null).max().value();
-                self.setScoreScale(min, max);
 
                 cases.sort((a, b) => b.resource.collaborationScore - a.resource.collaborationScore);
+                min = _.chain(cases.slice(0,7)).pluck('resource').pluck('collaborationScore').without(null).min().value();
+                max = _.chain(cases.slice(0,7)).pluck('resource').pluck('collaborationScore').without(null).max().value();
+                self.setScoreScale(min, max);
                 stateHash = {
                     //'tasks': _.object(_.map(cases, (c) => [c['resource']['externalModelId'], c] )),
                     'tasks': cases.slice(0, 7),
