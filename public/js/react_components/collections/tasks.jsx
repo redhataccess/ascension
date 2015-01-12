@@ -22,6 +22,8 @@ var TaskState               = require('../models/task/taskState.jsx');
 var TaskCase                = require('../models/task/taskCase.jsx');
 //var IconWithTooltip         = require('../utils/iconWithTooltip.jsx');
 
+var Alert                   = require('react-bootstrap/Alert');
+
 
 var Component = React.createClass({
     displayName: 'Tasks',
@@ -46,6 +48,12 @@ var Component = React.createClass({
         var self = this;
         if (this.state.loading == true) {
             return <i className='fa fa-spinner fa-spin'></i>;
+        } else if (this.state.loading == false && (this.state.tasks == null || this.state.tasks.length == 0)) {
+            return (
+                <Alert bsStyle="warning">
+                    <strong>No cases found!</strong>
+                </Alert>
+            );
         } else {
             return _.map(this.state.tasks, (c) => {
                 return <TaskCase case={c} scoreOpacityScale={self.scoreOpacityScale} />

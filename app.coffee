@@ -95,9 +95,9 @@ app.get "/tasks", (req, res) ->
     res.send(err)
   )
 app.get "/cases", (req, res) ->
-  roles = null
-  if _.isArray(roles) and roles isnt ''
-    roles = _.map(req.query['roles']?.split(','), (r) -> r.toUpperCase()) || []
+  roles = req.query['roles']
+  if roles isnt '' and roles isnt null
+    roles = _.map(req.query['roles'].split(','), (r) -> r.toUpperCase()) || []
 
   opts =
     # Opt param, fetches tasks based on this user [sbrs, ect.]

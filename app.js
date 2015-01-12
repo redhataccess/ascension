@@ -121,10 +121,10 @@
   });
 
   app.get("/cases", function(req, res) {
-    var opts, roles, _ref;
-    roles = null;
-    if (_.isArray(roles) && roles !== '') {
-      roles = _.map((_ref = req.query['roles']) != null ? _ref.split(',') : void 0, function(r) {
+    var opts, roles;
+    roles = req.query['roles'];
+    if (roles !== '' && roles !== null) {
+      roles = _.map(req.query['roles'].split(','), function(r) {
         return r.toUpperCase();
       }) || [];
     }
