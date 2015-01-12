@@ -16,7 +16,7 @@ var Component = React.createClass({
         }
         product = this.props.case.product.resource;
         version = (product != null ? product.version : void 0) || "";
-        return <Label bsStyle='default' key='caseProduct'>{`${product.line.resource.name} ${version}`}</Label>;
+        return <Label bsStyle='default' key='caseProduct'>{`${product.line.resource.name} ${version.resource.name}`}</Label>;
     }
 });
 
