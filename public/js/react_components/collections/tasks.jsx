@@ -9,6 +9,7 @@ var d3                      = require('d3/d3');
 var _                       = require('lodash');
 var S                       = require('string');
 var Task                    = require('../models/task/task.jsx');
+var Spacer                  = require('react-redhat/Spacer');
 var TaskIconMapping         = require('../utils/taskIconMapping.coffee');
 var TaskTypeEnum            = require('../../../../src/com/redhat/ascension/rules/enums/TaskTypeEnum.coffee');
 var TaskActionsEnum         = require('../../../../src/com/redhat/ascension/rest/enums/taskActionsEnum.coffee');
@@ -43,7 +44,9 @@ var Component = React.createClass({
     },
     // TODO - ref theTask and theCase everywhere
     genTaskElements: function() {
-        var self = this;
+        var taskCases,
+            stateHash,
+            self = this;
         if (this.state.loading == true) {
             return <i className='fa fa-spinner fa-spin'></i>;
         } else if (this.state.loading == false && (this.state.tasks == null || this.state.tasks.length == 0)) {
@@ -53,9 +56,22 @@ var Component = React.createClass({
                 </Alert>
             );
         } else {
-            return _.map(this.state.tasks, (c) => {
+            taskCases = _.map(this.state.tasks, (c) => {
                 return <TaskCase case={c} scoreOpacityScale={self.scoreOpacityScale} />
             });
+            stateHash = {
+                ssoUsername: this.state.ssoUsername,
+                roles: this.state.roles
+            };
+
+            return (
+                <div>
+                {taskCases}
+                <Spacer />
+                <i className="fa fa-refresh cursor" style={{marginLeft: "6px"}} onClick={this.queryCases.bind(this, stateHash)}></i>
+                </div>
+
+            )
         }
     },
     genBtnGroupClass: function(opts) {

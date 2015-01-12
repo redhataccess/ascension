@@ -52,6 +52,8 @@ CaseLogic.fetchCases = (opts) ->
     # http://cl.ly/image/3t3N1g0n0Q0j
     userUql =
       where: "SSO is \"#{opts.ssoUsername}\""
+    logger.debug("User UQL: #{userUql.where}")
+
     UserLogic.fetchUserUql(userUql).then((user) ->
 
       finalUql =
@@ -98,7 +100,7 @@ CaseLogic.fetchCases = (opts) ->
 #      deferred.resolve finalCases
 #    )
     .catch((err) ->
-      logger.error(err.message)
+      logger.error(err?.stack || err)
       deferred.reject err
     ).done()
   else
