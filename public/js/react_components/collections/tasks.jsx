@@ -20,8 +20,6 @@ var TaskAction              = require('../models/task/taskAction.jsx');
 var TaskState               = require('../models/task/taskState.jsx');
 // TaskCase represents the virtual mapping of case -> task for sprint 1
 var TaskCase                = require('../models/task/taskCase.jsx');
-//var IconWithTooltip         = require('../utils/iconWithTooltip.jsx');
-
 var Alert                   = require('react-bootstrap/Alert');
 
 

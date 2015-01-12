@@ -57,10 +57,13 @@ CaseLogic.fetchCases = (opts) ->
       finalUql =
         where: undefined
 
+      # If no sbrs present just pull the owned + fts cases, collaboration requires sbrs
+      if (not user.sbrs?) or user.sbrs?.length is 0
+        finalUql.where = RoutingRoles.OWNED_CASES(user)
       ######################################################
       # The url query params should override any user roles
       ######################################################
-      if opts.roles?.length > 0
+      else if opts.roles?.length > 0
         logger.debug("Discovered roles from the query parms: #{opts.roles}")
         uqlParts = _.map(opts.roles, (r) -> RoutingRoles[r](user))
         uqlFormatted = uqlParts.join(' or ')
