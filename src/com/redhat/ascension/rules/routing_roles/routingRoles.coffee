@@ -42,6 +42,7 @@ RoutingRoles.OWNED_CASES = (user) ->
   #"""(#{ownerCond} and ((#{worhCond} or #{ftsCond}) or (#{wocCond} and #{wooCond}))) or (#{ftsRoleCond} and #{ftsCond})"""
   """(#{internalStatusCond} and ((#{ownerCond} or #{ftsRoleCond}) or (#{wocCond} and #{wooCond})) and #{worhCond}"""
 
+# TODO can't be implemented until we can query the user's geo in relation to the case geo
 RoutingRoles.FTS = (user) ->
 
   """
