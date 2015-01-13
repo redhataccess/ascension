@@ -56,7 +56,7 @@ RoutingRoles.FTS = (user) ->
   ftsRoleCond = UQL.cond('ftsRole', 'is', '""')
   """(#{ftsCond} and #{ftsRoleCond} and #{this._makeSbrConds(user)})"""
 
-RoutingRoles.NNO_SUPER_REGION = (user, super_region) ->
+RoutingRoles._NNO_SUPER_REGION = (user, super_region) ->
 
   """
   NNO = "NA"
@@ -66,9 +66,22 @@ RoutingRoles.NNO_SUPER_REGION = (user, super_region) ->
   nnoNaCond = UQL.cond('nnoSuperRegion', 'is', """\"#{super_region}\"""")
   """(#{nnoNaCond} and #{this._makeSbrConds(user)})"""
 
-RoutingRoles.NNO_NA = (user) -> this.NNO_SUPER_REGION(user, 'NA')
-RoutingRoles.NNO_APAC = (user) -> this.NNO_SUPER_REGION(user, 'APAC')
-RoutingRoles.NNO_INDIA = (user) -> this.NNO_SUPER_REGION(user, 'INDIA')
-RoutingRoles.NNO_EMEA = (user) -> this.NNO_SUPER_REGION(user, 'EMEA')
+RoutingRoles.NNO_NA = (user) -> this._NNO_SUPER_REGION(user, 'NA')
+RoutingRoles.NNO_APAC = (user) -> this._NNO_SUPER_REGION(user, 'APAC')
+RoutingRoles.NNO_INDIA = (user) -> this._NNO_SUPER_REGION(user, 'INDIA')
+RoutingRoles.NNO_EMEA = (user) -> this._NNO_SUPER_REGION(user, 'EMEA')
+
+# INFO - UDS adds ownerId != spamId to all calls, so unassigned can drop that
+RoutingRoles.NCQ = (user) ->
+
+  #OwnerId != '{spam_queue_id}'
+  #AND Internal_Status__c = 'Unassigned'
+  #AND Status != 'Closed'
+  #AND Product__c LIKE '%%JBoss%%'
+  #ORDER BY SBT__c ASC
+
+  unassignedCond = UQL.cond('internalStatus', 'is', """\"Unassigned\"""")
+  notClosedCond = UQL.cond('status', 'ne', """\"Closed\"""")
+  """(#{unassignedCond} and #{notClosedCond} and #{this._makeSbrConds(user)})"""
 
 module.exports = RoutingRoles
