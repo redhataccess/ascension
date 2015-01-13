@@ -56,4 +56,19 @@ RoutingRoles.FTS = (user) ->
   ftsRoleCond = UQL.cond('ftsRole', 'is', '""')
   """(#{ftsCond} and #{ftsRoleCond} and #{this._makeSbrConds(user)})"""
 
+RoutingRoles.NNO_SUPER_REGION = (user, super_region) ->
+
+  """
+  NNO = "NA"
+  SBR Group includes "<group1>,<group2>"(Matches users current SBRs)
+  """
+
+  nnoNaCond = UQL.cond('nnoSuperRegion', 'is', """\"#{super_region}\"""")
+  """(#{nnoNaCond} and #{this._makeSbrConds(user)})"""
+
+RoutingRoles.NNO_NA = (user) -> this.NNO_SUPER_REGION(user, 'NA')
+RoutingRoles.NNO_APAC = (user) -> this.NNO_SUPER_REGION(user, 'APAC')
+RoutingRoles.NNO_INDIA = (user) -> this.NNO_SUPER_REGION(user, 'INDIA')
+RoutingRoles.NNO_EMEA = (user) -> this.NNO_SUPER_REGION(user, 'EMEA')
+
 module.exports = RoutingRoles
