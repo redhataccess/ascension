@@ -35,32 +35,23 @@ var App = React.createClass({
     getInitialState: function() {
         return {
             'authedUser': Auth.authedUser,
-            'scopedUser': Auth.scopedUser,
-            'authFailed': false,
-            'scopedFailed': false
+            'authFailed': false
+            //'scopedUser': Auth.scopedUser,
+            //'scopedFailed': false
         };
     },
-    //componentWillReceiveProps: function(nextProps) {
-    //    if (!_.isEqual(this.props.query.ssoUsername, nextProps.query.ssoUsername)) {
-    //        this.queryScopedUser(nextProps.query.ssoUsername);
-    //    } else if (nextProps.query.ssoUsername === '' || (nextProps.query.ssoUsername == null)) {
-    //        Auth.setScopedUser(void 0);
-    //        this.setState({
-    //            'scopedUser': void 0,
-    //            'scopedFailed': false
-    //        });
-    //    }
-    //},
     componentDidMount: function() {
-        var self, ssoUsername, userPromise, params, queryParams;
+        var self, ssoUsername, userPromise, params;
         self = this;
-        ssoUsername = this.getRhUserCookie() || this.props.query.ssoUsername;
+        // For the moment, there is no use for a scoped user, the url params will just assume calls under that ssoUsername
+        //ssoUsername = this.getRhUserCookie() || this.getQuery().ssoUsername;
+        ssoUsername = this.getRhUserCookie();
         userPromise = this.queryUser(ssoUsername);
         userPromise.then(function(user) {
             Auth.setAuthedUser(user);
             self.setState({
-                'scopedUser': user,
-                'scopedFailed': false
+                'authedUser': user,
+                'authedFailed': false
             });
             params = {
                 //userId: user.resource.sso[0]
