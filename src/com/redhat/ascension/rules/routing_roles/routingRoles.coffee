@@ -39,21 +39,8 @@ RoutingRoles.OWNED_CASES = (user) ->
   ftsCond = UQL.cond('isFTS', 'is', true)
   ftsRoleCond = UQL.cond('ftsRole', 'like', """\"#{user.kerberos}\"""")
 
-
-  #  #language=SQL
-  #  example = """
-  #(
-  #  OwnerId = '{owner_id}'
-  #  AND (
-  #      (Status = 'Waiting on Red Hat' OR FTS__c = TRUE)
-  #      OR
-  #      (Status = 'Waiting on Customer' AND Internal_Status__c = 'Waiting on Owner')
-  #  )
-  #)
-  #OR
-  #(FTS_Role__c LIKE '%{kerberos}%' AND FTS__c = TRUE)
-  #  """
-  """(#{ownerCond} and ((#{worhCond} or #{ftsCond}) or (#{wocCond} and #{wooCond}))) or (#{ftsRoleCond} and #{ftsCond})"""
+  #"""(#{ownerCond} and ((#{worhCond} or #{ftsCond}) or (#{wocCond} and #{wooCond}))) or (#{ftsRoleCond} and #{ftsCond})"""
+  """(#{internalStatusCond} and ((#{ownerCond} or #{ftsRoleCond}) or (#{wocCond} and #{wooCond})) and #{worhCond}"""
 
 RoutingRoles.FTS = (user) ->
 
