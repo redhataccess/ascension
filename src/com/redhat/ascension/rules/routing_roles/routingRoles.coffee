@@ -22,23 +22,10 @@ RoutingRoles._makeSbrConds = (user) ->
   UQL.or.apply(null, sbrConds)
 
 RoutingRoles.COLLABORATION = (user) ->
-  #if super_region is 'EMEA'
-  #  undefined
-
-  #AND (
-  #  (Case__r.Status = 'Waiting on Red Hat' OR Case__r.FTS__c = TRUE)
-  #  OR
-  #  (Case__r.Status = 'Waiting on Customer' AND Case__r.Internal_Status__c = 'Waiting on Owner')
-  #)
-
-#  where: if sbrConds?.length > 0 then UQL.and(UQL.or.apply(null, sbrConds), statusCond) else statusCond
   wocCond = UQL.cond('internalStatus', 'is', '"Waiting on Collaboration"')
-  closedCond = UQL.cond('status', 'ne', 'Closed')
   worhCond = UQL.cond('status', 'is', '"Waiting on Red Hat"')
 
-
-  """(#{wocCond} and #{this._makeSbrConds(user)})"""
-  UQL.and(wocCond, this._makeSbrConds(user))
+  """(#{wocCond} and #{worhCond} and #{this._makeSbrConds(user)})"""
 
 #TODO need filter logic and contributors field
 RoutingRoles.OWNED_CASES = (user) ->
