@@ -63,14 +63,12 @@ var Component = React.createClass({
                 ssoUsername: this.state.ssoUsername,
                 roles: this.state.roles
             };
-
             return (
                 <div>
-                {taskCases}
-                <Spacer />
-                <i className="fa fa-refresh cursor" style={{marginLeft: "6px"}} onClick={this.queryCases.bind(this, stateHash)}></i>
+                    {taskCases}
+                    <Spacer />
+                    <i className="fa fa-refresh cursor" style={{marginLeft: "6px"}} onClick={this.queryCases.bind(this, stateHash)}></i>
                 </div>
-
             )
         }
     },

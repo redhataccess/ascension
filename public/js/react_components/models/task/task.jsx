@@ -1,4 +1,5 @@
 var React                       = require('react/addons');
+var S                           = require('string');
 var Router                      = require('react-router/dist/react-router');
 var AjaxMixin                   = require('../../mixins/ajaxMixin.coffee');
 var WebUtilsMixin               = require('../../mixins/webUtilsMixin.coffee');
@@ -169,7 +170,7 @@ var Component = React.createClass({
         this.queryCase(this.props.caseNumber);
     },
     render: function() {
-        var caseNumber = this.props.caseNumber;
+        var caseNumber = S(this.props.caseNumber).padLeft(8, '0').s
         if (this.state.caseLoading == true) {
             return <i className='fa fa-spinner fa-spin'></i>;
         }
@@ -217,13 +218,13 @@ var Component = React.createClass({
                             <h3>Case Links</h3>
                             <ul>
                                 <li>
-                                    <a target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.case.resource.caseNumber}`}>
-                                    {`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.case.resource.caseNumber}`}
+                                    <a target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${caseNumber}`}>
+                                    {`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${caseNumber}`}
                                     </a>
                                 </li>
                                 <li>
-                                    <a target='_blank' href={`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.case.resource.caseNumber}`}>
-                                    {`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.case.resource.caseNumber}`}
+                                    <a target='_blank' href={`https://c.na7.visual.force.com/apex/Case_View?sbstr=${caseNumber}`}>
+                                    {`https://c.na7.visual.force.com/apex/Case_View?sbstr=${caseNumber}`}
                                     </a>
                                 </li>
                             </ul>
