@@ -8,14 +8,6 @@ RoutingRoles = {}
 # Case related
 ######################################################
 
-#Filters
-#  Internal status equal to "Waiting on collaboration"
-#  Status not equal to "Closed"
-#  Status equals "Waiting on Red Hat"
-#  TAM case not equal to "TRUE"(This is for EMEA only.  Americas, India, and APAC in the TAM 6/1 workflow no longer exclude TAM cases)
-#  SBR Group includes "<group1>,<group2>"(Matches users current SBRs)
-# TODO -- this can't be completed until the UDS has isTAM included
-
 RoutingRoles._makeSbrConds = (user) ->
   # Use with UQL.or.apply(null, sbrConds)
   sbrConds = _.map(user.sbrs, (s) -> UQL.cond('sbrGroup', 'is', """\"#{s}\""""))
@@ -39,8 +31,22 @@ RoutingRoles.OWNED_CASES = (user) ->
   ftsCond = UQL.cond('isFTS', 'is', true)
   ftsRoleCond = UQL.cond('ftsRole', 'like', """\"#{user.kerberos}\"""")
 
-  #"""(#{ownerCond} and ((#{worhCond} or #{ftsCond}) or (#{wocCond} and #{wooCond}))) or (#{ftsRoleCond} and #{ftsCond})"""
-  """(#{internalStatusCond} and ((#{ownerCond} or #{ftsRoleCond}) or (#{wocCond} and #{wooCond})) and #{worhCond}"""
+#FROM
+#  Case
+#WHERE
+#  (OwnerId = '{owner_id}'
+#    AND (
+#      (Status = 'Waiting on Red Hat' OR FTS__c = TRUE)
+#      OR
+#      (Status = 'Waiting on Customer' AND Internal_Status__c = 'Waiting on Owner')
+#    )
+#  )
+#  OR
+#  (FTS_Role__c LIKE '%{kerberos}%' AND FTS__c = TRUE)
+
+#"""(#{ownerCond} and ((#{worhCond} or #{ftsCond}) or (#{wocCond} and #{wooCond}))) or (#{ftsRoleCond} and #{ftsCond})"""
+#  """(#{internalStatusCond} and ((#{ownerCond} or #{ftsRoleCond}) and (#{wocCond} and #{wooCond})) and #{worhCond}"""
+  """((#{ownerCond} and ((#{worhCond} or #{ftsCond}) or (#{wocCond} and #{wooCond}))) or (#{ftsRoleCond} and #{ftsCond}))"""
 
 # TODO can't be implemented until we can query the user's geo in relation to the case geo
 RoutingRoles.FTS = (user) ->
@@ -73,13 +79,6 @@ RoutingRoles.NNO_EMEA = (user) -> this._NNO_SUPER_REGION(user, 'EMEA')
 
 # INFO - UDS adds ownerId != spamId to all calls, so unassigned can drop that
 RoutingRoles.NCQ = (user) ->
-
-  #OwnerId != '{spam_queue_id}'
-  #AND Internal_Status__c = 'Unassigned'
-  #AND Status != 'Closed'
-  #AND Product__c LIKE '%%JBoss%%'
-  #ORDER BY SBT__c ASC
-
   unassignedCond = UQL.cond('internalStatus', 'is', """\"Unassigned\"""")
   notClosedCond = UQL.cond('status', 'ne', """\"Closed\"""")
   """(#{unassignedCond} and #{notClosedCond} and #{this._makeSbrConds(user)})"""

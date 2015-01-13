@@ -110,16 +110,17 @@ var Component = React.createClass({
                 score={this.props.case.resource.collaborationScore}
                 onClick={this.taskClick.bind(this, this.props.case)}>
                 <TaskAction case={this.props.case} key='taskAction' absolute={true}></TaskAction>
-                <span className='task-entity-state-icon'>
-                </span>
+                {/*<span className='task-entity-state-icon'></span>*/}
                 <span className='task-entity-description'>{this.genEntityDescription(this.props.case)}</span>
                 <span className='task-bid'>{this.genTaskBid(this.props.case)}</span>
-                <span className='task-stat-icon'>
+                {/*
+                <span className='task-state-icon'>
                     <IconWithTooltip
                         iconName={this.genTaskStateIcon(this.props.case)}
                         tooltipPrefix="Task"
                         tooltipText={TaskIconMapping[this.props.case.resource.status] || '?'}></IconWithTooltip>
                 </span>
+                */}
             </div>
         )
     }
