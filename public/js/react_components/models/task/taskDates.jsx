@@ -28,21 +28,17 @@ var Component = React.createClass({
         if (this.props.task.resource.state !== TaskStateEnum.CLOSED.name) {
             return (
                 <div>
-                    <span>Task Created on</span>
-                    <Label className='task-meta-data' bsStyle='primary' key='created'>{created.format(format)}</Label>
-                    <span> and opened for </span>
-                    <Label className='task-meta-data' bsStyle='primary' key='duration'>{durHuman}</Label>
+                    <span>Created: {created.format(format)}</span>
+                    &nbsp;  &nbsp;
+                    <span>Opened: {durHuman}</span>
                 </div>
             )
         } else if (this.props.task.resource.state === TaskStateEnum.CLOSED.name) {
             return (
                 <div>
-                    <span>Task Created on</span>
-                    <Label className='task-meta-data' bsStyle='primary' key='created'>{created.format(format)}</Label>
-                    <span> and closed on </span>
-                    <Label className='task-meta-data' bsStyle='primary' key='duration'>{closed.format(format)}</Label>
-                    <span> a duration of </span>
-                    <Label className='task-meta-data' bsStyle='primary' key='duration'>{createdClosedDurHuman}</Label>
+                    <span>Created: {created.format(format)}</span>
+                    <span> Closed: {closed.format(format)} </span>
+                    <span> Opened: {createdClosedDurHuman}</span>
                 </div>
             )
         } else {

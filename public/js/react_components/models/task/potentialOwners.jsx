@@ -13,9 +13,9 @@ var Component = React.createClass({
             return null;
         }
         OwnersPopover = <Popover>No potential owners</Popover>;
-        this.props.task['potentialOwners'].sort((a, b) => b.resource.score - a.resource.score);
+        //this.props.task['potentialOwners'].sort((a, b) => b.resource.score - a.resource.score);
         potentialOwners = this.props.task['potentialOwners'] == null ? [] : null;
-        potentialOwnerCount = potentialOwners  || 0;
+        potentialOwnerCount = potentialOwners.length || 0;
         if (potentialOwnerCount  > 0) {
             lis = _.map(potentialOwners, (u) => <li key={u['id']}>{u['fullName']}</li>);
             OwnersPopover = (
@@ -25,9 +25,7 @@ var Component = React.createClass({
             )
         }
         return (
-            <OverlayTrigger trigger='hover' placement='bottom' overlay={OwnersPopover} key='overlay'>
-                <Label bsStyle='default' key='label'>`${potentialOwnerCount} Potential Owners(s)`</Label>
-            </OverlayTrigger>
+            <span>{`Potential Owners: ${potentialOwnerCount}`}</span>
         )
     }
 });
