@@ -5,7 +5,7 @@ var AjaxMixin                   = require('../../mixins/ajaxMixin.coffee');
 var WebUtilsMixin               = require('../../mixins/webUtilsMixin.coffee');
 var TaskState                   = require('./taskState.jsx');
 var TaskHeader                  = require('./taskHeader.jsx');
-var TaskAction                  = require('./taskAction.jsx');
+var TaskActionHeader            = require('./taskActionHeader.jsx');
 var TaskMetaData                = require('./taskMetaData.jsx');
 var TaskDates                   = require('./taskDates.jsx');
 var Spacer                      = require('react-redhat/Spacer');
@@ -171,6 +171,13 @@ var Component = React.createClass({
     },
     render: function() {
         var caseNumber = S(this.props.caseNumber).padLeft(8, '0').s
+        var summaryStyle = {
+            overflow : 'hidden',
+            width: '50em',
+            'text-overflow': 'ellipsis',
+            'white-space': 'nowrap'
+
+        };
         if (this.state.caseLoading == true) {
             return <i className='fa fa-spinner fa-spin'></i>;
         }
@@ -180,7 +187,7 @@ var Component = React.createClass({
         return (
             <div>
                 <div key='taskContainer' className='row'>
-                    <div className='col-md-6' key='containerLeft'>
+                    <div className='col-md-8' key='containerLeft'>
                         <TaskHeader task={this.state.case} key='header'></TaskHeader>
                         <span key='metaDataContainer'>
                             <TaskState
@@ -194,12 +201,13 @@ var Component = React.createClass({
                                 key='taskStatus'>
                             </TaskState>
                             &nbsp;
-                            <TaskAction case={this.state.case} key='action'></TaskAction>
-                            &nbsp;
-                            <User resource={this.state.case.resource.owner} key='user'></User>
-                            &nbsp;
-                            <TaskMetaData task={this.state.case} key='metaData'></TaskMetaData>
+                            <TaskActionHeader case={this.state.case} key='action'></TaskActionHeader>
                         </span>
+                        <span>{`Status: ${this.state.case.resource.internalStatus}`}</span>
+                        &nbsp;&nbsp;
+                        <DeclinedUsers task={this.state.case}></DeclinedUsers>
+                        &nbsp;&nbsp;
+                        <PotentialOwners task={this.state.case}></PotentialOwners>
                         <span className='clearfix'></span>
                         <Spacer />
                         <span key='datesContainer'>
@@ -207,28 +215,20 @@ var Component = React.createClass({
                         </span>
                         <span className='clearfix'></span>
                         <Spacer />
-                        <DeclinedUsers task={this.state.case}></DeclinedUsers>
-                        {/*<PotentialOwners task={this.state.case}></PotentialOwners>*/}
-                    </div>
-                    {/*/////////////////////////////////////////////////////////////////////////////////*/}
-                    {/*Top Right*/}
-                    {/*/////////////////////////////////////////////////////////////////////////////////*/}
-                    <div className='col-md-6' key='containerRight'>
-                        <Well key='well'>
-                            <h3>Case Links</h3>
-                            <ul>
-                                <li>
-                                    <a target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${caseNumber}`}>
-                                    {`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${caseNumber}`}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a target='_blank' href={`https://c.na7.visual.force.com/apex/Case_View?sbstr=${caseNumber}`}>
-                                    {`https://c.na7.visual.force.com/apex/Case_View?sbstr=${caseNumber}`}
-                                    </a>
-                                </li>
-                            </ul>
-                        </Well>
+                        <div style={summaryStyle}>Summary:  {this.state.case.resource.summary} </div>
+                        <Spacer />
+                        {/*/////////////////////////////////////////////////////////////////////////////////*/}
+                        {/*Case link buttons */}
+                        {/*/////////////////////////////////////////////////////////////////////////////////*/}
+                        <div key='caseLinks'>
+                            <a className='btn btn-open' target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.case.resource.caseNumber}`}>
+                                    {`Case Link 1`}
+                            </a>
+                        &nbsp;
+                            <a className='btn btn-open' target='_blank' href={`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.case.resource.caseNumber}`}>
+                                    {`Case Link 2`}
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {/*/////////////////////////////////////////////////////////////////////////////////*/}

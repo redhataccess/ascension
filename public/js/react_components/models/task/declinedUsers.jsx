@@ -24,9 +24,7 @@ var Component = React.createClass({
             )
         }
         return (
-            <OverlayTrigger trigger='hover' placement='bottom' overlay={UsersPopover} key='overlay'>
-                <Label bsStyle='default' key='label'>{`${declinedUserCount} Declined User(s)`}</Label>
-            </OverlayTrigger>
+            <span>{`Declined Owners: ${declinedUserCount}`}</span>
         )
     }
 });
