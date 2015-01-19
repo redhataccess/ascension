@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test-watch": "grunt watch 2>&1 >/dev/null & ./node_modules/karma/bin/karma start karma.dev.js"
   },
   "dependencies": {
     "body-parser": "~1.8.2",
