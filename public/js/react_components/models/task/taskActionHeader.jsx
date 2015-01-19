@@ -4,7 +4,7 @@ var TaskOpEnum      = require('../../../../../src/com/redhat/ascension/rules/enu
 var EntityOpEnum    = require('../../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum.coffee');
 
 //var Label           = React.createFactory(require('react-bootstrap/Label'));
-var Label           = require('react-bootstrap/Label');
+//var Label           = require('react-bootstrap/Label');
 
 var Component = React.createClass({
     displayName: 'TaskActionHeader',

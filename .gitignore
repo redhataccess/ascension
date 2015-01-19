@@ -26,8 +26,8 @@ public/js/lib/ascension/**/*.map
 src/**/*.map
 src/**/*.js
 
-test/*.js
-test/*.map
+test/**/*.js
+test/**/*.map
 
 # OS generated files #
 # ######################
