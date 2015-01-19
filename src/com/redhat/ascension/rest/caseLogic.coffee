@@ -91,7 +91,8 @@ CaseLogic.fetchCases = (opts) ->
       CaseLogic.fetchCasesUql(finalUql)
     )
     .then((cases) ->
-      deferred.resolve _.chain([cases || []]).flatten().uniq((c) -> c.externalModelId).each((c) -> c.resource.caseNumber = S(c.resource.caseNumber).padLeft(8, '0').s).value()
+      logger.debug("fetched #{cases.length} cases")
+      deferred.resolve _.chain([cases || []]).flatten().without(undefined).uniq((c) -> c.externalModelId).each((c) -> c.resource.caseNumber = S(c.resource.caseNumber).padLeft(8, '0').s).value()
     )
 #    .spread((sbrCases, ownerCases) ->
 #      logger.debug("Found #{sbrCases.length} sbrCases and #{ownerCases} ownerCases")
