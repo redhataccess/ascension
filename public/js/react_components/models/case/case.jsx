@@ -11,7 +11,9 @@ var CaseSummary         = require('./caseSummary.jsx');
 var CaseAssociates      = require('./caseAssociates.jsx');
 var CaseIssueLinks      = require('./caseIssueLinks.jsx');
 var CaseResourceLinks   = require('./caseResourceLinks.jsx');
-var Comments            = require('../comment/comments.jsx');
+//var Comments            = require('../comment/comments.jsx');
+var Comments            = require('react-redhat/comment/Comments');
+
 
 var Alert               = require('react-bootstrap/Alert');
 var Grid                = require('react-bootstrap/Grid');
