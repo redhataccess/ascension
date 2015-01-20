@@ -7,6 +7,8 @@
     "test-watch": "grunt watch 2>&1 >/dev/null & ./node_modules/karma/bin/karma start karma.dev.js"
   },
   "dependencies": {
+    "6to5": "2.x",
+    "6to5-loader": "2.x",
     "body-parser": "~1.8.2",
     "coffee-loader": "~0.7.2",
     "compression": "~1.1.0",
@@ -33,7 +35,7 @@
     "jsx-loader": "~0.12.x",
     "less": "2.*",
     "less-loader": "2.*",
-    "less-middleware": "2.*",
+    "less-middleware": "~1.0.4",
     "lodash": "^2.4.1",
     "matchdep": "~0.3.0",
     "moment": "2.x.x",
@@ -52,9 +54,7 @@
     "tracer": "^0.7.3",
     "url-loader": "~0.5.5",
     "webpack": "*",
-    "webpack-dev-server": "*",
-    "6to5": "2.x",
-    "6to5-loader": "2.x"
+    "webpack-dev-server": "*"
   },
   "devDependencies": {
     "chai": "~1.9.1",
