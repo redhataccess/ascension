@@ -8,12 +8,17 @@ moment            = require 'moment'
 Q                 = require 'q'
 TaskActionsEnum   = require './enums/taskActionsEnum'
 request           = require 'request'
+requestify        = require 'requestify'
 Uri               = require 'jsuri'
 
 UserLogic = {}
 
 UserLogic.normalizeUserResponse = (body) ->
   u = undefined
+
+  if _.isString(body)
+    u = JSON.parse(body)
+
   if _.isArray(body)
     u = body[0]
   else
@@ -34,9 +39,8 @@ UserLogic.fetchUser = (opts) ->
   opts =
     url: "#{settings.UDS_URL}/user/#{opts.userInput}"
     json: true
+    gzip: true
 
-  logger.debug "UserLogic.fetchUser: #{opts.url}"
-  # Lookup user based on given sso username
   request opts, (err, response, body) ->
     user = self.normalizeUserResponse(body)
 
@@ -61,6 +65,7 @@ UserLogic.fetchUserUql = (opts) ->
   opts =
     url: uri.toString()
     json: true
+    gzip: true
 
   # Lookup user based on given sso username
   request opts, (err, response, body) ->
@@ -80,6 +85,12 @@ UserLogic.fetchUserUql = (opts) ->
       return
 
     deferred.resolve user
+#  requestify.get(opts.url).then((response) ->
+#    user = self.normalizeUserResponse(response.getBody())
+#    deferred.resolve user
+#  , (err) ->
+#    deferred.reject err
+#  )
 
   deferred.promise
 
@@ -91,8 +102,7 @@ UserLogic.fetchUsersUql = (opts) ->
   opts =
     url: uri.toString()
     json: true
-
-  logger.debug "Fetching users with uri: #{opts.url}"
+    gzip: true
 
   # Lookup user based on given sso username
   request opts, (err, response, body) ->

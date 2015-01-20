@@ -34,6 +34,7 @@ CaseLogic.fetchCasesUql = (opts) ->
   opts =
     url: uri.toString()
     json: true
+    gzip: true
 
   # Lookup user based on given sso username
   request opts, (err, response, body) ->
@@ -52,12 +53,14 @@ CaseLogic.fetchCases = (opts) ->
     # http://cl.ly/image/3t3N1g0n0Q0j
     userUql =
       where: "SSO is \"#{opts.ssoUsername}\""
-    logger.debug("User UQL: #{userUql.where}")
 
     UserLogic.fetchUserUql(userUql).then((user) ->
 
       finalUql =
         where: undefined
+
+      if (not user?) or (not user?.externalModelId?)
+        new Error("Was not able to fetch user given UQL: #{userUql.where}")
 
       # If no sbrs present just pull the owned + fts cases, collaboration requires sbrs
       if (not user.sbrs?) or user.sbrs?.length is 0
