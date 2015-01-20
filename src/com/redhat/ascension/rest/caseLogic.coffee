@@ -54,7 +54,7 @@ CaseLogic.fetchContributorCasesUql = (opts) ->
   if opts.resourceProjection?
     uri.addQueryParam('resourceProjection', opts.resourceProjection)
 
-  logger.debug "Fetching contributors cases with uql: #{opts.where}"
+  #logger.debug "Fetching contributors cases with uql: #{opts.where}"
   logger.debug "Fetching contributors cases with uri: #{uri}"
   opts =
     url: uri.toString()
@@ -82,7 +82,7 @@ CaseLogic.fetchContributorCasesUql = (opts) ->
       if caseIds?.length > 0
         caseIdConds = _.map(caseIds, (caseId) -> UQL.cond('caseId', 'is', """\"#{caseId}\""""))
         caseIdsUql =
-          where: "(" + UQL.or.apply(null, caseIdConds) + ")"
+          where: UQL.or.apply(null, caseIdConds)
         CaseLogic.fetchCasesUql(caseIdsUql).then((cases) ->
           deferred.resolve cases
         )
@@ -145,6 +145,7 @@ CaseLogic.fetchCases = (opts) ->
         logger.debug("No url roles or user roles found.")
         userRoles = [RoutingRoles.key_mapping.OWNED_CASES, RoutingRoles.key_mapping.COLLABORATION, RoutingRoles.key_mapping.FTS]
 
+      logger.debug("Mapping the following roles: #{userRoles}")
       uqlParts = _.map(userRoles, (r) -> RoutingRoles.mapping[r](user))
 
       # Now that the role UQL statements are determined, or them together

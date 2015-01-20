@@ -70,6 +70,12 @@ ResourceOp.FOLLOW_UP_WITH_ENGINEERING =
 _.defaults ResourceOp,
   'FOLLOW_UP_WITH_ENGINEERING': ResourceOp.FOLLOW_UP_WITH_ENGINEERING
 
+ResourceOp.FOLLOW_UP_WITH_PM =
+  name: 'FOLLOW_UP_WITH_PM '
+  display: 'Follow up with PM'
+_.defaults ResourceOp,
+  'FOLLOW_UP_WITH_PM': ResourceOp.FOLLOW_UP_WITH_PM
+
 ResourceOp.FOLLOW_UP_WITH_SALES =
   name: 'FOLLOW_UP_WITH_SALES'
   display: 'Follow up with sales'
@@ -132,7 +138,7 @@ ResourceOp.getOpFromCase = (c) ->
       when 'Waiting on Engineering' then ResourceOp.FOLLOW_UP_WITH_ENGINEERING
       when 'Waiting on Customer' then ResourceOp.NOOP
       when 'Unassigned' then ResourceOp.TAKE_OWNERSHIP
-      when 'Waiting on PM' then ResourceOp.NOOP
+      when 'Waiting on PM' then ResourceOp.FOLLOW_UP_WITH_PM
       when 'Waiting on QA' then ResourceOp.UPDATE
       when 'Waiting on Contributor' then ResourceOp.CONTRIBUTE
       when 'Waiting on Sales' then ResourceOp.FOLLOW_UP_WITH_SALES

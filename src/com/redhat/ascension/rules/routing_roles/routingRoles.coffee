@@ -17,7 +17,7 @@ RoutingRoles.COLLABORATION = (user) ->
   wocCond = UQL.cond('internalStatus', 'is', '"Waiting on Collaboration"')
   notClosedCond = UQL.cond('status', 'ne', '"Closed"')
 
-  """(#{wocCond} and #{notClosedCond} and #{this._makeSbrConds(user)})"""
+  """(#{wocCond} and #{notClosedCond} and #{RoutingRoles._makeSbrConds(user)})"""
 
 # This is a supplemental role to the owned cases role, since we can't roll it into one UQL query, have to split it apart
 # Contributor example
@@ -68,7 +68,7 @@ RoutingRoles.FTS = (user) ->
 
   ftsCond = UQL.cond('isFTS', 'is', true)
   ftsRoleCond = UQL.cond('ftsRole', 'is', '""')
-  """(#{ftsCond} and #{ftsRoleCond} and #{this._makeSbrConds(user)})"""
+  """(#{ftsCond} and #{ftsRoleCond} and #{RoutingRoles._makeSbrConds(user)})"""
 
 RoutingRoles._NNO_SUPER_REGION = (user, super_region) ->
 
@@ -78,7 +78,7 @@ RoutingRoles._NNO_SUPER_REGION = (user, super_region) ->
   """
 
   nnoNaCond = UQL.cond('nnoSuperRegion', 'is', """\"#{super_region}\"""")
-  """(#{nnoNaCond} and #{this._makeSbrConds(user)})"""
+  """(#{nnoNaCond} and #{RoutingRoles._makeSbrConds(user)})"""
 
 RoutingRoles.NNO_NA = (user) -> this._NNO_SUPER_REGION(user, 'NA')
 RoutingRoles.NNO_APAC = (user) -> this._NNO_SUPER_REGION(user, 'APAC')
@@ -89,7 +89,7 @@ RoutingRoles.NNO_EMEA = (user) -> this._NNO_SUPER_REGION(user, 'EMEA')
 RoutingRoles.NCQ = (user) ->
   unassignedCond = UQL.cond('internalStatus', 'is', """\"Unassigned\"""")
   notClosedCond = UQL.cond('status', 'ne', """\"Closed\"""")
-  """(#{unassignedCond} and #{notClosedCond} and #{this._makeSbrConds(user)})"""
+  """(#{unassignedCond} and #{notClosedCond} and #{RoutingRoles._makeSbrConds(user)})"""
 
 ######################################################
 # Mapping
