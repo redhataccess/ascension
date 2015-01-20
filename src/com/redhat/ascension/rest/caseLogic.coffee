@@ -50,7 +50,6 @@ CaseLogic.fetchCases = (opts) ->
 
   if opts?.ssoUsername? and opts?.ssoUsername isnt ''
 
-    # http://cl.ly/image/3t3N1g0n0Q0j
     userUql =
       where: "SSO is \"#{opts.ssoUsername}\""
 

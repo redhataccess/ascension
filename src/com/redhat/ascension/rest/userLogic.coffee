@@ -8,7 +8,6 @@ moment            = require 'moment'
 Q                 = require 'q'
 TaskActionsEnum   = require './enums/taskActionsEnum'
 request           = require 'request'
-requestify        = require 'requestify'
 Uri               = require 'jsuri'
 
 UserLogic = {}
@@ -85,12 +84,6 @@ UserLogic.fetchUserUql = (opts) ->
       return
 
     deferred.resolve user
-#  requestify.get(opts.url).then((response) ->
-#    user = self.normalizeUserResponse(response.getBody())
-#    deferred.resolve user
-#  , (err) ->
-#    deferred.reject err
-#  )
 
   deferred.promise
 

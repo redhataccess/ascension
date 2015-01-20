@@ -136,6 +136,7 @@ var Component = React.createClass({
     //    }
     //    return null;
     //},
+    // TODO -- Add openUser here and propagate it down through the props.
     genEntityContents: function() {
         //return <Case key='taskCase' caseNumber={this.state.case.resource.caseNumber}></Case>;
         if (this.state.caseLoading == true) {

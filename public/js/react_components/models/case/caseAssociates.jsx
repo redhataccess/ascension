@@ -25,7 +25,7 @@ var Component = React.createClass({
         }
     },
     render: function() {
-        var associates, associatesUI, owner, ownerStyle, associateElements;
+        var associates, associatesUI, owner, associateElements;
         owner = this.props.owner;
         associates = this.props.associates;
 
