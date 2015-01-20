@@ -133,7 +133,6 @@
       limit: _.parseInt(req.query['limit']) || 100,
       roles: roles
     };
-    logger.debug("Discovered roles: " + req.query['roles']);
     return CaseLogic.fetchCases(opts).then(function(data) {
       return res.send(data);
     })["catch"](function(err) {

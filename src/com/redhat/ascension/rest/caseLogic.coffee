@@ -45,6 +45,58 @@ CaseLogic.fetchCasesUql = (opts) ->
 
   deferred.promise
 
+CaseLogic.fetchContributorCasesUql = (opts) ->
+  deferred = Q.defer()
+
+  uri = new Uri(settings.UDS_URL).setPath('/case/associates').addQueryParam('where', opts.where)
+  if opts.limit?
+    uri.addQueryParam('limit', opts.limit)
+  if opts.resourceProjection?
+    uri.addQueryParam('resourceProjection', opts.resourceProjection)
+
+  logger.debug "Fetching contributors cases with uql: #{opts.where}"
+  logger.debug "Fetching contributors cases with uri: #{uri}"
+  opts =
+    url: uri.toString()
+    json: true
+    gzip: true
+
+  # Lookup user based on given sso username
+  request opts, (err, response, body) ->
+    if err?
+      deferred.reject err
+    else
+      #{
+      #"resource": {
+      #  "role": "Contributor",
+      #  "associate": {
+      #    "resourceReliability": "Fresh",
+      #    "externalModelId": "005A0000001qUouIAE"
+      #  },
+      #  "caseId": "500A000000J5Eh2IAF"
+      #},
+      #"resourceReliability": "Fresh",
+      #"externalModelId": "500A000000J5Eh2IAF"
+      #}
+      caseIds = _.map(body, (r) -> r.resource.caseId)
+      if caseIds?.length > 0
+        caseIdConds = _.map(caseIds, (caseId) -> UQL.cond('caseId', 'is', """\"#{caseId}\""""))
+        caseIdsUql =
+          where: "(" + UQL.or.apply(null, caseIdConds) + ")"
+        CaseLogic.fetchCasesUql(caseIdsUql).then((cases) ->
+          deferred.resolve cases
+        )
+        .catch((err) ->
+          logger.error(err?.stack || err)
+          deferred.reject err
+        ).done()
+      else
+        deferred.resolve []
+
+  deferred.promise
+
+# TODO -- may need to make a function that creates and resolves a promise with []
+
 CaseLogic.fetchCases = (opts) ->
   deferred = Q.defer()
 
@@ -61,46 +113,61 @@ CaseLogic.fetchCases = (opts) ->
       if (not user?) or (not user?.externalModelId?)
         new Error("Was not able to fetch user given UQL: #{userUql.where}")
 
-      # If no sbrs present just pull the owned + fts cases, collaboration requires sbrs
-      if (not user.sbrs?) or user.sbrs?.length is 0
-        finalUql.where = RoutingRoles.OWNED_CASES(user)
+      # Attempt to extract the routing role specific roles from the UDS user
+      userRoles = RoutingRoles.extractRoutingRoles(user)
+
+      # Holds the individual uqlParts to be OR'd together
+      uqlParts = []
+
       ######################################################
       # The url query params should override any user roles
       ######################################################
-      else if opts.roles?.length > 0
-        logger.debug("Discovered roles from the query parms: #{opts.roles}")
-        uqlParts = _.map(opts.roles, (r) -> RoutingRoles[r](user))
-        uqlFormatted = uqlParts.join(' or ')
-        finalUql.where = uqlFormatted
+      if opts.roles?.length > 0
+        userRoles = opts.roles
+        logger.debug("Discovered roles from the query parms: #{userRoles}")
       ######################################################
-      # Next fall through to the user defined roles from UDS
-      # TODO -- this is yet to be implemented in UDS
+      # This should be the primary condition, where a user
+      # has routing roles on his/her user object
       ######################################################
-      else if user.routingRoles?.length > 0
-        undefined
+      else if userRoles?.length > 0
+        logger.debug("Discovered roles on the user: #{userRoles}")
+      ######################################################
+      # If no sbrs present just pull the owned + fts cases, collaboration requires sbrs
+      ######################################################
+      else if (not user.sbrs?) or user.sbrs?.length is 0
+        logger.debug("No sbrs found on user.")
+        userRoles = [RoutingRoles.key_mapping.OWNED_CASES]
       ######################################################
       # Finally just show the standard plate for the user
       # Based on the my plate logic
       ######################################################
       else
-        uqlParts = [RoutingRoles.COLLABORATION(user), RoutingRoles.OWNED_CASES(user), RoutingRoles.FTS(user)]
-        uqlFormatted = uqlParts.join(' or ')
-        finalUql.where = uqlFormatted
+        logger.debug("No url roles or user roles found.")
+        userRoles = [RoutingRoles.key_mapping.OWNED_CASES, RoutingRoles.key_mapping.COLLABORATION, RoutingRoles.key_mapping.FTS]
+
+      uqlParts = _.map(userRoles, (r) -> RoutingRoles.mapping[r](user))
+
+      # Now that the role UQL statements are determined, or them together
+      uqlFormatted = uqlParts.join(' or ')
+      finalUql.where = uqlFormatted
 
       logger.debug("Generated UQL: #{finalUql.where}")
       # Returns a promise for the next then in the chain
       #[CaseLogic.fetchCasesUql(sbrsUql), CaseLogic.fetchCasesUql(ownerUql)]
-      CaseLogic.fetchCasesUql(finalUql)
+
+      # Here return the promise of the main UQL fetch, and since we can't fetch contributor cases directly, return
+      # an optional second array element containing either null or the promise for the contributor cases
+      [CaseLogic.fetchCasesUql(finalUql), if _.contains(userRoles, RoutingRoles.key_mapping.OWNED_CASES) then CaseLogic.fetchContributorCasesUql({where: RoutingRoles._CONTRIBUTOR(user)}) else null]
+
     )
-    .then((cases) ->
-      logger.debug("fetched #{cases.length} cases")
-      deferred.resolve _.chain([cases || []]).flatten().without(undefined).uniq((c) -> c.externalModelId).each((c) -> c.resource.caseNumber = S(c.resource.caseNumber).padLeft(8, '0').s).value()
+    .spread((cases, contributorCases) ->
+      contribCases = contributorCases || []
+      logger.debug("fetched #{cases.length} main case(s) and #{contribCases.length} contributor case(s)")
+      deferred.resolve _.chain([[cases || []], [contribCases]]).flatten().without(undefined).uniq((c) -> c.externalModelId).each((c) -> c.resource.caseNumber = S(c.resource.caseNumber).padLeft(8, '0').s).value()
     )
-#    .spread((sbrCases, ownerCases) ->
-#      logger.debug("Found #{sbrCases.length} sbrCases and #{ownerCases} ownerCases")
-#      finalCases = _.chain([sbrCases || [], ownerCases || []]).flatten().uniq((c) -> c.externalModelId).value()
-#      logger.debug("finalCase count: #{finalCases.length}")
-#      deferred.resolve finalCases
+#    .then((cases) ->
+#      logger.debug("fetched #{cases.length} cases")
+#      deferred.resolve _.chain([cases || []]).flatten().without(undefined).uniq((c) -> c.externalModelId).each((c) -> c.resource.caseNumber = S(c.resource.caseNumber).padLeft(8, '0').s).value()
 #    )
     .catch((err) ->
       logger.error(err?.stack || err)

@@ -67,6 +67,7 @@ UserLogic.fetchUserUql = (opts) ->
     gzip: true
 
   # Lookup user based on given sso username
+  logger.debug("Fetching user: #{uri.toString()}")
   request opts, (err, response, body) ->
     user = undefined
 

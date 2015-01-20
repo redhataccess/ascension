@@ -105,8 +105,6 @@ app.get "/cases", (req, res) ->
     limit: _.parseInt(req.query['limit']) || 100
     roles: roles
 
-  logger.debug("Discovered roles: #{req.query['roles']}")
-
   CaseLogic.fetchCases(opts).then((data) ->
     res.send(data)
   ).catch((err) ->

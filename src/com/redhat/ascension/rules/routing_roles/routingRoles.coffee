@@ -15,14 +15,22 @@ RoutingRoles._makeSbrConds = (user) ->
 
 RoutingRoles.COLLABORATION = (user) ->
   wocCond = UQL.cond('internalStatus', 'is', '"Waiting on Collaboration"')
-  worhCond = UQL.cond('status', 'is', '"Waiting on Red Hat"')
+  notClosedCond = UQL.cond('status', 'ne', '"Closed"')
 
-  """(#{wocCond} and #{worhCond} and #{this._makeSbrConds(user)})"""
+  """(#{wocCond} and #{notClosedCond} and #{this._makeSbrConds(user)})"""
 
-#TODO need filter logic and contributors field
+# This is a supplemental role to the owned cases role, since we can't roll it into one UQL query, have to split it apart
+# Contributor example
+# /case/associates?where=((userId is "005A0000001qUouIAE" and caseStatus is "Waiting on Red Hat") and (caseInternalStatus is "Waiting on Contributor" and roleName is "Contributor")
+RoutingRoles._CONTRIBUTOR = (user) ->
+  ownerCond = UQL.cond('userId', 'is', """\"#{user.id}\"""")
+  worhCond = UQL.cond('caseStatus', 'is', '"Waiting on Red Hat"')
+  wocCond = UQL.cond('caseInternalStatus', 'is', '"Waiting on Contributor"')
+  contributorCond = UQL.cond('roleName', 'is', '"Contributor"')
+  """((#{ownerCond} and #{worhCond}) and (#{wocCond} and #{contributorCond}))"""
+
 RoutingRoles.OWNED_CASES = (user) ->
 
-#  where: if sbrConds?.length > 0 then UQL.and(UQL.or.apply(null, sbrConds), statusCond) else statusCond
   internalStatusCond = UQL.cond('internalStatus', 'is', '"Waiting on Owner"')
   ownerCond = UQL.cond('ownerId', 'is', """\"#{user.id}\"""")
   worhCond = UQL.cond('status', 'is', '"Waiting on Red Hat"')
@@ -82,5 +90,62 @@ RoutingRoles.NCQ = (user) ->
   unassignedCond = UQL.cond('internalStatus', 'is', """\"Unassigned\"""")
   notClosedCond = UQL.cond('status', 'ne', """\"Closed\"""")
   """(#{unassignedCond} and #{notClosedCond} and #{this._makeSbrConds(user)})"""
+
+######################################################
+# Mapping
+######################################################
+#ex. Role:
+#{
+#  "resource": {
+#    "name": "ascension-owned-cases",
+#    "description": "Ascension - Owned Cases",
+#    "superRegion": "NA"
+#  },
+#  "resourceReliability": "Fresh",
+#  "externalModelId": 39
+#},
+RoutingRoles.extractRoutingRoles = (user) ->
+  roleNames = []
+  if user?.roles?.length > 0
+    _.each user.roles, (r) ->
+      if RoutingRoles.mapping[r.resource.name.toLowerCase()]?
+        roleNames.push r.resource.name.toLowerCase()
+
+  roleNames
+
+RoutingRoles.key_mapping = {
+  OWNED_CASES: "ascension-owned-cases"
+  COLLABORATION: "ascension-collaboration"
+  NNO_APAC: "ascension-nno-apac"
+  NNO_NA: "ascension-nno-na"
+  NNO_INDIA: "ascension-nno-india"
+  NNO_EMEA: "ascension-nno-emea"
+  FTS: "ascension-fts"
+  NCQ: "ascension-ncq"
+}
+
+RoutingRoles.mapping = {
+  "owned_cases": RoutingRoles.OWNED_CASES
+  "ascension-owned-cases": RoutingRoles.OWNED_CASES
+
+  "collaboration": RoutingRoles.COLLABORATION
+  "ascension-collaboration": RoutingRoles.COLLABORATION
+
+  "nno_apac": RoutingRoles.NNO_APAC
+  "ascension-nno-apac": RoutingRoles.NNO_APAC
+  "nno_na": RoutingRoles.NNO_NA
+  "ascension-nno-na": RoutingRoles.NNO_NA
+  "nno_india": RoutingRoles.NNO_INDIA
+  "ascension-nno-india": RoutingRoles.NNO_INDIA
+  "nno_emea": RoutingRoles.NNO_EMEA
+  "ascension-nno-emea": RoutingRoles.NNO_EMEA
+
+  "fts": RoutingRoles.FTS
+  "ascension-fts": RoutingRoles.FTS
+
+  "ncq": RoutingRoles.NCQ
+  "ascension-ncq": RoutingRoles.NCQ
+
+}
 
 module.exports = RoutingRoles
