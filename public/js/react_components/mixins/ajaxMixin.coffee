@@ -2,11 +2,11 @@ moment    = require 'moment'
 _         = require 'lodash'
 Uri       = require 'jsUri'
 Q         = require 'q/q'
+Q.longStackSupport = true
 
 urlPrefix = '/etc/os1/ascension'
 
 Mixin =
-
   get: (opts) ->
 
     metricsConfig =

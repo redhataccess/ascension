@@ -156,8 +156,7 @@ CaseLogic.fetchCases = (opts) ->
       uqlParts = _.map(userRoles, (r) -> RoutingRoles.mapping[r](user))
 
       # Now that the role UQL statements are determined, or them together
-      uqlFormatted = uqlParts.join(' or ')
-      finalUql.where = uqlFormatted
+      finalUql.where = uqlParts.join(' or ')
 
       logger.debug("Generated UQL: #{finalUql.where}")
       # Returns a promise for the next then in the chain

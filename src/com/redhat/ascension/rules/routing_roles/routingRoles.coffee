@@ -39,7 +39,7 @@ RoutingRoles.OWNED_CASES = (user) ->
   wocCond = UQL.cond('status', 'is', '"Waiting on Customer"')
   wooCond = UQL.cond('internalStatus', 'is', '"Waiting on Owner"')
   ftsCond = UQL.cond('isFTS', 'is', true)
-  ftsRoleCond = UQL.cond('ftsRole', 'like', """\"\%#{user.kerberos}\%\"""")
+  ftsRoleCond = UQL.cond('ftsRole', 'like', """\"%#{user.kerberos}%\"""")
   notClosedCond = UQL.cond('status', 'ne', '"Closed"')
 
 #FROM
