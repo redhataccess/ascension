@@ -17,7 +17,8 @@ RoutingRoles.COLLABORATION = (user) ->
   wocCond = UQL.cond('internalStatus', 'is', '"Waiting on Collaboration"')
   notClosedCond = UQL.cond('status', 'ne', '"Closed"')
 
-  """(#{wocCond} and #{notClosedCond} and #{RoutingRoles._makeSbrConds(user)})"""
+  #"""(#{wocCond} and #{notClosedCond} and #{RoutingRoles._makeSbrConds(user)})"""
+  UQL.and(wocCond, UQL.and(notClosedCond, RoutingRoles._makeSbrConds(user)))
 
 # This is a supplemental role to the owned cases role, since we can't roll it into one UQL query, have to split it apart
 # Contributor example
@@ -27,7 +28,8 @@ RoutingRoles._CONTRIBUTOR = (user) ->
   worhCond = UQL.cond('caseStatus', 'is', '"Waiting on Red Hat"')
   wocCond = UQL.cond('caseInternalStatus', 'is', '"Waiting on Contributor"')
   contributorCond = UQL.cond('roleName', 'is', '"Contributor"')
-  """((#{ownerCond} and #{worhCond}) and (#{wocCond} and #{contributorCond}))"""
+  #"""((#{ownerCond} and #{worhCond}) and (#{wocCond} and #{contributorCond}))"""
+  UQL.and(ownerCond, UQL.and(worhCond, UQL.and(wocCond, contributorCond)))
 
 RoutingRoles.OWNED_CASES = (user) ->
 
@@ -37,7 +39,7 @@ RoutingRoles.OWNED_CASES = (user) ->
   wocCond = UQL.cond('status', 'is', '"Waiting on Customer"')
   wooCond = UQL.cond('internalStatus', 'is', '"Waiting on Owner"')
   ftsCond = UQL.cond('isFTS', 'is', true)
-  ftsRoleCond = UQL.cond('ftsRole', 'like', """\"#{user.kerberos}\"""")
+  ftsRoleCond = UQL.cond('ftsRole', 'like', """\"\%#{user.kerberos}\%\"""")
 
 #FROM
 #  Case
@@ -52,9 +54,8 @@ RoutingRoles.OWNED_CASES = (user) ->
 #  OR
 #  (FTS_Role__c LIKE '%{kerberos}%' AND FTS__c = TRUE)
 
-#"""(#{ownerCond} and ((#{worhCond} or #{ftsCond}) or (#{wocCond} and #{wooCond}))) or (#{ftsRoleCond} and #{ftsCond})"""
-#  """(#{internalStatusCond} and ((#{ownerCond} or #{ftsRoleCond}) and (#{wocCond} and #{wooCond})) and #{worhCond}"""
-  """((#{ownerCond} and ((#{worhCond} or #{ftsCond}) or (#{wocCond} and #{wooCond}))) or (#{ftsRoleCond} and #{ftsCond}))"""
+  #"""((#{ownerCond} and ((#{worhCond} or #{ftsCond}) or (#{wocCond} and #{wooCond}))) or (#{ftsRoleCond} and #{ftsCond}))"""
+  UQL.or(UQL.and(ownerCond, UQL.or(UQL.and(worhCond, ftsCond), UQL.and(wocCond, wooCond))), UQL.and(ftsRoleCond, ftsCond))
 
 # TODO can't be implemented until we can query the user's geo in relation to the case geo
 RoutingRoles.FTS = (user) ->
@@ -68,7 +69,8 @@ RoutingRoles.FTS = (user) ->
 
   ftsCond = UQL.cond('isFTS', 'is', true)
   ftsRoleCond = UQL.cond('ftsRole', 'is', '""')
-  """(#{ftsCond} and #{ftsRoleCond} and #{RoutingRoles._makeSbrConds(user)})"""
+  #"""(#{ftsCond} and #{ftsRoleCond} and #{RoutingRoles._makeSbrConds(user)})"""
+  UQL.and(ftsCond, UQL.and(ftsRoleCond, RoutingRoles._makeSbrConds(user)))
 
 RoutingRoles._NNO_SUPER_REGION = (user, super_region) ->
 
@@ -77,8 +79,9 @@ RoutingRoles._NNO_SUPER_REGION = (user, super_region) ->
   SBR Group includes "<group1>,<group2>"(Matches users current SBRs)
   """
 
-  nnoNaCond = UQL.cond('nnoSuperRegion', 'is', """\"#{super_region}\"""")
-  """(#{nnoNaCond} and #{RoutingRoles._makeSbrConds(user)})"""
+  nnoRegionCond = UQL.cond('nnoSuperRegion', 'is', """\"#{super_region}\"""")
+  #"""(#{nnoNaCond} and #{RoutingRoles._makeSbrConds(user)})"""
+  UQL.and(nnoRegionCond, RoutingRoles._makeSbrConds(user))
 
 RoutingRoles.NNO_NA = (user) -> this._NNO_SUPER_REGION(user, 'NA')
 RoutingRoles.NNO_APAC = (user) -> this._NNO_SUPER_REGION(user, 'APAC')
@@ -89,7 +92,8 @@ RoutingRoles.NNO_EMEA = (user) -> this._NNO_SUPER_REGION(user, 'EMEA')
 RoutingRoles.NCQ = (user) ->
   unassignedCond = UQL.cond('internalStatus', 'is', """\"Unassigned\"""")
   notClosedCond = UQL.cond('status', 'ne', """\"Closed\"""")
-  """(#{unassignedCond} and #{notClosedCond} and #{RoutingRoles._makeSbrConds(user)})"""
+  #"""(#{unassignedCond} and #{notClosedCond} and #{RoutingRoles._makeSbrConds(user)})"""
+  UQL.and(unassignedCond, UQL.and(notClosedCond, RoutingRoles._makeSbrConds(user)))
 
 ######################################################
 # Mapping
