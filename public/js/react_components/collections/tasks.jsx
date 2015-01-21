@@ -85,7 +85,6 @@ var Component = React.createClass({
         this.scoreOpacityScale = d3.scale.linear().domain([min, max]).range([.25, 1]);
     },
     queryCases: function(args) {
-        this.setState({loading: true});
         var opts, ssoUsername, _ref2;
         var self = this;
         // For loading cases and simulating tasks, taskId is really just the caseNumber for now
@@ -103,10 +102,11 @@ var Component = React.createClass({
             queryParams: [
                 { name: 'ssoUsername', value: ssoUsername },
                 { name: 'roles', value: args.roles },
-                { name: 'admin', value: this.getQuery()['admin'] }
-                //{ name: 'limit', value: 7 }
+                { name: 'admin', value: this.getQuery()['admin'] },
+                { name: 'resourceProjection', value: "Minimal" }
             ]
         };
+        this.setState({loading: true});
         this.get(opts)
             .then((cases) => {
                 var max, min, params, stateHash;

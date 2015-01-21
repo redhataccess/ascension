@@ -27,8 +27,12 @@ CaseLogic.fetchCasesUql = (opts) ->
   uri = new Uri(settings.UDS_URL).setPath('/case').addQueryParam('where', opts.where)
   if opts.limit?
     uri.addQueryParam('limit', opts.limit)
+  # coffeescript refuses to not translate is or == to ===, and void 0 != null, and isEqual does ===.  Therefore, the
+  # only way to do this is ? which translates !=, now that is annoying
   if opts.resourceProjection?
     uri.addQueryParam('resourceProjection', opts.resourceProjection)
+  else
+    uri.addQueryParam('resourceProjection', 'Minimal')
 
   logger.debug "Fetching cases with uri: #{uri}"
   opts =
@@ -53,6 +57,8 @@ CaseLogic.fetchContributorCasesUql = (opts) ->
     uri.addQueryParam('limit', opts.limit)
   if opts.resourceProjection?
     uri.addQueryParam('resourceProjection', opts.resourceProjection)
+  else
+    uri.addQueryParam('resourceProjection', 'Minimal')
 
   #logger.debug "Fetching contributors cases with uql: #{opts.where}"
   logger.debug "Fetching contributors cases with uri: #{uri}"

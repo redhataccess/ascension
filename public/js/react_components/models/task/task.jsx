@@ -146,8 +146,8 @@ var Component = React.createClass({
         }
     },
     queryCase: function (caseNumber) {
-        this.setState({caseLoading: true});
         var self = this;
+        this.setState({caseLoading: true});
         this.get({path: `/case/${caseNumber}`})
             .then((task) => self.setState({'case': task}))
             .catch((err) => console.error(`Could not load case: ${caseNumber}, ${err.stack}`))
@@ -166,24 +166,27 @@ var Component = React.createClass({
     componentDidMount: function() {
         if (this.props.caseNumber == 'list') {
             console.warn('/tasks/list received, not fetching task.');
+            this.setState({caseLoading: false});
             return;
         }
         this.queryCase(this.props.caseNumber);
     },
     render: function() {
-        var caseNumber = S(this.props.caseNumber).padLeft(8, '0').s
+        var caseNumber = S(this.props.caseNumber).padLeft(8, '0').s;
         var summaryStyle = {
             overflow : 'hidden',
             width: '50em',
             'text-overflow': 'ellipsis',
             'white-space': 'nowrap'
-
         };
         if (this.state.caseLoading == true) {
             return <i className='fa fa-spinner fa-spin'></i>;
         }
+        if (this.state.case == null && this.state.caseLoading == false && this.props.caseNumber == 'list') {
+            return <Alert bsStyle='info' key='info'>No case to load, please select a task in the tasks list, or search for a different user.</Alert>
+        }
         if (this.state.case == null && this.state.caseLoading == false) {
-            return <Alert bsStyle='danger' key='alert'>`Error fetching case: ${caseNumber}`</Alert>
+            return <Alert bsStyle='danger' key='alert'>Error fetching case: {caseNumber}</Alert>
         }
         return (
             <div>
