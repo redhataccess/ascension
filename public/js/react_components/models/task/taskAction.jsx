@@ -3,8 +3,8 @@ var cx              = React.addons.classSet;
 var TaskOpEnum      = require('../../../../../src/com/redhat/ascension/rules/enums/TaskOpEnum.coffee');
 var EntityOpEnum    = require('../../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum.coffee');
 
-//var Label           = React.createFactory(require('react-bootstrap/Label'));
 var Label           = require('react-bootstrap/Label');
+
 
 var Component = React.createClass({
     displayName: 'TaskAction',
@@ -22,6 +22,9 @@ var Component = React.createClass({
             resourceOp = EntityOpEnum[this.props.task.resource.resourceOperation];
         } else if (this.props.case != null) {
             resourceOp = EntityOpEnum.getOpFromCase(this.props.case);
+            if (resourceOp.name == EntityOpEnum.NOOP.name && this.props.case.resource.isFTSCase == true) {
+                resourceOp = EntityOpEnum.TAKE_FTS
+            }
         } else {
             return null;
         }

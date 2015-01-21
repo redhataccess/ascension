@@ -1,20 +1,16 @@
 var React       = require('react');
+var S           = require('string');
 var CaseProduct = require('./caseProduct.jsx');
-
 var Well        = require('react-bootstrap/Well');
 
 var Component = React.createClass({
     render: function() {
-        //var description;
-        //description = <span>No description available.</span>;
-        //if (this.props.description != null) {
-        //    description = <pre className='case description paneled'>{this.props.description}</pre>;
-        //}
+        var caseNumber = S(this.props.case.caseNumber).padLeft(8, '0').s;
         return (
             <Well key='caseHeader'>
                 <div>
                     <div className='pull-left'>
-                        <h2 key='header'>{`Case ${this.props.case.caseNumber}`}</h2>
+                        <h2 key='header'>{`Case ${caseNumber}`}</h2>
                     </div>
                     <div className='pull-right'>
                         <CaseProduct case={this.props.case} key='product'></CaseProduct>

@@ -151,6 +151,7 @@ CaseLogic.fetchCases = (opts) ->
         logger.debug("No url roles or user roles found.")
         userRoles = [RoutingRoles.key_mapping.OWNED_CASES, RoutingRoles.key_mapping.COLLABORATION, RoutingRoles.key_mapping.FTS]
 
+      userRoles = _.map(userRoles, (ur) -> ur.toLowerCase())
       logger.debug("Mapping the following roles: #{userRoles}")
       uqlParts = _.map(userRoles, (r) -> RoutingRoles.mapping[r](user))
 
