@@ -1,5 +1,5 @@
 (function() {
-  var CaseLogic, TaskLogic, Uri, app, bodyParser, compression, cookieParser, env, express, favicon, http, ipAddress, logger, morgan, oneDay, path, port, request, server, serverStartTime, settings, _;
+  var CaseLogic, S, TaskLogic, Uri, app, bodyParser, compression, cookieParser, env, express, favicon, http, ipAddress, logger, morgan, oneDay, path, port, request, server, serverStartTime, settings, _;
 
   express = require('express');
 
@@ -28,6 +28,8 @@
   Uri = require('jsuri');
 
   _ = require('lodash');
+
+  S = require('string');
 
   TaskLogic = require('./src/com/redhat/ascension/rest/taskLogic');
 
@@ -178,14 +180,26 @@
     return req.pipe(request("" + settings.UDS_URL + "/case/" + req.params.caseNumber)).pipe(res);
   });
 
+  app.get("/user/metadata/:type", function(req, res) {
+    var uri;
+    logger.debug("type: " + req.params.type + ", query: " + (unescape(req.query.where)));
+    uri = settings.UDS_URL + ("/user/metadata/" + req.params.type) + "?where=" + escape(req.query.where);
+    logger.debug("Proxying to: " + uri);
+    return req.pipe(request(uri)).pipe(res);
+  });
+
   app.get("/user/:input", function(req, res) {
     return req.pipe(request("" + settings.UDS_URL + "/user/" + req.params.input)).pipe(res);
   });
 
   app.get("/user", function(req, res) {
-    var uql, uri;
-    uql = decodeURIComponent(req.query.where);
-    uri = new Uri(settings.UDS_URL).setPath('/user').setQuery('where=' + uql);
+    var uri;
+    uri = new Uri(settings.UDS_URL);
+    uri.setPath("/user");
+    _.each(req.query, function(value, key) {
+      return uri.addQueryParam(key, unescape(value));
+    });
+    logger.debug("Proxying to: " + uri.toString());
     return req.pipe(request(uri.toString())).pipe(res);
   });
 

@@ -52,6 +52,7 @@
     "string": "*",
     "style-loader": "0.8.x",
     "tracer": "^0.7.3",
+    "typeahead.js": "~0.10.5",
     "url-loader": "~0.5.5",
     "webpack": "*",
     "webpack-dev-server": "*"

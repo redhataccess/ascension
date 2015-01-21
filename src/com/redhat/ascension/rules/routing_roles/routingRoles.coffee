@@ -40,6 +40,7 @@ RoutingRoles.OWNED_CASES = (user) ->
   wooCond = UQL.cond('internalStatus', 'is', '"Waiting on Owner"')
   ftsCond = UQL.cond('isFTS', 'is', true)
   ftsRoleCond = UQL.cond('ftsRole', 'like', """\"\%#{user.kerberos}\%\"""")
+  notClosedCond = UQL.cond('status', 'ne', '"Closed"')
 
 #FROM
 #  Case
@@ -54,8 +55,14 @@ RoutingRoles.OWNED_CASES = (user) ->
 #  OR
 #  (FTS_Role__c LIKE '%{kerberos}%' AND FTS__c = TRUE)
 
+  # Alt version that is more inline with the official routing roles
+  #  (OwnerId = '{owner_id}' AND (Status = 'Waiting on Red Hat' OR Internal_Status__c = 'Waiting on Owner')
+  #  OR
+  #  (FTS_Role__c LIKE '%{kerberos}%')
+
   #"""((#{ownerCond} and ((#{worhCond} or #{ftsCond}) or (#{wocCond} and #{wooCond}))) or (#{ftsRoleCond} and #{ftsCond}))"""
-  UQL.or(UQL.and(ownerCond, UQL.or(UQL.and(worhCond, ftsCond), UQL.and(wocCond, wooCond))), UQL.and(ftsRoleCond, ftsCond))
+  #UQL.or(UQL.and(ownerCond, UQL.or(UQL.and(worhCond, ftsCond), UQL.and(wocCond, wooCond))), UQL.and(ftsRoleCond, ftsCond))
+  UQL.or(UQL.and(ownerCond, UQL.or(worhCond, wooCond)), UQL.and(ftsRoleCond, notClosedCond))
 
 # TODO can't be implemented until we can query the user's geo in relation to the case geo
 RoutingRoles.FTS = (user) ->

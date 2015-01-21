@@ -12,6 +12,7 @@ request         = require 'request'
 settings        = require './src/com/redhat/ascension/settings/settings'
 Uri             = require 'jsuri'
 _               = require 'lodash'
+S               = require 'string'
 
 #mongoose        = require 'mongoose'
 #MongoOps        = require './src/com/redhat/ascension/db/MongoOperations'
@@ -141,12 +142,25 @@ app.get "/case/:caseNumber/comments", (req, res) ->
   req.pipe(request("#{settings.UDS_URL}/case/#{req.params.caseNumber}/comments")).pipe(res)
 app.get "/case/:caseNumber", (req, res) ->
   req.pipe(request("#{settings.UDS_URL}/case/#{req.params.caseNumber}")).pipe(res)
+app.get "/user/metadata/:type", (req, res) ->
+  logger.debug("type: #{req.params.type}, query: #{unescape(req.query.where)}")
+  uri = settings.UDS_URL + "/user/metadata/#{req.params.type}" + "?where=" + escape(req.query.where)
+  logger.debug("Proxying to: #{uri}")
+  req.pipe(request(uri)).pipe(res)
 app.get "/user/:input", (req, res) ->
   req.pipe(request("#{settings.UDS_URL}/user/#{req.params.input}")).pipe(res)
 app.get "/user", (req, res) ->
-  uql = decodeURIComponent(req.query.where)
-  uri = new Uri(settings.UDS_URL).setPath('/user').setQuery('where=' + uql)
-  req.pipe(request(uri.toString())).pipe(res)
+#  where = S(unescape(req.query.where)).replaceAll('%', '%25').s
+#  logger.debug("query: #{req.query.where}, unescaped: #{where}")
+#  uri = settings.UDS_URL + "/user" + "?where=" + where
+#  logger.debug("Proxying to: #{uri}")
+#  req.pipe(request(uri)).pipe(res)
+
+  uri = new Uri(settings.UDS_URL);
+  uri.setPath("/user");
+  _.each req.query, (value, key) -> uri.addQueryParam(key, unescape(value));
+  logger.debug("Proxying to: " +  uri.toString());
+  req.pipe(request(uri.toString())).pipe(res);
 
 ###########################################################
 ## Handle the redirections for the Chrome two theme

@@ -58,7 +58,10 @@ var App = React.createClass({
                 //userId: user.externalModelId
                 taskId: self.getParams().taskId || 'list'
             };
-            self.transitionTo("tasks", params, self.getQuery());
+            // If we are on any path but users, direct the user to his/her task list
+            if (self.getPath() != "/users") {
+                self.transitionTo("tasks", params, self.getQuery());
+            }
         })
         .catch(function(err) {
             Auth.setAuthedUser(void 0);
@@ -129,10 +132,16 @@ var App = React.createClass({
                                  key='linkTask'
                                  params={{'taskId': 'list'}}>Tasks</Link>
                             </li>
-                            <li>
+                            {/*<li>
                                 <Link
                                     to='admin'
                                     key='linkAdmin'>Admin</Link>
+                            </li>
+                            */}
+                            <li>
+                                <Link
+                                    to='users'
+                                    key='linkUsers'>Users</Link>
                             </li>
                         </ul>
                         <ul className='nav navbar-nav navbar-right' key='authInfo'>
@@ -163,6 +172,10 @@ var routes = (
             key='admin'
             name='admin'
             handler={Admin}></Route>
+        <Route
+            key='users'
+            name='users'
+            handler={UserDashboard}></Route>
         <NotFoundRoute key='notFound' handler={NotFoundHandler}></NotFoundRoute>
         <DefaultRoute key='defaultRoute' handler={App}></DefaultRoute>
     </Route>

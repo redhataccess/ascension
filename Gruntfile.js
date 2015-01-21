@@ -55,6 +55,9 @@
             test: /\.svg$/,
             loader: "file-loader?prefix=font/"
           }, {
+            test: /\.png$/,
+            loader: "file-loader"
+          }, {
             test: /\.coffee$/,
             loader: "coffee-loader"
           }, {
