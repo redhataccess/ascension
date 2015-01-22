@@ -22,7 +22,16 @@ var Alert                       = require('react-bootstrap/Alert');
 
 var Component = React.createClass({
     displayName: 'Task',
-    mixins: [AjaxMixin, Router.State, WebUtilsMixin],
+    mixins: [AjaxMixin, Router.State, Router.Navigation, WebUtilsMixin],
+    // This dictates how to open users from this component down
+    openUser: function (user) {
+        var query, params, self = this;
+        params = { taskId: self.getParams().taskId || 'list' };
+        // We may already have some query params in the navigation, so let's extend with the user to overwrite
+        // what may be there and keep what may already be there
+        query = _.extend(this.getQuery(), {ssoUsername: user.resource.sso[0]});
+        this.transitionTo("tasks", params, query);
+    },
     getInitialState: function() {
         // task and case are part of the same object, but due to the nested nature of UDS, I am defining both and setting
         // both as it makes for referring to the case much easier

@@ -1,16 +1,22 @@
 var React               = require('react');
-//var AjaxMixin           = require('../../mixins/ajaxMixin.coffee');
+var Router              = require('react-router/dist/react-router');
 var User                = require('react-redhat/user/User');
-//var Auth                = require('../../auth/auth.coffee');
 var TaskActionsEnum     = require('../../../../../src/com/redhat/ascension/rest/enums/taskActionsEnum.coffee');
 var TaskTypeEnum        = require('../../../../../src/com/redhat/ascension/rules/enums/TaskTypeEnum.coffee');
 
 var Accordion           = require('react-bootstrap/Accordion');
 var Panel               = require('react-bootstrap/Panel');
 var Table               = require('react-bootstrap/Table');
+var NavigationActions   = require('../../actions/NavigationActions');
 
 var Component = React.createClass({
     displayName: 'Case Associates',
+    mixins: [Router.State],
+    openUser: function(user) {
+        var params = this.getParams(),
+            query = this.getQuery();
+        NavigationActions.navigateToTasks(user, params, query);
+    },
     displayOwner: function(owner) {
         if (owner == null) {
             return [ 'danger', <span></span>];
@@ -19,13 +25,13 @@ var Component = React.createClass({
                 'default',
                 <tr key={owner.resource.externalModelId}>
                     <td>Owner</td>
-                    <td><User resource={owner.resource}></User></td>
+                    <td><User openUser={this.openUser} resource={owner.resource}></User></td>
                 </tr>
             ];
         }
     },
     render: function() {
-        var associates, associatesUI, owner, associateElements;
+        var associates, associatesUI, owner, associateElements, self = this;
         owner = this.props.owner;
         associates = this.props.associates;
 
@@ -35,7 +41,7 @@ var Component = React.createClass({
             return (
                 <tr>
                     <td>{associate.resource.role}</td>
-                    <td><User resource={associate.resource.associate}></User></td>
+                    <td><User openUser={self.openUser} resource={associate.resource.associate}></User></td>
                 </tr>
             )
         });
