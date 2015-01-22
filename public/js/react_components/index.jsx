@@ -22,12 +22,14 @@ var Alert                   = require('react-bootstrap/Alert');
 // Just load the less which we have bound to the extract-text plusin
 require("../../stylesheets/main.less");
 
+
 // This is a webpack thing where you can specify env vars to be substituted in the resulting js output.  The
 // ENVIRONMENT is driven from the webpack configuration.
+window.redHatUrlPrefix = '/etc/os1/ascension';
 if (ENVIRONMENT == 'development') {
-    window.redHatUrlPrefix = ''
+    window.redHatUrlPrefix = '';
 } else {
-    window.redHatUrlPrefix = '/etc/os1/ascension'
+    window.redHatUrlPrefix = '/etc/os1/ascension';
 }
 
 var NotFoundHandler = React.createClass({
