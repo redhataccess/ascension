@@ -3,6 +3,7 @@ var Router                  = require('react-router/dist/react-router');
 var WebUtilsMixin           = require('../mixins/webUtilsMixin.coffee');
 var AuthUtilsMixin          = require('../mixins/authUtilsMixin.coffee');
 var UserSearch              = require('react-redhat/usersearch/UserSearch');
+var UdsMixin                = require('react-redhat/utils/UdsMixin');
 
 var { Route, Redirect, RouteHandler, Link, NotFoundRoute, DefaultRoute } = Router;
 
@@ -12,6 +13,12 @@ require('typeahead.js/dist/typeahead.bundle');
 var Component = React.createClass({
     displayName: 'UserDashboard',
     mixins: [AuthUtilsMixin, WebUtilsMixin, Router.State, Router.Navigation],
+    //getInitialState: function() {
+    //    return {
+    //        'sbrs': [],
+    //        'loading': false
+    //    };
+    //},
     openUser: function (user) {
         var query, params, self = this;
         params = { taskId: self.getParams().taskId || 'list' };
@@ -20,6 +27,7 @@ var Component = React.createClass({
         query = _.extend(this.getQuery(), {ssoUsername: user.resource.sso[0]});
         this.transitionTo("tasks", params, query);
     },
+
     render: function() {
         return (
             <UserSearch openUser={this.openUser}></UserSearch>

@@ -4,8 +4,6 @@ Uri       = require 'jsUri'
 Q         = require 'q/q'
 Q.longStackSupport = true
 
-urlPrefix = '/etc/os1/ascension'
-
 Mixin =
   get: (opts) ->
 
@@ -17,10 +15,7 @@ Mixin =
       cache: true
 
     uri = new Uri()
-    if ENVIRONMENT is 'development'
-      uri.setPath "#{opts.path}"
-    else
-      uri.setPath "#{urlPrefix}#{opts.path}"
+    uri.setPath "#{window.redHatUrlPrefix}#{opts.path}"
 
     #uri.addQueryParam('accountIds', accountIds.join(','))
     #uri.addQueryParam('beginDate', opts.beginDate) if opts.beginDate?
@@ -45,10 +40,7 @@ Mixin =
       type: 'POST'
 
     uri = new Uri()
-    if ENVIRONMENT is 'development'
-      uri.setPath "#{opts.path}"
-    else
-      uri.setPath "#{urlPrefix}#{opts.path}"
+    uri.setPath "#{window.redHatUrlPrefix}#{opts.path}"
 
     _.each opts['queryParams'], (queryParam) ->
       uri.addQueryParam(queryParam['name'], queryParam['value'])

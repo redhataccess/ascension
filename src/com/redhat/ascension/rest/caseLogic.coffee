@@ -60,7 +60,6 @@ CaseLogic.fetchContributorCasesUql = (opts) ->
   else
     uri.addQueryParam('resourceProjection', 'Minimal')
 
-  #logger.debug "Fetching contributors cases with uql: #{opts.where}"
   logger.debug "Fetching contributors cases with uri: #{uri}"
   opts =
     url: uri.toString()
