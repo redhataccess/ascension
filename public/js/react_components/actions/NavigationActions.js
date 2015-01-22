@@ -6,9 +6,9 @@ var NavigationActions = Marty.createActionCreators({
     navigateToTasks: function (user, params, query) {
         //console.debug(JSON.stringify(require('../router.jsx').getParams()));
         var sso = (user.resource.sso && user.resource.sso[0]) || "rhn-support-" + user.resource.kerberos;
-        var newQuery = _.defaults(query, {ssoUsername: sso});
+        var newQuery = _.extend(_.clone(query), {ssoUsername: sso});
         var taskId = (params && params.taskId) || 'list';
-        var newParams = _.defaults(params, {taskId: taskId});
+        var newParams = _.extend(_.clone(params), {taskId: taskId});
         navigateTo("tasks", newParams, newQuery);
     }
 });

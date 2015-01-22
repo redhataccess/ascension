@@ -19,6 +19,7 @@ var Auth                    = require('../auth/auth.coffee');
 var TaskAction              = require('../models/task/taskAction.jsx');
 //var TaskMetaData            = require('../models/task/taskMetaData.jsx');
 var TaskState               = require('../models/task/taskState.jsx');
+var RoutingRoles            = require('../models/task/routingRoles.jsx');
 // TaskCase represents the virtual mapping of case -> task for sprint 1
 var TaskCase                = require('../models/task/taskCase.jsx');
 var Alert                   = require('react-bootstrap/Alert');
@@ -39,7 +40,14 @@ var Component = React.createClass({
             'maxScore': 0,
             'layoutMode': this.props.layoutMode || 'masonry',
             'sortBy': this.props.sortBy || 'score',
-            'items': [{}, {}]
+            'items': [{}, {}],
+
+            // This is purely medata returned from the backend about user roles found
+            'userRoles': null,
+            // Metadata that indicates if the default roles were assigned if no user roles present
+            'defaultRoles': false,
+            // Metadata that indicates if url roles overrode user or default roles.
+            'urlRoles': false
         };
     },
     // TODO - ref theTask and theCase everywhere
@@ -108,8 +116,8 @@ var Component = React.createClass({
         };
         this.setState({loading: true});
         this.get(opts)
-            .then((cases) => {
-                var max, min, params, stateHash;
+            .then((results) => {
+                var max, min, params, stateHash, cases = results.cases;
                 _.each(cases, (c) => {
                     if(c.resource == null) {
                         console.error(JSON.stringify(c, null, ' '));
@@ -124,6 +132,10 @@ var Component = React.createClass({
                 stateHash = {
                     //'tasks': _.object(_.map(cases, (c) => [c['resource']['externalModelId'], c] )),
                     'tasks': cases.slice(0, 7),
+                    'userRoles': results.userRoles,
+                    'defaultRoles': results.defaultRoles,
+                    'urlRoles': results.urlRoles,
+                    'uql': results.uql,
                     'minScore': min,
                     'maxScore': max
                 };
@@ -169,6 +181,11 @@ var Component = React.createClass({
             <div className='row'>
                 <div className='col-md-3'>{this.genTaskElements()}</div>
                 <div className='col-md-9'>
+                    <RoutingRoles
+                        roles={this.state.userRoles}
+                        defaultRoles={this.state.defaultRoles}
+                        urlRoles={this.state.urlRoles}></RoutingRoles>
+                    <Spacer />
                     <Task caseNumber={taskId} queryTasks={this.queryCases.bind(this, this.props)}></Task>
                 </div>
             </div>

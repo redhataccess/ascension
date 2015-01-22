@@ -103,6 +103,14 @@ CaseLogic.fetchContributorCasesUql = (opts) ->
 # TODO -- may need to make a function that creates and resolves a promise with []
 
 CaseLogic.fetchCases = (opts) ->
+  # Actual roles on the user object
+  userRoles = null
+  # flag to indicate no user roles and roles were assumed
+  defaultRoles = false
+  # flag to indicate that url roles were used instead of user or default
+  urlRoles = false
+  finalUql =
+    where: undefined
   deferred = Q.defer()
 
   if opts?.ssoUsername? and opts?.ssoUsername isnt ''
@@ -111,9 +119,6 @@ CaseLogic.fetchCases = (opts) ->
       where: "SSO is \"#{opts.ssoUsername}\""
 
     UserLogic.fetchUserUql(userUql).then((user) ->
-
-      finalUql =
-        where: undefined
 
       if (not user?) or (not user?.externalModelId?)
         new Error("Was not able to fetch user given UQL: #{userUql.where}")
@@ -130,6 +135,7 @@ CaseLogic.fetchCases = (opts) ->
       if opts.roles?.length > 0
         userRoles = opts.roles
         logger.debug("Discovered roles from the query parms: #{userRoles}")
+        urlRoles = true
       ######################################################
       # This should be the primary condition, where a user
       # has routing roles on his/her user object
@@ -142,6 +148,8 @@ CaseLogic.fetchCases = (opts) ->
       else if (not user.sbrs?) or user.sbrs?.length is 0
         logger.debug("No sbrs found on user.")
         userRoles = [RoutingRoles.key_mapping.OWNED_CASES]
+        defaultRoles = true
+
       ######################################################
       # Finally just show the standard plate for the user
       # Based on the my plate logic
@@ -149,6 +157,7 @@ CaseLogic.fetchCases = (opts) ->
       else
         logger.debug("No url roles or user roles found.")
         userRoles = [RoutingRoles.key_mapping.OWNED_CASES, RoutingRoles.key_mapping.COLLABORATION, RoutingRoles.key_mapping.FTS]
+        defaultRoles = true
 
       userRoles = _.map(userRoles, (ur) -> ur.toLowerCase())
       logger.debug("Mapping the following roles: #{userRoles}")
@@ -169,7 +178,13 @@ CaseLogic.fetchCases = (opts) ->
     .spread((cases, contributorCases) ->
       contribCases = contributorCases || []
       logger.debug("fetched #{cases.length} main case(s) and #{contribCases.length} contributor case(s)")
-      deferred.resolve _.chain([[cases || []], [contribCases]]).flatten().without(undefined).uniq((c) -> c.externalModelId).each((c) -> c.resource.caseNumber = S(c.resource.caseNumber).padLeft(8, '0').s).value()
+      deferred.resolve {
+        cases: _.chain([[cases || []], [contribCases]]).flatten().without(undefined).uniq((c) -> c.externalModelId).each((c) -> c.resource.caseNumber = S(c.resource.caseNumber).padLeft(8, '0').s).value(),
+        userRoles: userRoles
+        defaultRoles: defaultRoles
+        urlRoles: urlRoles
+        uql: finalUql.where
+      }
     )
 #    .then((cases) ->
 #      logger.debug("fetched #{cases.length} cases")
