@@ -19,7 +19,7 @@ var Component = React.createClass({
         if (defaultRoles == true) {
             return (
                 <span>
-                    <Label bsStyle="warning">No user Roles, assuming defaults.</Label>
+                    <Label bsStyle="warning">No user Roles, assuming defaults</Label>
                     &nbsp;
                 </span>
             )
@@ -30,7 +30,7 @@ var Component = React.createClass({
         if (urlRoles == true) {
             return (
                 <span>
-                    <Label bsStyle="warning">No user Roles, assuming urls.</Label>
+                    <Label bsStyle="warning">Overriding roles from the URL</Label>
                     &nbsp;
                 </span>
             )

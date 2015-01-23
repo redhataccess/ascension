@@ -90,10 +90,10 @@ RoutingRoles._NNO_SUPER_REGION = (user, super_region) ->
   #"""(#{nnoNaCond} and #{RoutingRoles._makeSbrConds(user)})"""
   UQL.and(nnoRegionCond, RoutingRoles._makeSbrConds(user))
 
-RoutingRoles.NNO_NA = (user) -> this._NNO_SUPER_REGION(user, 'NA')
-RoutingRoles.NNO_APAC = (user) -> this._NNO_SUPER_REGION(user, 'APAC')
-RoutingRoles.NNO_INDIA = (user) -> this._NNO_SUPER_REGION(user, 'INDIA')
-RoutingRoles.NNO_EMEA = (user) -> this._NNO_SUPER_REGION(user, 'EMEA')
+RoutingRoles.NNO_NA = (user) -> RoutingRoles._NNO_SUPER_REGION(user, 'NA')
+RoutingRoles.NNO_APAC = (user) -> RoutingRoles._NNO_SUPER_REGION(user, 'APAC')
+RoutingRoles.NNO_INDIA = (user) -> RoutingRoles._NNO_SUPER_REGION(user, 'INDIA')
+RoutingRoles.NNO_EMEA = (user) -> RoutingRoles._NNO_SUPER_REGION(user, 'EMEA')
 
 # INFO - UDS adds ownerId != spamId to all calls, so unassigned can drop that
 RoutingRoles.NCQ = (user) ->

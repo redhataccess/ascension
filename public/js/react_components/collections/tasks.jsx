@@ -1,4 +1,5 @@
 var React                   = require('react/addons');
+var Marty                   = require('marty');
 //var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 //var ReactTransitionGroup    = React.addons.TransitionGroup;
 var Router                  = require('react-router/dist/react-router');
@@ -24,6 +25,17 @@ var RoutingRoles            = require('../models/task/routingRoles.jsx');
 var TaskCase                = require('../models/task/taskCase.jsx');
 var Alert                   = require('react-bootstrap/Alert');
 
+var DeclinedTasksStore      = require('../stores/DeclinedTasksStore');
+var DeclinedTasksActions    = require('../actions/DeclinedTasksActions');
+
+var DeclinedTasksState = Marty.createStateMixin({
+    allDeclinedTasks: DeclinedTasksStore,
+    getState: function () {
+        return {
+            declinedTasks: DeclinedTasksStore.getAll()
+        }
+    }
+});
 
 var Component = React.createClass({
     displayName: 'Tasks',
@@ -50,7 +62,6 @@ var Component = React.createClass({
             'urlRoles': false
         };
     },
-    // TODO - ref theTask and theCase everywhere
     genTaskElements: function() {
         var taskCases,
             stateHash,
@@ -90,6 +101,7 @@ var Component = React.createClass({
     },
     setScoreScale: function(min, max) {
         //this.scoreScale = d3.scale.quantize().domain([min, max]).range([100, 200, 300]);
+        //this.scoreOpacityScale = d3.scale.quantize().domain([min, max]).range([.25, 1]);
         this.scoreOpacityScale = d3.scale.linear().domain([min, max]).range([.25, 1]);
     },
     queryCases: function(args) {
@@ -117,7 +129,7 @@ var Component = React.createClass({
         this.setState({loading: true});
         this.get(opts)
             .then((results) => {
-                var max, min, params, stateHash, cases = results.cases;
+                var max, min, params, stateHash, topSevenCases, cases = results.cases;
                 _.each(cases, (c) => {
                     if(c.resource == null) {
                         console.error(JSON.stringify(c, null, ' '));
@@ -126,8 +138,9 @@ var Component = React.createClass({
                 //self.casesById = _.zipObject(_.map(cases, (c) => [c['resource']['resourceId'], c]));
 
                 cases.sort((a, b) => b.resource.collaborationScore - a.resource.collaborationScore);
-                min = _.chain(cases.slice(0,7)).pluck('resource').pluck('collaborationScore').without(null).min().value();
-                max = _.chain(cases.slice(0,7)).pluck('resource').pluck('collaborationScore').without(null).max().value();
+                topSevenCases = cases.slice(0, 7);
+                min = _.chain(topSevenCases).pluck('resource').pluck('collaborationScore').without(null).min().value();
+                max = _.chain(topSevenCases).pluck('resource').pluck('collaborationScore').without(null).max().value();
                 self.setScoreScale(min, max);
                 stateHash = {
                     //'tasks': _.object(_.map(cases, (c) => [c['resource']['externalModelId'], c] )),

@@ -3,11 +3,13 @@ var cx              = React.addons.classSet;
 var TaskOpEnum      = require('../../../../../src/com/redhat/ascension/rules/enums/TaskOpEnum.coffee');
 var EntityOpEnum    = require('../../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum.coffee');
 
-//var Label           = React.createFactory(require('react-bootstrap/Label'));
-//var Label           = require('react-bootstrap/Label');
+var DeclinedTasksActions    = require('../../actions/DeclinedTasksActions');
 
 var Component = React.createClass({
     displayName: 'TaskActionHeader',
+    _declineTask: function() {
+        DeclinedTasksActions.declineTask(this.props.case)
+    },
     render: function() {
         var resourceOp;
         if (this.props.task != null) {
@@ -31,7 +33,7 @@ var Component = React.createClass({
                 </div>
                 <div className='col-sm-6'>
                     <div className='pull-right'>
-                        <button className='btn btn-secondary'>{`Deny`}</button>
+                        <button className='btn btn-secondary' onClick={this._declineTask}>{`Deny`}</button>
                     &nbsp;
                         <button className='btn btn-secondary'>{`Accept`}</button>
                     </div>

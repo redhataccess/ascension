@@ -1,4 +1,4 @@
-var React       = require('react');
+var React                   = require('react');
 
 var Component = React.createClass({
     render: function() {
@@ -18,9 +18,9 @@ var Component = React.createClass({
                         <h3 >{`Case #${this.props.case.caseNumber}`}</h3>
                     </div>
                     <div className='pull-right'>
-                        <button className='btn btn-secondary '>{`Deny`}</button>
+                        <button className='btn btn-secondary'>{`Deny`}</button>
                         &nbsp;
-                        <button className='btn btn-secondary '>{`Accept`}</button>
+                        <button className='btn btn-secondary'>{`Accept`}</button>
                     </div>
                 </div>
                 <div className='clearfix'></div>
