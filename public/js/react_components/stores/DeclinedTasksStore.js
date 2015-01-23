@@ -12,14 +12,17 @@ var Store = Marty.createStore({
         invalidateTasks: DeclinedTasksConstants.INVALIDATE_TASKS
     },
     getInitialState: function () {
+        console.debug("store:getInitialState");
         return DeclinedTasksAPI.getAllDeclinedTasks() || {};
     },
     declineTask: function (task) {
-        this.state[task.resource.caseNumber] = task;
+        console.debug("store:declineTask");
+        this.state[task.resource.caseNumber] = task.resource.lastModified;
         DeclinedTasksAPI.declineTask(task);
         this.hasChanged();
     },
     removeDeclinedTask: function (task) {
+        console.debug("store:removeTask");
         delete this.state[task.resource.caseNumber];
         DeclinedTasksAPI.removeDeclinedTask(task);
         this.hasChanged();
@@ -29,19 +32,24 @@ var Store = Marty.createStore({
             id: 'all-declined-tasks',
             locally: function () {
                 if (this.hasAlreadyFetched('all-declined-tasks')) {
+                    console.debug("store:return local state");
                     return this.state;
                 }
             },
             remotely: function () {
+                console.debug("store:API get all tasks");
                 return DeclinedTasksAPI.getAllDeclinedTasks();
             }
         });
     },
     addDeclinedTasks: function (tasks) {
-        this.state = _.object(_.map(tasks, function (t) { return [t.resource.caseNumber, t]; }));
+        console.debug("store:add declined tasks");
+        //this.state = _.object(_.map(tasks, function (t) { return [t.resource.caseNumber, t]; }));
+        this.state = tasks;
         this.hasChanged();
     },
     invalidateTasks: function(tasks) {
+        console.debug("store:invalidate tasks");
         var mutated = false,
             taskMap, overlappingTasks, overlappingTaskMap;
         //var taskIds = _.chain(tasks).pluck('externalModelId').value();
@@ -70,7 +78,3 @@ var Store = Marty.createStore({
 });
 module.exports = Store;
 
-//var listener = UsersStore.addChangeListener(function () {
-//    console.log('Users store changed');
-//    listener.dispose();
-//});

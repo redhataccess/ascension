@@ -41,111 +41,6 @@ var Component = React.createClass({
             'caseLoading': true
         };
     },
-    assignOwnership: function(user, event) {
-        var queryParams,
-            self = this;
-        event.preventDefault();
-        event.stopPropagation();
-        console.log(`${user['resource']['firstName']} is Taking ownership of ${this.state.task.resource.externalModelId}`);
-        queryParams = [
-            {
-                name: 'action',
-                value: TaskActionsEnum.ASSIGN.name
-            },
-            {
-                name: 'userInput',
-                value: user['externalModelId']
-            }
-        ];
-        // Make a post call to assign the current authenticated user to the task
-        this.post({path: `/task/${self.getParams()['taskId']}`, queryParams: queryParams})
-            // Re-fetch the task after it has been assigned the user
-            .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
-            // The returned task will be the latest, update the state
-            .then((task) => {
-                self.setState({'task': task, 'case': task.resource.resource.resource});
-                self.props.queryTasks.call(null);
-            })
-            .catch((err) => console.error("Could not load task: #{err.stack}"))
-            .done();
-    },
-    declineOwnership: function(user, event) {
-        var queryParams,
-            self = this;
-        event.preventDefault();
-        event.stopPropagation();
-        console.log(`${user['resource']['firstName']} is declining ownership of ${this.state.task.resource.externalModelId}`);
-        queryParams = [
-            {
-                name: 'action',
-                value: TaskActionsEnum.DECLINE.name
-            }, {
-                name: 'userInput',
-                value: user['externalModelId']
-            }
-        ];
-        this.post({path: `/task/${self.getParams()['taskId']}`, queryParams: queryParams})
-            // Re-fetch the task after it has been assigned the user
-            .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
-            // The returned task will be the latest, update the state
-            .then((task) => {
-                self.setState({'task': task, 'case': task.resource.resource.resource});
-                self.props.queryTasks.call(null);
-            })
-            .catch((err) => console.error(`Could not load task: ${err.stack}`))
-            .done();
-    },
-    removeOwnership: function(event) {
-        var queryParams,
-            self = this;
-        event.preventDefault();
-        console.log(`${Auth.getAuthedUser()['resource']['firstName']} is removing ownership from ${this.state.task.resource.externalModelId}`);
-        queryParams = [
-            {
-                name: 'action',
-                value: TaskActionsEnum.UNASSIGN.name
-            }
-        ];
-        this.post({path: `/task/${self.getParams()['taskId']}`, queryParams: queryParams})
-            // Re-fetch the task after it has been assigned the user
-            .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
-            // The returned task will be the latest, update the state
-            .then((task) => {
-                self.setState({'task': task, 'case': task.resource.resource.resource});
-                self.props.queryTasks.call(null);
-            })
-            .catch((err) => console.error(`Could not load task: ${err.stack}`))
-            .done();
-    },
-    close: function(event) {
-        var queryParams,
-            self = this;
-        event.preventDefault();
-        console.log(`${Auth.getAuthedUser()['resource']['firstName']} is closing ${this.state.task.resource.externalModelId}`);
-        queryParams = [
-            {
-                name: 'action',
-                value: TaskActionsEnum.CLOSE.name
-            }
-        ];
-        this.post({path: `/task/${self.getParams()['taskId']}`, queryParams: queryParams})
-            // Re-fetch the task after it has been assigned the user
-            .then(() => self.get({path: `/task/${self.getParams()['taskId']}`}))
-            // The returned task will be the latest, update the state
-            .then((task) => {
-                self.setState({'task': task, 'case': task.resource.resource.resource});
-                self.props.queryTasks.call(null);
-            })
-            .catch((err) => console.error(`Could not load task: ${err.stack}`))
-            .done();
-    },
-    //genEntityContents: function() {
-    //    if (this.state.task.resource.type === TaskTypeEnum.CASE.name) {
-    //        return <Case key='taskCase' caseNumber={this.state.case.resource.caseNumber}></Case>;
-    //    }
-    //    return null;
-    //},
-    // TODO -- Add openUser here and propagate it down through the props.
     genEntityContents: function() {
         //return <Case key='taskCase' caseNumber={this.state.case.resource.caseNumber}></Case>;
         if (this.state.caseLoading == true) {
@@ -162,20 +57,24 @@ var Component = React.createClass({
             .catch((err) => console.error(`Could not load case: ${caseNumber}, ${err.stack}`))
             .done(() => self.setState({caseLoading: false}));
     },
+    _isCaseNumberList: function (caseNumber) {
+        if (caseNumber == 'list') {
+            console.warn('/tasks/list received, not fetching task.');
+            this.setState({caseLoading: false});
+            return true;
+        }
+        return false;
+    },
     componentWillReceiveProps: function(nextProps) {
+        if (this._isCaseNumberList(nextProps.caseNumber) == true) {
+            return;
+        }
         if (!_.isEqual(this.props.caseNumber, nextProps.caseNumber)) {
             this.queryCase(nextProps.caseNumber);
         }
-
-            //currentTaskId = WebUtilsMixin.getDefined(this, 'state.case.resource.caseNumber');
-        //if (`${taskId}` != `${currentTaskId}` && `${taskId}` != 'list') {
-        //}
     },
-    // Refactor this to the more elegant advanced form in scorecard
     componentDidMount: function() {
-        if (this.props.caseNumber == 'list') {
-            console.warn('/tasks/list received, not fetching task.');
-            this.setState({caseLoading: false});
+        if (this._isCaseNumberList(this.props.caseNumber) == true) {
             return;
         }
         this.queryCase(this.props.caseNumber);
@@ -197,6 +96,11 @@ var Component = React.createClass({
         if (this.state.case == null && this.state.caseLoading == false) {
             return <Alert bsStyle='danger' key='alert'>Error fetching case: {caseNumber}</Alert>
         }
+        //takeOwnership={this.assignOwnership.bind(this, Auth.getAuthedUser())}
+        //declineOwnership={this.declineOwnership.bind(this, Auth.getAuthedUser())}
+        //assignScopedOwnership={this.assignOwnership.bind(this, Auth.getScopedUser())}
+        //declineScopedOwnership={this.declineOwnership.bind(this, Auth.getScopedUser())}
+        //removeOwnership={this.removeOwnership}
         return (
             <div>
                 <div key='taskContainer' className='row'>
@@ -205,11 +109,6 @@ var Component = React.createClass({
                         <span key='metaDataContainer'>
                             <TaskState
                                 task={this.state.case}
-                                takeOwnership={this.assignOwnership.bind(this, Auth.getAuthedUser())}
-                                declineOwnership={this.declineOwnership.bind(this, Auth.getAuthedUser())}
-                                assignScopedOwnership={this.assignOwnership.bind(this, Auth.getScopedUser())}
-                                declineScopedOwnership={this.declineOwnership.bind(this, Auth.getScopedUser())}
-                                removeOwnership={this.removeOwnership}
                                 close={this.close}
                                 key='taskStatus'>
                             </TaskState>

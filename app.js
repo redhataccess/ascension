@@ -183,7 +183,7 @@
   app.get("/user/metadata/:type", function(req, res) {
     var uri;
     logger.debug("type: " + req.params.type + ", query: " + (unescape(req.query.where)));
-    uri = settings.UDS_URL + ("/user/metadata/" + req.params.type) + "?where=" + escape(req.query.where);
+    uri = settings.UDS_URL + ("/user/metadata/" + req.params.type) + "?where=" + escape(req.query.where) + "&resourceProjection=Minimal";
     logger.debug("Proxying to: " + uri);
     return req.pipe(request(uri)).pipe(res);
   });

@@ -33,7 +33,8 @@ var API = Marty.createStateSource({
         this._set(NAMESPACE, declinedTasks);
     },
     getAllDeclinedTasks: function () {
-        return this._get(NAMESPACE);
+        var declinedTasks = this._get(NAMESPACE);
+        DeclinedTasksSourceActions.addDeclinedTasks(declinedTasks)
     },
     removeDeclinedTask: function (task) {
         var declinedTasks = this.get(NAMESPACE) || {};

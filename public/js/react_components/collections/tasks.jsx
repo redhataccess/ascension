@@ -1,5 +1,6 @@
 var React                   = require('react/addons');
 var Marty                   = require('marty');
+var ObjectDiff              = require('objectdiff');
 //var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 //var ReactTransitionGroup    = React.addons.TransitionGroup;
 var Router                  = require('react-router/dist/react-router');
@@ -29,12 +30,12 @@ var DeclinedTasksStore      = require('../stores/DeclinedTasksStore');
 var DeclinedTasksActions    = require('../actions/DeclinedTasksActions');
 
 var DeclinedTasksState = Marty.createStateMixin({
-    allDeclinedTasks: DeclinedTasksStore,
-    getState: function () {
-        return {
-            declinedTasks: DeclinedTasksStore.getAll()
-        }
-    }
+    declinedTasks: DeclinedTasksStore
+    //getState: function () {
+    //    return {
+    //        declinedTasks: DeclinedTasksStore.getAll()
+    //    }
+    //}
 });
 
 var Component = React.createClass({
@@ -171,35 +172,55 @@ var Component = React.createClass({
         var stateHash;
         stateHash = {
             ssoUsername: this.getQuery()['ssoUsername'],
-            roles: this.getQuery()['roles']
+            roles: this.getQuery()['roles'],
+            taskId: this.getParams()['taskId']
         };
         this.setState(stateHash);
         this.queryCases(stateHash);
     },
     componentWillReceiveProps: function(nextProps) {
+        console.debug("tasks:willReceiveProps");
         var stateHash;
         if (this.getQuery()['ssoUsername'] != this.state.ssoUsername
-            || this.getQuery()['roles'] != this.state.roles) {
+            || this.getQuery()['roles'] != this.state.roles
+            || this.getParams()['taskId'] != this.state.taskId) {
             stateHash = {
                 ssoUsername: this.getQuery()['ssoUsername'],
-                roles: this.getQuery()['roles']
+                roles: this.getQuery()['roles'],
+                taskId: this.getParams()['taskId']
             };
             this.setState(stateHash);
             this.queryCases(stateHash);
         }
+        // Since tasks.jsx doesn't directly render the case, let's handle this separately and only update the state
+        // so the child components can render it accordingly
+        if (this.getParams()['taskId'] != this.state.taskId) {
+            this.setState({taskId: this.getParams()['taskId']});
+        }
+    },
+    shouldComponentUpdate: function (nextProps, nextState) {
+        if (this.getQuery()['ssoUsername'] != this.state.ssoUsername
+            || this.getQuery()['roles'] != this.state.roles
+            || this.getParams()['taskId'] != this.state.taskId
+            || !_.isEqual(this.state, nextState)) {
+            //console.debug("tasks:Something isn't equal, updating!");
+            //console.debug(ObjectDiff.diff(this.state, nextState));
+            return true;
+        }
+        return false
     },
     render: function() {
-        this.state.declinedTasks.when({
-           pending: function() {
-               console.debug("pending");
-           },
-           failed: function(error) {
-               console.debug("error");
-           },
-           done: function(results) {
-               console.debug("declinedTasks: " + JSON.stringify(results));
-           }
-        });
+        //this.state.declinedTasks.when({
+        //   pending: function() {
+        //       console.debug("pending");
+        //   },
+        //   failed: function(error) {
+        //       console.debug("error");
+        //   },
+        //   done: function(results) {
+        //       console.debug("declinedTasks: " + JSON.stringify(results));
+        //   }
+        //});
         var { taskId } = this.getParams();
         return (
             <div className='row'>

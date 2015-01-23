@@ -144,7 +144,8 @@ app.get "/case/:caseNumber", (req, res) ->
   req.pipe(request("#{settings.UDS_URL}/case/#{req.params.caseNumber}")).pipe(res)
 app.get "/user/metadata/:type", (req, res) ->
   logger.debug("type: #{req.params.type}, query: #{unescape(req.query.where)}")
-  uri = settings.UDS_URL + "/user/metadata/#{req.params.type}" + "?where=" + escape(req.query.where)
+  uri = settings.UDS_URL + "/user/metadata/#{req.params.type}" + "?where=" + escape(req.query.where) + "&resourceProjection=Minimal"
+#  uri = settings.UDS_URL + "/user/metadata/#{req.params.type}" + "?where=" + escape(req.query.where)
   logger.debug("Proxying to: #{uri}")
   req.pipe(request(uri)).pipe(res)
 app.get "/user/:input", (req, res) ->

@@ -25,6 +25,7 @@
     "grunt-contrib-watch": "^0.6.1",
     "grunt-mocha-test": "~0.12.0",
     "grunt-newer": "^0.7.0",
+    "grunt-webpack": "*",
     "imports-loader": "~0.6.3",
     "jade": "~1.6.0",
     "js-yaml": "^3.2.2",
@@ -41,6 +42,7 @@
     "moment": "2.x.x",
     "morgan": "1.x.x",
     "multiparty": "~3.3.2",
+    "objectdiff": "~1.1.0",
     "prettyjson": "~1.0.0",
     "q": "^1.0.1",
     "react": "~0.12.x",
@@ -54,7 +56,6 @@
     "tracer": "^0.7.3",
     "typeahead.js": "~0.10.5",
     "url-loader": "~0.5.5",
-    "grunt-webpack": "*",
     "webpack": "*",
     "webpack-dev-server": "*"
   },
