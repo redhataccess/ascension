@@ -7,6 +7,7 @@ var Store = Marty.createStore({
     name: 'Decline Tasks',
     handlers: {
         declineTask: DeclinedTasksConstants.DECLINE_TASK_CLICK,
+        addDeclinedTasks: DeclinedTasksConstants.ADD_DECLINED_TASKS,
         removeDeclinedTask: DeclinedTasksConstants.REMOVE_DECLINED_TASK,
         invalidateTasks: DeclinedTasksConstants.INVALIDATE_TASKS
     },
@@ -35,6 +36,10 @@ var Store = Marty.createStore({
                 return DeclinedTasksAPI.getAllDeclinedTasks();
             }
         });
+    },
+    addDeclinedTasks: function (tasks) {
+        this.state = _.object(_.map(tasks, function (t) { return [t.resource.caseNumber, t]; }));
+        this.hasChanged();
     },
     invalidateTasks: function(tasks) {
         var mutated = false,

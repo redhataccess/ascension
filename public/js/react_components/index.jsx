@@ -1,6 +1,8 @@
 var React                   = require('react/addons');
+var Marty                   = require('marty');
 if (typeof window !== 'undefined') {
     window.React = React;
+    window.Marty = Marty;
 }
 
 //var Router                  = require('react-router/dist/react-router');
