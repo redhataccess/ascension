@@ -23,9 +23,9 @@ var Component = React.createClass({
         } else {
             return [
                 'default',
-                <tr key={owner.resource.externalModelId}>
+                <tr key={owner.externalModelId}>
                     <td>Owner</td>
-                    <td><User openUser={this.openUser} resource={owner.resource}></User></td>
+                    <td><User openUser={this.openUser} resource={owner}></User></td>
                 </tr>
             ];
         }
