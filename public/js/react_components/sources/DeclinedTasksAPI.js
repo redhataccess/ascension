@@ -31,7 +31,6 @@ var API = Marty.createStateSource({
         _.extend(declinedTasks, this._constructItem(task));
         // now update the local storage
         this._set(NAMESPACE, declinedTasks);
-        DeclinedTasksSourceActions.declineTask(task)
     },
     getAllDeclinedTasks: function () {
         return this._get(NAMESPACE);
@@ -40,7 +39,6 @@ var API = Marty.createStateSource({
         var declinedTasks = this.get(NAMESPACE) || {};
         delete declinedTasks[task.resource.caseNumber];
         this._set(NAMESPACE, declinedTasks);
-        DeclinedTasksSourceActions.removeDeclinedTask(task)
     }
 });
 

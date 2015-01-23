@@ -39,7 +39,7 @@ var DeclinedTasksState = Marty.createStateMixin({
 
 var Component = React.createClass({
     displayName: 'Tasks',
-    mixins: [AjaxMixin, Router.State, Router.Navigation],
+    mixins: [AjaxMixin, Router.State, Router.Navigation, DeclinedTasksState],
     getInitialState: function() {
         return {
             // This will allow the cases pulled to be overridden from the Auth.getAuthedUser()
@@ -189,6 +189,17 @@ var Component = React.createClass({
         }
     },
     render: function() {
+        this.state.declinedTasks.when({
+           pending: function() {
+               console.debug("pending");
+           },
+           failed: function(error) {
+               console.debug("error");
+           },
+           done: function(results) {
+               console.debug("declinedTasks: " + JSON.stringify(results));
+           }
+        });
         var { taskId } = this.getParams();
         return (
             <div className='row'>

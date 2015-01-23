@@ -11,7 +11,7 @@ var Store = Marty.createStore({
         invalidateTasks: DeclinedTasksConstants.INVALIDATE_TASKS
     },
     getInitialState: function () {
-        return {};
+        return DeclinedTasksAPI.getAllDeclinedTasks() || {};
     },
     declineTask: function (task) {
         this.state[task.resource.caseNumber] = task;
@@ -28,7 +28,7 @@ var Store = Marty.createStore({
             id: 'all-declined-tasks',
             locally: function () {
                 if (this.hasAlreadyFetched('all-declined-tasks')) {
-                    return _.values(this.state);
+                    return this.state;
                 }
             },
             remotely: function () {
