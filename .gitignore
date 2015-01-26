@@ -8,6 +8,8 @@ public/js/bower_components/**/*
 .idea/workspace.xml
 .idea
 *.iml
+ascension-sublime-project
+ascension-sublime-workspace
 
 # Ignore node_modules which will be rebuilt in openshift
 node_modules/*
