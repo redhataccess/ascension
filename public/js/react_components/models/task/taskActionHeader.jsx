@@ -1,4 +1,5 @@
 var React           = require('react/addons');
+var S               = require('string');
 var cx              = React.addons.classSet;
 var TaskOpEnum      = require('../../../../../src/com/redhat/ascension/rules/enums/TaskOpEnum.coffee');
 var EntityOpEnum    = require('../../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum.coffee');
@@ -23,12 +24,11 @@ var Component = React.createClass({
         if (resourceOp == null && this.props.case != null) {
             console.error(`No resourceOp, case.resource.internalStatus: ${this.props.case.resource.internalStatus}`)
         }
-
         return (
             <div className="row">
                 <div className='col-sm-6'>
                     <h4>
-                        Task: {resourceOp.display}  (Case{this.props.case.resource.caseNumber})
+                        {resourceOp.display} 
                     </h4>
                 </div>
                 <div className='col-sm-6'>

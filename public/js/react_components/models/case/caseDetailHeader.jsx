@@ -1,5 +1,6 @@
 var React                   = require('react');
 
+// TODO -- This is currently not in use
 var Component = React.createClass({
     render: function() {
         //var description;

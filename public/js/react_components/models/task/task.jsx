@@ -81,12 +81,6 @@ var Component = React.createClass({
     },
     render: function() {
         var caseNumber = S(this.props.caseNumber).padLeft(8, '0').s;
-        var summaryStyle = {
-            overflow : 'hidden',
-            width: '50em',
-            'text-overflow': 'ellipsis',
-            'white-space': 'nowrap'
-        };
         if (this.state.caseLoading == true) {
             return <i className='fa fa-spinner fa-spin'></i>;
         }
@@ -101,11 +95,13 @@ var Component = React.createClass({
         //assignScopedOwnership={this.assignOwnership.bind(this, Auth.getScopedUser())}
         //declineScopedOwnership={this.declineOwnership.bind(this, Auth.getScopedUser())}
         //removeOwnership={this.removeOwnership}
+                        // <DeclinedUsers task={this.state.case}></DeclinedUsers>
+                        // &nbsp;&nbsp;
+                        // <PotentialOwners task={this.state.case}></PotentialOwners>
         return (
             <div>
                 <div key='taskContainer' className='row'>
-                    <div className='col-md-8' key='containerLeft'>
-                        <TaskHeader task={this.state.case} key='header'></TaskHeader>
+                    <div className='col-md-12' key='containerLeft'>
                         <span key='metaDataContainer'>
                             <TaskState
                                 task={this.state.case}
@@ -115,30 +111,26 @@ var Component = React.createClass({
                             &nbsp;
                             <TaskActionHeader case={this.state.case} key='action'></TaskActionHeader>
                         </span>
-                        <span>{`Status: ${this.state.case.resource.internalStatus}`}</span>
-                        &nbsp;&nbsp;
-                        <DeclinedUsers task={this.state.case}></DeclinedUsers>
-                        &nbsp;&nbsp;
-                        <PotentialOwners task={this.state.case}></PotentialOwners>
+                        <span>{this.state.case.resource.status} / {this.state.case.resource.internalStatus}</span>
+                        &nbsp;--&nbsp;
+                        <span>{this.state.case.resource.severity} / {this.state.case.resource.internalPriority}</span>
                         <span className='clearfix'></span>
-                        <Spacer />
                         <span key='datesContainer'>
                             <TaskDates task={this.state.case} key='dates'></TaskDates>
                         </span>
                         <span className='clearfix'></span>
-                        <Spacer />
-                        <div style={summaryStyle}>Summary:  {this.state.case.resource.summary} </div>
+                        <strong>{this.state.case.resource.subject}</strong>
                         <Spacer />
                         {/*/////////////////////////////////////////////////////////////////////////////////*/}
                         {/*Case link buttons */}
                         {/*/////////////////////////////////////////////////////////////////////////////////*/}
                         <div key='caseLinks'>
-                            <a className='btn btn-open' target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.state.case.resource.caseNumber}`}>
-                                    {`Case Link 1`}
+                            <a className='btn btn-open' target='_blank' href={`https://na7.salesforce.com/${this.state.case.externalModelId}`}>
+                                {`Salesforce`}
                             </a>
                         &nbsp;
                             <a className='btn btn-open' target='_blank' href={`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.case.resource.caseNumber}`}>
-                                    {`Case Link 2`}
+                                {`Unified`}
                             </a>
                         </div>
                     </div>
