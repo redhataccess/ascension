@@ -125,7 +125,7 @@ var Component = React.createClass({
         this.setState({loading: true});
         this.get(opts)
             .then((results) => {
-                var max, min, params, stateHash, topSevenCases, cases = results.cases;
+                var max, min, params, stateHash, topSevenCases, cases = results.cases, closedCases;
                 _.each(cases, (c) => {
                     if(c.resource == null) {
                         console.error(JSON.stringify(c, null, ' '));
@@ -134,6 +134,11 @@ var Component = React.createClass({
                 //self.casesById = _.zipObject(_.map(cases, (c) => [c['resource']['resourceId'], c]));
 
                 cases.sort((a, b) => b.resource.collaborationScore - a.resource.collaborationScore);
+                // Remove all the Closed cases and append them to the end of the array
+                closedCases = _.filter(cases, (c) => c.resource.status == "Closed");
+                cases = _.filter(cases, (c) => c.resource.status != "Closed");
+                cases = _.chain([cases, closedCases]).flatten().value();
+
                 topSevenCases = cases.slice(0, 7);
                 min = _.chain(topSevenCases).pluck('resource').pluck('collaborationScore').without(null).min().value();
                 max = _.chain(topSevenCases).pluck('resource').pluck('collaborationScore').without(null).max().value();
