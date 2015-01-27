@@ -1,5 +1,5 @@
 var React           = require('react');
-var _               = require('lodash');
+var map             = require('lodash/collection/map');
 
 var Label           = require('react-bootstrap/Label');
 var Popover         = require('react-bootstrap/Popover');
@@ -17,7 +17,7 @@ var Component = React.createClass({
         potentialOwners = this.props.task['potentialOwners'] == null ? [] : null;
         potentialOwnerCount = potentialOwners.length || 0;
         if (potentialOwnerCount  > 0) {
-            lis = _.map(potentialOwners, (u) => <li key={u['id']}>{u['fullName']}</li>);
+            lis = map(potentialOwners, (u) => <li key={u['id']}>{u['fullName']}</li>);
             OwnersPopover = (
                 <Popover key='popover'>
                     <ul className='list-unstyled' key='owner'>{lis}</ul>

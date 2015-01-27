@@ -179,7 +179,6 @@ var Component = React.createClass({
         this.queryCases(stateHash);
     },
     componentWillReceiveProps: function(nextProps) {
-        console.debug("tasks:willReceiveProps");
         var stateHash;
         if (this.getQuery()['ssoUsername'] != this.state.ssoUsername
             || this.getQuery()['roles'] != this.state.roles
@@ -203,8 +202,6 @@ var Component = React.createClass({
             || this.getQuery()['roles'] != this.state.roles
             || this.getParams()['taskId'] != this.state.taskId
             || !_.isEqual(this.state, nextState)) {
-            //console.debug("tasks:Something isn't equal, updating!");
-            //console.debug(ObjectDiff.diff(this.state, nextState));
             return true;
         }
         return false

@@ -36,7 +36,7 @@
     "less": "2.*",
     "less-loader": "2.*",
     "less-middleware": "~1.0.4",
-    "lodash": "^2.4.1",
+    "lodash": "~3.0.0",
     "marty": "*",
     "matchdep": "~0.3.0",
     "moment": "2.x.x",

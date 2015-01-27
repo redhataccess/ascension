@@ -1,5 +1,4 @@
 var React           = require('react/addons');
-var _               = require('lodash');
 var WebUtilsMixin   = require('../../mixins/webUtilsMixin.coffee');
 
 var Label           = require('react-bootstrap/Label');

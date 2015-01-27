@@ -179,7 +179,7 @@ CaseLogic.fetchCases = (opts) ->
       contribCases = contributorCases || []
       logger.debug("fetched #{cases.length} main case(s) and #{contribCases.length} contributor case(s)")
       deferred.resolve {
-        cases: _.chain([[cases || []], [contribCases]]).flatten().without(undefined).uniq((c) -> c.externalModelId).each((c) -> c.resource.caseNumber = S(c.resource.caseNumber).padLeft(8, '0').s).value(),
+        cases: _.chain([cases, contribCases]).flatten().without(undefined).uniq((c) -> c.externalModelId).each((c) -> c.resource.caseNumber = S(c.resource.caseNumber).padLeft(8, '0').s).value(),
         userRoles: userRoles
         defaultRoles: defaultRoles
         urlRoles: urlRoles

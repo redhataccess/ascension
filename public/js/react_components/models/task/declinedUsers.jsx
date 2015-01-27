@@ -1,5 +1,5 @@
 var React           = require('react/addons');
-var _               = require('lodash');
+var map             = require('lodash/collection/map');
 
 var Label           = require('react-bootstrap/Label');
 var Popover         = require('react-bootstrap/Popover');
@@ -16,7 +16,7 @@ var Component = React.createClass({
         declinedUsers = this.props.task['declinedUsers'] == null ? [] : this.props.task['declinedUsers'];
         declinedUserCount = declinedUsers.length || 0;
         if (declinedUserCount > 0) {
-            lis = _.map(declinedUsers, (u) => <li key={u['id']}>{u['fullName']}</li>);
+            lis = map(declinedUsers, (u) => <li key={u['id']}>{u['fullName']}</li>);
             UsersPopover = (
                 <Popover key='popover'>
                     <ul className='list-unstyled' key='users'>{lis}</ul>

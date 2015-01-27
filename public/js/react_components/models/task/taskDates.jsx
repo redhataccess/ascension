@@ -30,7 +30,7 @@ var Component = React.createClass({
                 <div>
                     <span>Created: {created.format(format)}</span>
                     &nbsp;  &nbsp;
-                    <span>Opened: {durHuman}</span>
+                    <span>Opened {durHuman}</span>
                 </div>
             )
         } else if (this.props.task.resource.state === TaskStateEnum.CLOSED.name) {
@@ -38,7 +38,7 @@ var Component = React.createClass({
                 <div>
                     <span>Created: {created.format(format)}</span>
                     <span> Closed: {closed.format(format)} </span>
-                    <span> Opened: {createdClosedDurHuman}</span>
+                    <span> Opened {createdClosedDurHuman}</span>
                 </div>
             )
         } else {
