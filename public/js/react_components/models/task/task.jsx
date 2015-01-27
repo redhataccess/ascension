@@ -4,7 +4,6 @@ var Router                      = require('react-router/dist/react-router');
 var AjaxMixin                   = require('../../mixins/ajaxMixin.coffee');
 var WebUtilsMixin               = require('../../mixins/webUtilsMixin.coffee');
 var TaskState                   = require('./taskState.jsx');
-var TaskActionHeader            = require('./taskActionHeader.jsx');
 var TaskMetaData                = require('./taskMetaData.jsx');
 var Spacer                      = require('react-redhat/Spacer');
 var Case                        = require('../case/case.jsx');
