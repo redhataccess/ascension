@@ -6,6 +6,9 @@ var EntityOpEnum    = require('../../../../../src/com/redhat/ascension/rules/enu
 
 var DeclinedTasksActions    = require('../../actions/DeclinedTasksActions');
 
+var OverlayTrigger  = require('react-bootstrap/OverlayTrigger');
+var Tooltip         = require('react-bootstrap/Tooltip');
+
 var Component = React.createClass({
     displayName: 'TaskActionHeader',
     _declineTask: function() {
@@ -33,9 +36,9 @@ var Component = React.createClass({
                 </div>
                 <div className='col-sm-6'>
                     <div className='pull-right'>
-                        <button className='btn btn-secondary' onClick={this._declineTask}>{`Deny`}</button>
-                    &nbsp;
-                        <button className='btn btn-secondary'>{`Accept`}</button>
+                        <OverlayTrigger placement="top" overlay={<Tooltip>Ignore case until next time it is updated.</Tooltip>}>
+                            <button className='btn btn-secondary' onClick={this._declineTask}>{`Ignore`}</button>
+                        </OverlayTrigger>
                     </div>
                 </div>
             </div>

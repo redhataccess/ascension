@@ -13,7 +13,6 @@ var CaseIssueLinks      = require('./caseIssueLinks.jsx');
 var CaseResourceLinks   = require('./caseResourceLinks.jsx');
 var Comments            = require('react-redhat/comment/Comments');
 
-
 var Alert               = require('react-bootstrap/Alert');
 var Grid                = require('react-bootstrap/Grid');
 
@@ -40,7 +39,7 @@ var Component = React.createClass({
         }
         return (
             <div>
-                <CaseHeader case={this.props.case.resource} key='caseHeader'></CaseHeader>
+                <CaseHeader case={this.props.case} key='caseHeader'></CaseHeader>
                 <div key='caseMetaData'>
                     <CaseDescription description={this.props.case.resource.description}></CaseDescription>
                     <CaseSummary summary={this.props.case.resource.summary}></CaseSummary>

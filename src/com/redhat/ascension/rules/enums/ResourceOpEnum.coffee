@@ -3,6 +3,7 @@ _ = require 'lodash'
 # The Entity operation is the operation that needs to be performed on the entity in question
 # So for example a 'Waiting on Owner' case operation would be to update the case.
 
+# The grammar field is just for combining the display and the 'Case 123456' into a legible sentence.
 # This all is primarily meta data driven by existing fields
 ResourceOp = {}
 
@@ -13,42 +14,48 @@ ResourceOp = {}
 ResourceOp.TAKE_FTS =
   name: 'FTS'
   display: 'Take FTS Role'
+  grammar: 'on'
 _.defaults ResourceOp,
   'FTS': ResourceOp.TAKE_FTS
 
 ResourceOp.TAKE_OWNERSHIP =
   name: 'TAKE_OWNERSHIP'
   display: 'Take ownership'
+  grammar: 'of'
 _.defaults ResourceOp,
   'TAKE_OWNERSHIP': ResourceOp.TAKE_OWNERSHIP
 
 ResourceOp.COLLABORATE =
   name: 'COLLABORATE'
   display: 'Collaborate'
+  grammar: 'on'
 _.defaults ResourceOp,
   'COLLABORATE': ResourceOp.COLLABORATE
 
 ResourceOp.CONTRIBUTE =
   name: 'CONTRIBUTE'
   display: 'Contribute'
+  grammar: 'on'
 _.defaults ResourceOp,
   'CONTRIBUTE': ResourceOp.CONTRIBUTE
 
 ResourceOp.UPDATE =
   name: 'UPDATE'
-  display: 'Update case'
+  display: 'Update'
 _.defaults ResourceOp,
   'UPDATE': ResourceOp.UPDATE
 
 ResourceOp.SET_SBRS =
   name: 'SET_SBRS'
   display: 'Set SBRs'
+  grammar: 'on'
 _.defaults ResourceOp,
   'SET_SBRS': ResourceOp.SET_SBRS
 
 ResourceOp.SET_TAGS =
   name: 'SET_TAGS'
   display: 'Set tags'
+  grammar: 'on'
 _.defaults ResourceOp,
   'SET_TAGS': ResourceOp.SET_TAGS
 
@@ -61,54 +68,63 @@ _.defaults ResourceOp,
 ResourceOp.NOOP =
   name: 'NOOP'
   display: 'No action required'
+  grammar: 'on'
 _.defaults ResourceOp,
   'NOOP': ResourceOp.NOOP
 
 ResourceOp.FOLLOW_UP_WITH_ENGINEERING =
   name: 'FOLLOW_UP_WITH_ENGINEERING '
   display: 'Follow up with engineering'
+  grammar: 'on'
 _.defaults ResourceOp,
   'FOLLOW_UP_WITH_ENGINEERING': ResourceOp.FOLLOW_UP_WITH_ENGINEERING
 
 ResourceOp.FOLLOW_UP_WITH_PM =
   name: 'FOLLOW_UP_WITH_PM '
   display: 'Follow up with PM'
+  grammar: 'on'
 _.defaults ResourceOp,
   'FOLLOW_UP_WITH_PM': ResourceOp.FOLLOW_UP_WITH_PM
 
 ResourceOp.FOLLOW_UP_WITH_SALES =
   name: 'FOLLOW_UP_WITH_SALES'
   display: 'Follow up with sales'
+  grammar: 'on'
 _.defaults ResourceOp,
   'FOLLOW_UP_WITH_SALES': ResourceOp.FOLLOW_UP_WITH_SALES
 
 ResourceOp.NNO =
   name: 'NNO'
   display: 'Needs new owner'
+  grammar: 'for'
 _.defaults ResourceOp,
   'NNO': ResourceOp.NNO
 
 ResourceOp.NNO_NA =
   name: 'NNO_NA'
   display: 'Needs new NA owner'
+  grammar: 'for'
 _.defaults ResourceOp,
   'NNO_NA': ResourceOp.NNO_NA
 
 ResourceOp.NNO_APAC =
   name: 'NNO_APAC'
   display: 'Needs new APAC owner'
+  grammar: 'for'
 _.defaults ResourceOp,
   'NNO_APAC': ResourceOp.NNO_APAC
 
 ResourceOp.NNO_EMEA =
   name: 'NNO_EMEA'
   display: 'Needs new EMEA owner'
+  grammar: 'for'
 _.defaults ResourceOp,
   'NNO_EMEA': ResourceOp.NNO_EMEA
 
 ResourceOp.NNO_INDIA =
   name: 'NNO_INDIA'
   display: 'Needs new India owner'
+  grammar: 'for'
 _.defaults ResourceOp,
   'NNO_INDIA': ResourceOp.NNO_INDIA
 
@@ -118,7 +134,8 @@ _.defaults ResourceOp,
 
 ResourceOp.CREATE_KCS =
   name: 'CREATE_KCS'
-  display: 'Create KCS Content for case'
+  display: 'Create KCS Content'
+  grammar: 'for'
 _.defaults ResourceOp,
   'CREATE_KCS': ResourceOp.CREATE_KCS
 

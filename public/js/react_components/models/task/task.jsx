@@ -7,7 +7,6 @@ var TaskState                   = require('./taskState.jsx');
 var TaskHeader                  = require('./taskHeader.jsx');
 var TaskActionHeader            = require('./taskActionHeader.jsx');
 var TaskMetaData                = require('./taskMetaData.jsx');
-var TaskDates                   = require('./taskDates.jsx');
 var Spacer                      = require('react-redhat/Spacer');
 var Case                        = require('../case/case.jsx');
 var User                        = require('react-redhat/user/User');
@@ -90,14 +89,6 @@ var Component = React.createClass({
         if (this.state.case == null && this.state.caseLoading == false) {
             return <Alert bsStyle='danger' key='alert'>Error fetching case: {caseNumber}</Alert>
         }
-        //takeOwnership={this.assignOwnership.bind(this, Auth.getAuthedUser())}
-        //declineOwnership={this.declineOwnership.bind(this, Auth.getAuthedUser())}
-        //assignScopedOwnership={this.assignOwnership.bind(this, Auth.getScopedUser())}
-        //declineScopedOwnership={this.declineOwnership.bind(this, Auth.getScopedUser())}
-        //removeOwnership={this.removeOwnership}
-                        // <DeclinedUsers task={this.state.case}></DeclinedUsers>
-                        // &nbsp;&nbsp;
-                        // <PotentialOwners task={this.state.case}></PotentialOwners>
         return (
             <div>
                 <div key='taskContainer' className='row'>
@@ -108,37 +99,12 @@ var Component = React.createClass({
                                 close={this.close}
                                 key='taskStatus'>
                             </TaskState>
-                            &nbsp;
-                            <TaskActionHeader case={this.state.case} key='action'></TaskActionHeader>
                         </span>
-                        <span>{this.state.case.resource.status} / {this.state.case.resource.internalStatus}</span>
-                        &nbsp;--&nbsp;
-                        <span>{this.state.case.resource.severity} / {this.state.case.resource.internalPriority}</span>
-                        <span className='clearfix'></span>
-                        <span key='datesContainer'>
-                            <TaskDates task={this.state.case} key='dates'></TaskDates>
-                        </span>
-                        <span className='clearfix'></span>
-                        <strong>{this.state.case.resource.subject}</strong>
-                        <Spacer />
-                        {/*/////////////////////////////////////////////////////////////////////////////////*/}
-                        {/*Case link buttons */}
-                        {/*/////////////////////////////////////////////////////////////////////////////////*/}
-                        <div key='caseLinks'>
-                            <a className='btn btn-open' target='_blank' href={`https://na7.salesforce.com/${this.state.case.externalModelId}`}>
-                                {`Salesforce`}
-                            </a>
-                        &nbsp;
-                            <a className='btn btn-open' target='_blank' href={`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.state.case.resource.caseNumber}`}>
-                                {`Unified`}
-                            </a>
-                        </div>
                     </div>
                 </div>
                 {/*/////////////////////////////////////////////////////////////////////////////////*/}
                 {/*Entity Contents*/}
                 {/*/////////////////////////////////////////////////////////////////////////////////*/}
-                <hr />
                 <div key='entityContainerRow' className='row'>
                     <div className='col-md-12' key='entityContainerContents'>
                     {this.genEntityContents()}
