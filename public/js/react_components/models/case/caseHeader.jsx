@@ -60,6 +60,7 @@ var Component = React.createClass({
                             </a>
                         </div>
                     </div>
+                    {/*
                     <div className='col-sm-6'>
                         <div className='pull-right'>
                             <OverlayTrigger placement="top" overlay={<Tooltip>Ignore case until next time it is updated.</Tooltip>}>
@@ -67,6 +68,7 @@ var Component = React.createClass({
                             </OverlayTrigger>
                         </div>
                     </div>
+                    */}
                 </div>
             </Well>
         )
