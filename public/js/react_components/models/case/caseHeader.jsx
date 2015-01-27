@@ -55,7 +55,7 @@ var Component = React.createClass({
                                 {`Salesforce`}
                             </a>
                             &nbsp;
-                            <a className='btn btn-open' target='_blank' href={`https://c.na7.visual.force.com/apex/Case_View?sbstr=${this.props.case.resource.caseNumber}`}>
+                            <a className='btn btn-open' target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.props.case.resource.caseNumber}`}>
                                 {`Unified`}
                             </a>
                         </div>
