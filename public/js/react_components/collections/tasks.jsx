@@ -29,18 +29,13 @@ var Alert                   = require('react-bootstrap/Alert');
 var DeclinedTasksStore      = require('../stores/DeclinedTasksStore');
 var DeclinedTasksActions    = require('../actions/DeclinedTasksActions');
 
-var DeclinedTasksState = Marty.createStateMixin({
-    declinedTasks: DeclinedTasksStore
-    //getState: function () {
-    //    return {
-    //        declinedTasks: DeclinedTasksStore.getAll()
-    //    }
-    //}
-});
+// var DeclinedTasksState = Marty.createStateMixin({
+//     declinedTasks: DeclinedTasksStore
+// });
 
 var Component = React.createClass({
     displayName: 'Tasks',
-    mixins: [AjaxMixin, Router.State, Router.Navigation, DeclinedTasksState],
+    mixins: [AjaxMixin, Router.State, Router.Navigation],
     getInitialState: function() {
         return {
             // This will allow the cases pulled to be overridden from the Auth.getAuthedUser()
@@ -181,8 +176,8 @@ var Component = React.createClass({
     componentWillReceiveProps: function(nextProps) {
         var stateHash;
         if (this.getQuery()['ssoUsername'] != this.state.ssoUsername
-            || this.getQuery()['roles'] != this.state.roles
-            || this.getParams()['taskId'] != this.state.taskId) {
+            || this.getQuery()['roles'] != this.state.roles ) {
+            // || this.getParams()['taskId'] != this.state.taskId) {
             stateHash = {
                 ssoUsername: this.getQuery()['ssoUsername'],
                 roles: this.getQuery()['roles'],

@@ -14,7 +14,7 @@ var Component = React.createClass({
         var resourceOp, resourceOpText;
         if (c != null) {
             resourceOp = ResourceOpEnum.getOpFromCase(c);
-            resourceOpText = resourceOp.display + (resourceOp.grammar != null ? " " + resource.grammar : "")
+            resourceOpText = resourceOp.display + (resourceOp.grammar != null ? " " + resourceOp.grammar : "")
             return (
                 <span>{resourceOpText}&nbsp;</span>
             );
