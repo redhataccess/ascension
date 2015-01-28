@@ -1,6 +1,8 @@
 var React       = require('react');
 var S           = require('string');
 var CaseProduct = require('./caseProduct.jsx');
+var CaseStatus =  require('./caseStatus.jsx');
+var CaseSeverity =  require('./caseSeverity.jsx')
 var CaseSbrs    = require('./caseSbrs.jsx');
 var CaseTags    = require('./caseTags.jsx');
 var TaskDates   = require('../task/taskDates.jsx');
@@ -52,9 +54,9 @@ var Component = React.createClass({
                             {this.genTamLabel(this.props.case)}
                         </h2>
                         <div className='clearfix'></div>
-                        <span>{this.props.case.resource.status} / {this.props.case.resource.internalStatus}</span>
+                        <CaseStatus case={this.props.case} key='status'></CaseStatus>
                         &nbsp;--&nbsp;
-                        <span>{this.props.case.resource.severity} / {this.props.case.resource.internalPriority}</span>
+                        <CaseSeverity case={this.props.case} key='severity'></CaseSeverity>
                         <div className='clearfix'></div>
                         <TaskDates task={this.props.case} key='dates'></TaskDates>
                     </Col>
