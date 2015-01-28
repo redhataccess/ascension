@@ -1,6 +1,7 @@
 express         = require 'express'
 app             = express()
 http            = require 'http'
+url             = require 'url'
 path            = require 'path'
 favicon         = require 'serve-favicon'
 logger          = require('tracer').colorConsole()
@@ -44,7 +45,7 @@ app.set('view engine', 'jade');
 app.set('ipAddress', ipAddress)
 app.set('port', port)
 app.use(morgan('dev'));
-app.use(bodyParser.json());
+app.use(bodyParser.json(strict: false));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -61,6 +62,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 # will print stacktrace
 if app.get("env") is "dev"
   app.use (err, req, res, next) ->
+    logger.error(err.stack || err)
     res.status err.status or 500
     res.render "error",
       message: err.message
@@ -69,6 +71,7 @@ if app.get("env") is "dev"
 # production error handler
 # no stacktraces leaked to user
 app.use (err, req, res, next) ->
+  logger.error(err.stack || err)
   res.status err.status or 500
   res.render "error",
     message: err.message
@@ -140,23 +143,33 @@ app.post "/task/:_id", (req, res) ->
 #  http://unified-ds.gsslab.rdu2.redhat.com:9100/user?where=SSO is "rhn-support-smendenh" and (isActive is true and isInGSS is true)
 app.get "/case/:caseNumber/comments", (req, res) ->
   req.pipe(request("#{settings.UDS_URL}/case/#{req.params.caseNumber}/comments")).pipe(res)
+app.post "/case/:caseNumber/comments/:commentType", (req, res) ->
+  opts = 
+    uri: "#{settings.UDS_URL}/case/#{req.params.caseNumber}/comments/#{req.params.commentType}"
+    method: "POST"
+    headers: req.headers
+  # delete opts.headers["content-length"]
+  opts.headers["Content-Length"] = Buffer.byteLength(req.body)
+  opts.headers["Content-Type"] = "application/json; charset=utf-8"
+  opts.headers["Accept"] = "application/json"
+  opts.headers["Accept-Encoding"] = "gzip,deflate,sdch"
+  theUrl = url.parse(opts.uri)
+  logger.debug("Posting to: #{opts.uri}");
+  logger.debug("with form data: #{JSON.stringify(req.body)}");
+  logger.debug("with headers: #{JSON.stringify(opts.headers)}");
+  # logger.debug("headers: #{JSON.stringify(req.headers)}");
+  # req.pipe(request.post({url: opts.uri, headers: req.headers, form: req.body})).pipe(res)
+  req.pipe(request.post({url: opts.uri, headers: opts.headers, body: req.body})).pipe(res)
 app.get "/case/:caseNumber", (req, res) ->
   req.pipe(request("#{settings.UDS_URL}/case/#{req.params.caseNumber}")).pipe(res)
 app.get "/user/metadata/:type", (req, res) ->
   logger.debug("type: #{req.params.type}, query: #{unescape(req.query.where)}")
   uri = settings.UDS_URL + "/user/metadata/#{req.params.type}" + "?where=" + escape(req.query.where) + "&resourceProjection=Minimal"
-#  uri = settings.UDS_URL + "/user/metadata/#{req.params.type}" + "?where=" + escape(req.query.where)
   logger.debug("Proxying to: #{uri}")
   req.pipe(request(uri)).pipe(res)
 app.get "/user/:input", (req, res) ->
   req.pipe(request("#{settings.UDS_URL}/user/#{req.params.input}")).pipe(res)
 app.get "/user", (req, res) ->
-#  where = S(unescape(req.query.where)).replaceAll('%', '%25').s
-#  logger.debug("query: #{req.query.where}, unescaped: #{where}")
-#  uri = settings.UDS_URL + "/user" + "?where=" + where
-#  logger.debug("Proxying to: #{uri}")
-#  req.pipe(request(uri)).pipe(res)
-
   uri = new Uri(settings.UDS_URL);
   uri.setPath("/user");
   _.each req.query, (value, key) -> uri.addQueryParam(key, unescape(value));

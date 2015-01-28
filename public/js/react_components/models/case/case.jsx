@@ -1,4 +1,5 @@
 var React               = require('react/addons');
+var padLeft             = require('lodash/string/padLeft');
 var AjaxMixin           = require('../../mixins/ajaxMixin.coffee');
 var Spacer              = require('react-redhat/Spacer');
 var User                = require('react-redhat/user/User');
@@ -11,6 +12,7 @@ var CaseSummary         = require('./caseSummary.jsx');
 var CaseAssociates      = require('./caseAssociates.jsx');
 var CaseIssueLinks      = require('./caseIssueLinks.jsx');
 var CaseResourceLinks   = require('./caseResourceLinks.jsx');
+var NewComment          = require('./newComment.jsx');
 var Comments            = require('react-redhat/comment/Comments');
 
 var Alert               = require('react-bootstrap/Alert');
@@ -22,8 +24,25 @@ var Component = React.createClass({
     getInitialState: function() {
         return {
             'case': void 0,
-            'loading': true
+            'loading': true,
+            comment: [
+                {
+                  'name': 'status',
+                  'value': this.props.case.resource.status
+                }, 
+                {
+                  'name': 'internalStatus',
+                  'value': this.props.case.resource.internalStatus
+                }, 
+                {
+                  'name': 'public',
+                  'value': false
+                }
+            ]
         };
+    },
+    setComment: function(comment) {
+        this.setState({ 'comment': comment });
     },
     componentDidMount: function() {
         this.setState({'case': this.props.case, 'loading': false});
@@ -37,6 +56,7 @@ var Component = React.createClass({
             {`No case found with case number: ${this.props.case.resource.caseNumber}`}
             </Alert>;
         }
+        var caseNumber = padLeft(this.props.case.resource.caseNumber, 8, '0');
         return (
             <div>
                 <CaseHeader case={this.props.case} key='caseHeader'></CaseHeader>
@@ -45,9 +65,19 @@ var Component = React.createClass({
                     <CaseSummary summary={this.props.case.resource.summary}></CaseSummary>
                     <CaseAssociates owner={this.props.case.resource.owner} associates={this.state.case.resource.caseAssociates}></CaseAssociates>
                     <CaseResourceLinks resourceLinks={this.props.case.resource.resourceLinks}></CaseResourceLinks>
+                    <NewComment caseNumber={caseNumber}
+                      onRequestHide={this.toggle}
+                      refreshParentComponent={this.props.refreshParentComponent}
+                      showSuccessAlert={this.props.showSuccessAlert}
+                      showDangerAlert={this.props.showDangerAlert}
+                      setComment={this.setComment}
+                      comment={this.state.comment}
+                      url={`/case/${caseNumber}/comments`}
+                      isUserAuthenticated={this.props.isUserAuthenticated}
+                      authenticatedUser={this.props.authenticatedUser}></NewComment>
                 </div>
                 <hr />
-                <Comments caseNumber={this.props.case.resource.caseNumber}></Comments>
+                <Comments caseNumber={caseNumber}></Comments>
             </div>
         )
     }

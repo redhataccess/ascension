@@ -1,7 +1,7 @@
 var React       = require('react');
-var S           = require('string');
+var padLeft     = require('lodash/string/padLeft');
 var CaseProduct = require('./caseProduct.jsx');
-var CaseStatus =  require('./caseStatus.jsx');
+var CaseStatus  =  require('./caseStatus.jsx');
 var CaseSeverity =  require('./caseSeverity.jsx')
 var CaseSbrs    = require('./caseSbrs.jsx');
 var CaseTags    = require('./caseTags.jsx');
@@ -46,7 +46,7 @@ var Component = React.createClass({
         return null;
     },
     render: function() {
-        var caseNumber = S(this.props.case.resource.caseNumber).padLeft(8, '0').s;
+        var caseNumber = padLeft(this.props.case.resource.caseNumber, 8, '0');
         return (
             <Well key='caseHeader'>
                 <Row>

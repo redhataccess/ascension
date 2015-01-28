@@ -1,8 +1,8 @@
 var React                 = require('react');
+var cx                    = React.addons.classSet;
 var _                     = require('lodash');
-
-// var CaseStatusComponent   = require('./caseStatusComponent.coffee');
-var CommentType           = require('./commentType.jsx');
+var strata                = require('stratajs');
+var Spacer                = require('react-redhat/Spacer');
 
 // React Bootstrap imports
 var Label                 = require('react-bootstrap/Label');
@@ -11,6 +11,8 @@ var Button                = require('react-bootstrap/Button');
 var Input                 = require('react-bootstrap/Input');
 var DropdownButton        = require('react-bootstrap/DropdownButton');
 var MenuItem              = require('react-bootstrap/MenuItem');
+var Accordion             = require('react-bootstrap/Accordion');
+var Panel                 = require('react-bootstrap/Panel');
 
 module.exports = React.createClass({
   getInitialState: function() {
@@ -41,86 +43,84 @@ module.exports = React.createClass({
   },
   updateStatus: function(newStatus) {
     var items = _.filter(this.state.comment, (item) => item.name !== 'status' && item.name !== 'internalStatus');
+    var status, intStatus;
+    switch(newStatus) {
+      case "woc":
+        status = "Waiting on Customer";
+        intStatus = "Waiting on Customer";
+        break;
+      case "worh":
+        status = "Waiting on Red Hat";
+        intStatus = "Waiting on Owner";
+        break;
+      case "wocon":
+        status = "Waiting on Red Hat";
+        intStatus = "Waiting on Contributor";
+        break;
+      case "closed":
+        status = "Closed";
+        intStatus = "Closed";
+        break;
+      default:
+        console.debug("No status found, setting to WoRH/WoO");
+        status = "Waiting on Red Hat";
+        intStatus = "Waiting on Owner";
+        break;
+    };
     this.setState({
       comment: _.union(items, [
         {
           'name': 'status',
-          'value': newStatus
+          'value': status
         }, {
           'name': 'internalStatus',
-          'value': newStatus
+          'value': intStatus
         }
       ])
     });
   },
-  render: function() {
-    var commentStyle, self, statusStyle;
-    self = this;
-    commentStyle = self.getDefaultValue("public") ? 'success' : 'danger';
-    statusStyle = 'success';
-    if (self.getDefaultValue("status") === 'Waiting on Customer') {
-      statusStyle = 'info';
-    } else if (self.getDefaultValue("status") === 'Waiting on Red Hat') {
-      statusStyle = 'warning';
-    }
-    // var caseStatus = <CaseStatus status={this.getDefaultValue("status")} internalStatus={this.getDefaultValue("internalStatus")}></CaseStatus>;
-    var caseStatus = this.getDefaultValue("status") + " " + this.getDefaultValue("internalStatus");
-    return (
-      <Modal animation={false} keyboard={true} title="Submit a Comment" onRequestHide={this.hide}>
-        <form onSubmit={this.submitNewComment}>
-          <div className="modal-body">
-            <div className="pull-left">
-              <DropdownButton pullRight={true} disabled={true} bsStyle="large" title={caseStatus}>
-                <MenuItem onSelect={this.updateStatus} key="woc">Waiting on Customer</MenuItem>
-                <MenuItem onSelect={this.updateStatus} key="worh">Waiting on Red Hat</MenuItem>
-                <MenuItem onSelect={this.updateStatus} key="closed">Closed</MenuItem>
-              </DropdownButton>
-            </div>
-            <div className="pull-right">
-              <Button onClick={this.toggleCommentType} bsStyle={commentStyle} bsSize="large">
-                <CommentType resource={{public: this.getDefaultValue("public")}}></CommentType>
-              </Button>
-            </div>
-            <br />
-            <br />
-            <br />
-            <Input type="textarea" ref="comment" rows={10} defaultValue={this.getDefaultValue("comment")}/>
-          </div>
-          <div className="modal-footer">
-            <Button type="submit" bsStyle="primary" disabled={this.state.isSaving}>Submit</Button>
-          </div>
-        </form>
-      </Modal>
-    );
-  },
   submitNewComment: function() {
-    var comment, commentType, self, url, self = this;
+    var newComment, comment, commentType, self, url, self = this;
     this.setState({isSaving: true});
     commentType = self.getDefaultValue('public') ? 'public' : 'private';
     url = "" + this.props.url + "/" + commentType;
     comment = $(self.refs['comment'].getDOMNode()).children('textarea').val().trim();
-    $.ajax(url, {
-      type: 'POST',
-      data: JSON.stringify("" + comment),
-      contentType: "application/json; charset=utf-8",
-      error: (function(jqXHR, textStatus, errorThrown) {
-        console.log("Error submitting a new comment.");
-        self.hide();
-        return self.props.showDangerAlert("Cannot submit comment. You most probably need to login to http://gss.my.salesforce.com");
-      }).bind(this),
-      success: (function(result, textStatus, jqXHR) {
-        console.log("Comment saved: " + result);
-        self.setState({
-          isSaving: false,
-          comment: _.filter(this.state.comment, function(item) {
-            return item.name === 'status' || item.name === 'internalStatus' || item.name === 'public';
-          })
-        });
-        self.props.onRequestHide();
-        self.props.showSuccessAlert("Comment submitted successfully");
-        return self.props.refreshParentComponent();
-      }).bind(this)
-    });
+    // https://github.com/redhataccess/redhat_access_angular_ui/blob/master/app/common/services/strataService.js
+    newComment = {
+      'text': $(self.refs['comment'].getDOMNode()).children('textarea').val().trim(),
+      'public': self.getDefaultValue('public') ? "true" : "false",
+      'draft': "false"
+    };
+    strata.cases.comments.post(this.props.caseNumber, newComment, (response) => {
+      console.debug(JSON.stringify(response));
+    }, (err) => {
+      console.error(err.stack || err);
+    })
+    // $.ajax({
+    //   url: url,
+    //   type: 'POST',
+    //   xhrFields: {'withCredentials': true},
+    //   data: JSON.stringify(comment),
+    //   contentType: "application/json; charset=utf-8",
+    //   error: (function(jqXHR, textStatus, errorThrown) {
+    //     console.error("Error submitting a new comment." + (errorThrown.stack || errorThrown));
+    //     self.hide();
+    //     // return self.props.showDangerAlert("Cannot submit comment. You most probably need to login to http://gss.my.salesforce.com");
+    //   }).bind(this),
+    //   success: (function(result, textStatus, jqXHR) {
+    //     console.log("Comment saved: " + result);
+    //     self.setState({
+    //       isSaving: false,
+    //       comment: _.filter(this.state.comment, function(item) {
+    //         return item.name === 'status' || item.name === 'internalStatus' || item.name === 'public';
+    //       })
+    //     });
+    //     // self.props.onRequestHide();
+    //     // self.props.showSuccessAlert("Comment submitted successfully");
+    //     // TODO 
+    //     // return self.props.refreshParentComponent();
+    //   }).bind(this)
+    // });
     return false;
   },
   hide: function() {
@@ -137,6 +137,51 @@ module.exports = React.createClass({
     });
     items = _.filter(this.state.comment, (item) => item.name === 'status' || item.name === 'internalStatus' || item.name === 'public');
     this.setState({'comment': _.union(items, textAreas)});
-    return this.props.onRequestHide();
+    // return this.props.onRequestHide();
+  },
+  render: function() {
+    var commentStyle, self, statusStyle, textareaStyle;
+    self = this;
+    commentStyle = self.getDefaultValue("public") ? 'success' : 'danger';
+    statusStyle = 'success';
+    if (self.getDefaultValue("status") === 'Waiting on Customer') {
+      statusStyle = 'info';
+    } else if (self.getDefaultValue("status") === 'Waiting on Red Hat') {
+      statusStyle = 'warning';
+    }
+
+    textareaStyle = cx({private: !this.getDefaultValue("public")});
+    // var caseStatus = <CaseStatus status={this.getDefaultValue("status")} internalStatus={this.getDefaultValue("internalStatus")}></CaseStatus>;
+    // var caseStatus = this.getDefaultValue("status") + " / " + this.getDefaultValue("internalStatus");
+    var caseStatus = this.getDefaultValue("internalStatus");
+    return (
+      <Accordion>
+        <Panel eventKey="newComment" key="newComment" header="New Comment" collapsable={true}  defaultExpanded={false}>
+          <form onSubmit={this.submitNewComment}>
+            <div className="pull-left">
+              <DropdownButton pullRight={true} disabled={false} title={caseStatus}>
+                <MenuItem onSelect={this.updateStatus} key="woc" eventKey="woc">Waiting on Customer</MenuItem>
+                <MenuItem onSelect={this.updateStatus} key="worh" eventKey="worh">Waiting on Owner</MenuItem>
+                <MenuItem onSelect={this.updateStatus} key="wocon" eventKey="wocon">Waiting on Contributor</MenuItem>
+                <MenuItem onSelect={this.updateStatus} key="closed" eventKey="closed">Closed</MenuItem>
+              </DropdownButton>
+            </div>
+            <div className="pull-right">
+              <Button bsSize="small" onClick={this.toggleCommentType} bsStyle={commentStyle}>
+              {this.getDefaultValue("public") ? "Public" : "Private"}
+              </Button>
+            </div>
+            <br />
+            <br />
+            <br />
+            <Input type="textarea" ref="comment" className={textareaStyle} rows={10} defaultValue={this.getDefaultValue("comment")}/>
+            <Spacer />
+            <div className="pull-right">
+              <Button type="submit" disabled={this.state.isSaving}>Submit</Button>
+            </div>
+          </form>
+        </Panel>
+      </Accordion>
+    );
   }
 });

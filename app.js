@@ -1,11 +1,13 @@
 (function() {
-  var CaseLogic, S, TaskLogic, Uri, app, bodyParser, compression, cookieParser, env, express, favicon, http, ipAddress, logger, morgan, oneDay, path, port, request, server, serverStartTime, settings, _;
+  var CaseLogic, S, TaskLogic, Uri, app, bodyParser, compression, cookieParser, env, express, favicon, http, ipAddress, logger, morgan, oneDay, path, port, request, server, serverStartTime, settings, url, _;
 
   express = require('express');
 
   app = express();
 
   http = require('http');
+
+  url = require('url');
 
   path = require('path');
 
@@ -64,7 +66,9 @@
 
   app.use(morgan('dev'));
 
-  app.use(bodyParser.json());
+  app.use(bodyParser.json({
+    strict: false
+  }));
 
   app.use(bodyParser.urlencoded({
     extended: false
@@ -76,6 +80,7 @@
 
   if (app.get("env") === "dev") {
     app.use(function(err, req, res, next) {
+      logger.error(err.stack || err);
       res.status(err.status || 500);
       return res.render("error", {
         message: err.message,
@@ -85,6 +90,7 @@
   }
 
   app.use(function(err, req, res, next) {
+    logger.error(err.stack || err);
     res.status(err.status || 500);
     return res.render("error", {
       message: err.message,
@@ -174,6 +180,28 @@
 
   app.get("/case/:caseNumber/comments", function(req, res) {
     return req.pipe(request("" + settings.UDS_URL + "/case/" + req.params.caseNumber + "/comments")).pipe(res);
+  });
+
+  app.post("/case/:caseNumber/comments/:commentType", function(req, res) {
+    var opts, theUrl;
+    opts = {
+      uri: "" + settings.UDS_URL + "/case/" + req.params.caseNumber + "/comments/" + req.params.commentType,
+      method: "POST",
+      headers: req.headers
+    };
+    opts.headers["Content-Length"] = Buffer.byteLength(req.body);
+    opts.headers["Content-Type"] = "application/json; charset=utf-8";
+    opts.headers["Accept"] = "application/json";
+    opts.headers["Accept-Encoding"] = "gzip,deflate,sdch";
+    theUrl = url.parse(opts.uri);
+    logger.debug("Posting to: " + opts.uri);
+    logger.debug("with form data: " + (JSON.stringify(req.body)));
+    logger.debug("with headers: " + (JSON.stringify(opts.headers)));
+    return req.pipe(request.post({
+      url: opts.uri,
+      headers: opts.headers,
+      body: req.body
+    })).pipe(res);
   });
 
   app.get("/case/:caseNumber", function(req, res) {

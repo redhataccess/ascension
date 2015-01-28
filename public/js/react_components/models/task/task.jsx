@@ -1,5 +1,5 @@
 var React                       = require('react/addons');
-var S                           = require('string');
+var padLeft                     = require('lodash/string/padLeft');
 var Router                      = require('react-router/dist/react-router');
 var AjaxMixin                   = require('../../mixins/ajaxMixin.coffee');
 var WebUtilsMixin               = require('../../mixins/webUtilsMixin.coffee');
@@ -77,7 +77,7 @@ var Component = React.createClass({
         this.queryCase(this.props.caseNumber);
     },
     render: function() {
-        var caseNumber = S(this.props.caseNumber).padLeft(8, '0').s;
+        var caseNumber = padLeft(this.props.caseNumber, 8, '0');
         if (this.state.caseLoading == true) {
             return <i className='fa fa-spinner fa-spin'></i>;
         }
