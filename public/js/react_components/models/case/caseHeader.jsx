@@ -8,6 +8,7 @@ var CaseTags    = require('./caseTags.jsx');
 var TaskDates   = require('../task/taskDates.jsx');
 var Spacer      = require('react-redhat/Spacer');
 var ResourceOpEnum    = require('../../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum.coffee');
+var CaseActionsMenu   = require('./CaseActionsMenu.jsx');
 
 var Well            = require('react-bootstrap/Well');
 var Grid            = require('react-bootstrap/Grid');
@@ -16,6 +17,9 @@ var Label           = require('react-bootstrap/Label');
 var Col             = require('react-bootstrap/Col');
 var OverlayTrigger  = require('react-bootstrap/OverlayTrigger');
 var Tooltip         = require('react-bootstrap/Tooltip');
+var ButtonToolbar   = require('react-bootstrap/ButtonToolbar');
+var ButtonGroup     = require('react-bootstrap/ButtonGroup');
+var Button          = require('react-bootstrap/Button');
 
 var Component = React.createClass({
     genEntityOpText: function (c) {
@@ -53,6 +57,20 @@ var Component = React.createClass({
                             {this.genFtsLabel(this.props.case)}
                             {this.genTamLabel(this.props.case)}
                         </h2>
+                        {/*/////////////////////////////////////////////////////////////////////////////////*/}
+                        {/*Case link buttons */}
+                        {/*/////////////////////////////////////////////////////////////////////////////////*/}
+                        <ButtonToolbar>
+                            <ButtonGroup>
+                                <Button bsSize="small" target='_blank' href={`https://na7.salesforce.com/${this.props.case.externalModelId}`}>Salesforce</Button>
+                                <Button bsSize="small" target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.props.case.resource.caseNumber}`}>Unified</Button>
+                            </ButtonGroup>
+                            <ButtonGroup>
+                                <CaseActionsMenu 
+                                    caseNumber={this.props.case.resource.caseNumber}
+                                    resource={this.props.case}></CaseActionsMenu>
+                            </ButtonGroup>
+                        </ButtonToolbar>
                         <div className='clearfix'></div>
                         <CaseStatus case={this.props.case} key='status'></CaseStatus>
                         &nbsp;--&nbsp;
@@ -67,18 +85,6 @@ var Component = React.createClass({
                         <Spacer />
                         <CaseTags case={this.props.case} key='tags'></CaseTags>
                         <Spacer />
-                        {/*/////////////////////////////////////////////////////////////////////////////////*/}
-                        {/*Case link buttons */}
-                        {/*/////////////////////////////////////////////////////////////////////////////////*/}
-                        <div key='caseLinks'>
-                            <a className='btn btn-open' target='_blank' href={`https://na7.salesforce.com/${this.props.case.externalModelId}`}>
-                                {`Salesforce`}
-                            </a>
-                            &nbsp;
-                            <a className='btn btn-open' target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.props.case.resource.caseNumber}`}>
-                                {`Unified`}
-                            </a>
-                        </div>
                     </Col>
                 </Row>
                 <Spacer />
