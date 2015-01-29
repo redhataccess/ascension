@@ -115,7 +115,8 @@ module.exports = (grunt) ->
       modulesDirectories: ['web_modules', './node_modules', './public/js/bower_components']
 #      modulesDirectories: [path.join(__dirname, "node_modules"), path.join(__dirname, 'public/js/bower_components')]
 
-#      alias:
+     alias:
+        jsUri: "jsuri"
       #  # Bind version of jquery
       #  jquery: "jquery/dist/jquery"
       # Don't want to do this with React .12

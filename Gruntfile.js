@@ -73,6 +73,9 @@
         extensions: ['', '.js'],
         modulesDirectories: ['web_modules', './node_modules', './public/js/bower_components']
       },
+      alias: {
+        jsUri: "jsuri"
+      },
       plugins: [
         new ExtractTextPlugin("main.css", {
           allChunks: true
