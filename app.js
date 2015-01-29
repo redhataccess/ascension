@@ -189,10 +189,6 @@
       method: "POST",
       headers: req.headers
     };
-    opts.headers["Content-Length"] = Buffer.byteLength(req.body);
-    opts.headers["Content-Type"] = "application/json; charset=utf-8";
-    opts.headers["Accept"] = "application/json";
-    opts.headers["Accept-Encoding"] = "gzip,deflate,sdch";
     theUrl = url.parse(opts.uri);
     logger.debug("Posting to: " + opts.uri);
     logger.debug("with form data: " + (JSON.stringify(req.body)));
@@ -200,7 +196,7 @@
     return req.pipe(request.post({
       url: opts.uri,
       headers: opts.headers,
-      body: req.body
+      json: req.body
     })).pipe(res);
   });
 

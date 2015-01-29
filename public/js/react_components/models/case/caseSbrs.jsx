@@ -19,11 +19,10 @@ var Component = React.createClass({
     	}
                 // {this.props.spacer == true ? <Spacer /> : null}
     	return (
-    		<div>
-                <div className='clearfix'></div>
+    		<span>
 	    		{this.props.case.resource.sbrs.map((s) => <span key={s}><Label bsStyle="default">{s}</Label>&nbsp;</span>)}
 	    		&nbsp;
-    		</div>
+    		</span>
 		)
     }
 });

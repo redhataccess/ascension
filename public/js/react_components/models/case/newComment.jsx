@@ -13,6 +13,7 @@ var DropdownButton        = require('react-bootstrap/DropdownButton');
 var MenuItem              = require('react-bootstrap/MenuItem');
 var Accordion             = require('react-bootstrap/Accordion');
 var Panel                 = require('react-bootstrap/Panel');
+var Alert                 = require('react-bootstrap/Alert');
 
 module.exports = React.createClass({
   getInitialState: function() {
@@ -80,7 +81,7 @@ module.exports = React.createClass({
     });
   },
   submitNewComment: function() {
-    var newComment, comment, commentType, self, url, self = this;
+    var newComment, newStatus, comment, commentType, self, url, self = this;
     this.setState({isSaving: true});
     commentType = self.getDefaultValue('public') ? 'public' : 'private';
     url = "" + this.props.url + "/" + commentType;
@@ -91,36 +92,47 @@ module.exports = React.createClass({
       'public': self.getDefaultValue('public') ? "true" : "false",
       'draft': "false"
     };
-    strata.cases.comments.post(this.props.caseNumber, newComment, (response) => {
-      console.debug(JSON.stringify(response));
-    }, (err) => {
-      console.error(err.stack || err);
-    })
-    // $.ajax({
-    //   url: url,
-    //   type: 'POST',
-    //   xhrFields: {'withCredentials': true},
-    //   data: JSON.stringify(comment),
-    //   contentType: "application/json; charset=utf-8",
-    //   error: (function(jqXHR, textStatus, errorThrown) {
-    //     console.error("Error submitting a new comment." + (errorThrown.stack || errorThrown));
-    //     self.hide();
-    //     // return self.props.showDangerAlert("Cannot submit comment. You most probably need to login to http://gss.my.salesforce.com");
-    //   }).bind(this),
-    //   success: (function(result, textStatus, jqXHR) {
-    //     console.log("Comment saved: " + result);
-    //     self.setState({
-    //       isSaving: false,
-    //       comment: _.filter(this.state.comment, function(item) {
-    //         return item.name === 'status' || item.name === 'internalStatus' || item.name === 'public';
-    //       })
-    //     });
-    //     // self.props.onRequestHide();
-    //     // self.props.showSuccessAlert("Comment submitted successfully");
-    //     // TODO 
-    //     // return self.props.refreshParentComponent();
-    //   }).bind(this)
-    // });
+    newStatus = {
+      'status': self.getDefaultValue('status'),
+      'internalStatus': self.getDefaultValue('internalStatus')
+    };
+    var errFunc = (err) => console.error(err.stack || err);
+    // TODO -- Q'ify this to prevent waterfall
+    // strata.cases.comments.post(this.props.caseNumber, newComment, (response) => {
+    //   console.debug(JSON.stringify(response));
+    //   strata.cases.put(this.props.caseNumber, newStatus, (response) => {
+    //     console.debug(JSON.stringify(response));
+    //   }, errFunc)
+    // }, errFunc)
+
+    $.ajax({
+      url: url,
+      type: 'POST',
+      xhrFields: {'withCredentials': true},
+      data: JSON.stringify(comment),
+      contentType: "application/json; charset=utf-8",
+      error: (function(jqXHR, textStatus, errorThrown) {
+        console.error("Error submitting a new comment." + (errorThrown.stack || errorThrown));
+        self.hide();
+        // return self.props.showDangerAlert("Cannot submit comment. You most probably need to login to http://gss.my.salesforce.com");
+      }).bind(this),
+      success: (function(result, textStatus, jqXHR) {
+        console.log("Comment saved: " + result + " updating status.");
+        strata.cases.put(this.props.caseNumber, newStatus, (response) => {
+          console.debug(JSON.stringify(response));
+        }, errFunc)
+        self.setState({
+          isSaving: false,
+          comment: _.filter(this.state.comment, function(item) {
+            return item.name === 'status' || item.name === 'internalStatus' || item.name === 'public';
+          })
+        });
+        // self.props.onRequestHide();
+        // self.props.showSuccessAlert("Comment submitted successfully");
+        // TODO 
+        // return self.props.refreshParentComponent();
+      }).bind(this)
+    });
     return false;
   },
   hide: function() {
@@ -153,6 +165,7 @@ module.exports = React.createClass({
     textareaStyle = cx({private: !this.getDefaultValue("public")});
     // var caseStatus = <CaseStatus status={this.getDefaultValue("status")} internalStatus={this.getDefaultValue("internalStatus")}></CaseStatus>;
     // var caseStatus = this.getDefaultValue("status") + " / " + this.getDefaultValue("internalStatus");
+    {/*<MenuItem onSelect={this.updateStatus} key="wocon" eventKey="wocon">Waiting on Contributor</MenuItem>*/}
     var caseStatus = this.getDefaultValue("internalStatus");
     return (
       <Accordion>
@@ -162,6 +175,7 @@ module.exports = React.createClass({
               <DropdownButton pullRight={true} disabled={false} title={caseStatus}>
                 <MenuItem onSelect={this.updateStatus} key="woc" eventKey="woc">Waiting on Customer</MenuItem>
                 <MenuItem onSelect={this.updateStatus} key="worh" eventKey="worh">Waiting on Owner</MenuItem>
+                {/*We can't set this in strata yet.*/}
                 <MenuItem onSelect={this.updateStatus} key="wocon" eventKey="wocon">Waiting on Contributor</MenuItem>
                 <MenuItem onSelect={this.updateStatus} key="closed" eventKey="closed">Closed</MenuItem>
               </DropdownButton>
@@ -176,8 +190,13 @@ module.exports = React.createClass({
             <br />
             <Input type="textarea" ref="comment" className={textareaStyle} rows={10} defaultValue={this.getDefaultValue("comment")}/>
             <Spacer />
-            <div className="pull-right">
-              <Button type="submit" disabled={this.state.isSaving}>Submit</Button>
+            <div>
+              <div className="pull-left">
+                <Alert bsStyle="warning">Adding a comment and updating the status <b>does work</b> but it will take 2 mins for the UDS cache to be invalidated and the comment to show up.  This is a work in progress.</Alert>
+              </div>
+              <div className="pull-right">
+                <Button type="submit" disabled={this.state.isSaving}>Submit</Button>
+              </div>
             </div>
           </form>
         </Panel>

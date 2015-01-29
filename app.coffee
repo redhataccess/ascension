@@ -149,17 +149,13 @@ app.post "/case/:caseNumber/comments/:commentType", (req, res) ->
     method: "POST"
     headers: req.headers
   # delete opts.headers["content-length"]
-  opts.headers["Content-Length"] = Buffer.byteLength(req.body)
-  opts.headers["Content-Type"] = "application/json; charset=utf-8"
-  opts.headers["Accept"] = "application/json"
-  opts.headers["Accept-Encoding"] = "gzip,deflate,sdch"
   theUrl = url.parse(opts.uri)
   logger.debug("Posting to: #{opts.uri}");
   logger.debug("with form data: #{JSON.stringify(req.body)}");
   logger.debug("with headers: #{JSON.stringify(opts.headers)}");
   # logger.debug("headers: #{JSON.stringify(req.headers)}");
   # req.pipe(request.post({url: opts.uri, headers: req.headers, form: req.body})).pipe(res)
-  req.pipe(request.post({url: opts.uri, headers: opts.headers, body: req.body})).pipe(res)
+  req.pipe(request.post({url: opts.uri, headers: opts.headers, json: req.body})).pipe(res)
 app.get "/case/:caseNumber", (req, res) ->
   req.pipe(request("#{settings.UDS_URL}/case/#{req.params.caseNumber}")).pipe(res)
 app.get "/user/metadata/:type", (req, res) ->

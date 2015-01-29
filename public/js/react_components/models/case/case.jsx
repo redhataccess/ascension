@@ -66,6 +66,8 @@ var Component = React.createClass({
                     <CaseAssociates owner={this.props.case.resource.owner} associates={this.state.case.resource.caseAssociates}></CaseAssociates>
                     <CaseResourceLinks resourceLinks={this.props.case.resource.resourceLinks}></CaseResourceLinks>
                     <NewComment caseNumber={caseNumber}
+                      caseStatus={this.state.case.resource.status}
+                      caseInternalStatus={this.state.case.resource.internalStatus}
                       onRequestHide={this.toggle}
                       refreshParentComponent={this.props.refreshParentComponent}
                       showSuccessAlert={this.props.showSuccessAlert}

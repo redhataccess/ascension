@@ -8,7 +8,6 @@ var CaseTags    = require('./caseTags.jsx');
 var TaskDates   = require('../task/taskDates.jsx');
 var Spacer      = require('react-redhat/Spacer');
 var ResourceOpEnum    = require('../../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum.coffee');
-var CaseActionsMenu   = require('./caseActionsMenu.jsx');
 
 var Well            = require('react-bootstrap/Well');
 var Grid            = require('react-bootstrap/Grid');
@@ -50,13 +49,27 @@ var Component = React.createClass({
         return (
             <Well key='caseHeader'>
                 <Row>
-                    <Col md={6}>
+                    <Col md={12}>
                         <h2 key='header'>
                             {this.genEntityOpText(this.props.case)} 
                             Case {caseNumber}
                             {this.genFtsLabel(this.props.case)}
                             {this.genTamLabel(this.props.case)}
                         </h2>
+                        <span>
+                            <CaseProduct case={this.props.case.resource} key='product'></CaseProduct>
+                            <CaseSbrs case={this.props.case} key='sbrs'></CaseSbrs>
+                            <CaseTags case={this.props.case} key='tags'></CaseTags>
+                        </span>
+                        <Spacer />
+                        <div className='clearfix'></div>
+                        <CaseStatus case={this.props.case} key='status'></CaseStatus>
+                        &nbsp; &nbsp;
+                        <CaseSeverity case={this.props.case} key='severity'></CaseSeverity>
+                        <div className='clearfix'></div>
+                        <Spacer />
+                        {/* Text dates are not flowing with the above, need to figure out a better way to visually display*/}
+                        {/*<TaskDates task={this.props.case} key='dates'></TaskDates>*/}
                         {/*/////////////////////////////////////////////////////////////////////////////////*/}
                         {/*Case link buttons */}
                         {/*/////////////////////////////////////////////////////////////////////////////////*/}
@@ -65,26 +78,7 @@ var Component = React.createClass({
                                 <Button bsSize="small" target='_blank' href={`https://na7.salesforce.com/${this.props.case.externalModelId}`}>Salesforce</Button>
                                 <Button bsSize="small" target='_blank' href={`https://unified.gsslab.rdu2.redhat.com/cli#Case/number/${this.props.case.resource.caseNumber}`}>Unified</Button>
                             </ButtonGroup>
-                            <ButtonGroup>
-                                <CaseActionsMenu 
-                                    caseNumber={this.props.case.resource.caseNumber}
-                                    resource={this.props.case}></CaseActionsMenu>
-                            </ButtonGroup>
                         </ButtonToolbar>
-                        <div className='clearfix'></div>
-                        <CaseStatus case={this.props.case} key='status'></CaseStatus>
-                        &nbsp; &nbsp;
-                        <CaseSeverity case={this.props.case} key='severity'></CaseSeverity>
-                        <div className='clearfix'></div>
-                        <TaskDates task={this.props.case} key='dates'></TaskDates>
-                    </Col>
-                    <Col md={6}>
-                        <CaseProduct case={this.props.case.resource} key='product'></CaseProduct>
-                        <Spacer />
-                        <CaseSbrs case={this.props.case} key='sbrs'></CaseSbrs>
-                        <Spacer />
-                        <CaseTags case={this.props.case} key='tags'></CaseTags>
-                        <Spacer />
                     </Col>
                 </Row>
                 <Spacer />
