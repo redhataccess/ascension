@@ -16,6 +16,8 @@ npm install --loglevel error
 # Prune some unecessary files from node_modules
 find node_modules/* -type f -iname "*.md" -o -type d -name "test*" -o -type d -name "example*" | xargs rm -rf
 
+npm update react-redhat
+
 grunt prod
 
 
