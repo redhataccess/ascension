@@ -3,7 +3,7 @@ var Router                  = require('react-router/dist/react-router');
 var WebUtilsMixin           = require('../mixins/webUtilsMixin.coffee');
 var AuthUtilsMixin          = require('../mixins/authUtilsMixin.coffee');
 var UserSearch              = require('react-redhat/usersearch/UserSearch');
-var NavigationActions       = require('../actions/NavigationActions');
+var NavigationActions       = require('../../flux/actions/NavigationActions');
 
 require('../../vendor/chosen_v1.3.0/chosen.jquery');
 require('typeahead.js/dist/typeahead.bundle');

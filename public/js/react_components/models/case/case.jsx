@@ -18,6 +18,23 @@ var Comments            = require('react-redhat/comment/Comments');
 var Alert               = require('react-bootstrap/Alert');
 var Grid                = require('react-bootstrap/Grid');
 
+// var State               = require("react-router").State;
+var State               = require('react-router/dist/react-router').State;
+
+var CaseStore           = require('../../../flux/stores/CaseStore');
+
+var CaseStateMixin = Marty.createStateMixin({
+    mixins: [State],
+    listenTo: CaseStore,
+    getState: function () {
+        return {
+            // TODO -- Add Router.State mixin and this.getParams['id']
+            case: CaseStore.getCase(this.getParams().id)
+        }
+    }
+});
+
+
 var Component = React.createClass({
     displayName: 'Case',
     mixins: [AjaxMixin],

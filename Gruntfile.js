@@ -66,6 +66,10 @@
           }, {
             test: /\.jsx$/,
             loader: "jsx-loader?harmony"
+          }, {
+            test: /\.js$/,
+            loader: "6to5-loader",
+            include: path.join(__dirname, "public")
           }
         ]
       },
@@ -141,7 +145,7 @@
         start: {
           keepAlive: true,
           webpack: {
-            devtool: "eval",
+            devtool: "sourcemap",
             debug: true,
             plugins: webpackConfig.plugins.concat(new webpack.DefinePlugin({
               ENVIRONMENT: JSON.stringify('development')

@@ -1,19 +1,14 @@
-Store = require 'store.js/store'
-
 Auth =
-  'authedUser': undefined
-
+  authedUser: undefined
   setAuthedUser: (user) ->
-    Auth.authedUser = user
-    Store.set('authedUser', user)
+    if user?
+      Auth.authedUser = user
+      localStorage.setItem('authedUser', JSON.stringify(user))
+    else
+      console.error("Attempting to localStore save an undefined user")
   getAuthedUser: ->
-    Auth.authedUser || Store.get('authedUser')
-
-  'scopedUser': undefined
-  setScopedUser: (user) ->
-    Auth.scopedUser = user
-    Store.set('scopedUser', user)
-  getScopedUser: ->
-    Auth.scopedUser || Store.get('scopedUser')
+    user = Auth.authedUser || localStorage.getItem('authedUser')
+    if user? and (user isnt "undefined")
+      return if (typeof user is "object") then user else JSON.parse(user)
 
 module.exports = Auth

@@ -1,5 +1,5 @@
 var Marty   = require('marty');
-var Router  = require('../router.jsx');
+var Router  = require('../../react_components/router.jsx');
 var _       = require('lodash');
 
 var NavigationActions = Marty.createActionCreators({
@@ -14,7 +14,7 @@ var NavigationActions = Marty.createActionCreators({
 });
 
 function navigateTo(route, params, query) {
-    require('../router.jsx').transitionTo(route, params, query)
+    require('../../react_components/router.jsx').transitionTo(route, params, query)
 }
 
 module.exports = NavigationActions;

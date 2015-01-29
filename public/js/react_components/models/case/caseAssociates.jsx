@@ -7,7 +7,7 @@ var TaskTypeEnum        = require('../../../../../src/com/redhat/ascension/rules
 var Accordion           = require('react-bootstrap/Accordion');
 var Panel               = require('react-bootstrap/Panel');
 var Table               = require('react-bootstrap/Table');
-var NavigationActions   = require('../../actions/NavigationActions');
+var NavigationActions   = require('../../../flux/actions/NavigationActions');
 
 var Component = React.createClass({
     displayName: 'Case Associates',

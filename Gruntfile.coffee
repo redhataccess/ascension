@@ -98,11 +98,13 @@ module.exports = (grunt) ->
           test: /\.jsx$/
 #          loaders: ["6to5", "jsx-loader?harmony"]
           loader: "jsx-loader?harmony"
+        },
+        {
+          test: /\.js$/
+          loader: "6to5-loader",
+          include: path.join(__dirname, "public")
+
         }
-        #{
-        #  test: /\.jsx$/
-        #  loader: "jsx-loader?insertPragma=React.DOM"
-        #}
       ]
 
     #resolveLoader:
@@ -222,7 +224,8 @@ module.exports = (grunt) ->
       start:
         keepAlive: true
         webpack:
-          devtool: "eval"
+          # devtool: "eval"
+          devtool: "sourcemap"
           debug: true
           plugins: webpackConfig.plugins.concat(
             new webpack.DefinePlugin

@@ -54,15 +54,15 @@ var App = React.createClass({
                 self.transitionTo("tasks", params, self.getQuery());
             }
         })
-            .catch(function(err) {
-                Auth.setAuthedUser(void 0);
-                self.setState({
-                    'authedUser': void 0,
-                    'authFailed': true
-                });
-                console.error(err);
-            })
-            .done();
+        .catch(function(err) {
+            Auth.setAuthedUser(void 0);
+            self.setState({
+                'authedUser': void 0,
+                'authFailed': true
+            });
+            console.error(err);
+        })
+        .done();
     },
     genAuthenticationElement: function() {
         if (Auth.getAuthedUser() != null) {

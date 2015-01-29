@@ -26,8 +26,8 @@ var RoutingRoles            = require('../models/task/routingRoles.jsx');
 var TaskCase                = require('../models/task/taskCase.jsx');
 var Alert                   = require('react-bootstrap/Alert');
 
-var DeclinedTasksStore      = require('../stores/DeclinedTasksStore');
-var DeclinedTasksActions    = require('../actions/DeclinedTasksActions');
+// var DeclinedTasksStore      = require('../../flux/stores/DeclinedTasksStore');
+// var DeclinedTasksActions    = require('../../flux/actions/DeclinedTasksActions');
 
 // var DeclinedTasksState = Marty.createStateMixin({
 //     declinedTasks: DeclinedTasksStore

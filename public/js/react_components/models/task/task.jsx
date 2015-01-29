@@ -89,6 +89,7 @@ var Component = React.createClass({
         }
         return (
             <div>
+                {/*
                 <div key='taskContainer' className='row'>
                     <div className='col-md-12' key='containerLeft'>
                         <span key='metaDataContainer'>
@@ -100,6 +101,7 @@ var Component = React.createClass({
                         </span>
                     </div>
                 </div>
+                */}
                 {/*/////////////////////////////////////////////////////////////////////////////////*/}
                 {/*Entity Contents*/}
                 {/*/////////////////////////////////////////////////////////////////////////////////*/}
