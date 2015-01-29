@@ -8,7 +8,7 @@ var CaseTags    = require('./caseTags.jsx');
 var TaskDates   = require('../task/taskDates.jsx');
 var Spacer      = require('react-redhat/Spacer');
 var ResourceOpEnum    = require('../../../../../src/com/redhat/ascension/rules/enums/ResourceOpEnum.coffee');
-var CaseActionsMenu   = require('./CaseActionsMenu.jsx');
+var CaseActionsMenu   = require('./caseActionsMenu.jsx');
 
 var Well            = require('react-bootstrap/Well');
 var Grid            = require('react-bootstrap/Grid');
@@ -73,7 +73,7 @@ var Component = React.createClass({
                         </ButtonToolbar>
                         <div className='clearfix'></div>
                         <CaseStatus case={this.props.case} key='status'></CaseStatus>
-                        &nbsp;--&nbsp;
+                        &nbsp; &nbsp;
                         <CaseSeverity case={this.props.case} key='severity'></CaseSeverity>
                         <div className='clearfix'></div>
                         <TaskDates task={this.props.case} key='dates'></TaskDates>
