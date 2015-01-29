@@ -1,7 +1,7 @@
 var React                 = require('react');
 var cx                    = React.addons.classSet;
 var _                     = require('lodash');
-var strata                = require('stratajs');
+var strata                = require('imports?jsUri=jsuri!stratajs');
 var Spacer                = require('react-redhat/Spacer');
 
 // React Bootstrap imports
