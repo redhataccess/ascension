@@ -1,7 +1,6 @@
 var React                 = require('react');
 var cx                    = React.addons.classSet;
 var _                     = require('lodash');
-// var strata                = require('imports?define=>false!stratajs');
 var strata                = require('stratajs');
 var Spacer                = require('react-redhat/Spacer');
 

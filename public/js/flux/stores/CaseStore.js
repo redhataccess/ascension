@@ -6,8 +6,8 @@ var CaseAPI                 = require('../sources/CaseAPI');
 var Store = Marty.createStore({
     name: 'Case Store',
     handlers: {
-        receiveCase: CaseConstants.RECEIVE_CASE
-        // refreshCase: CaseConstants.REFRESH_CASE
+        receiveCase: CaseConstants.RECEIVE_CASE,
+        invalidateCase: CaseConstants.INVALIDATE_CASE
     },
     getInitialState: function () {
         return {};
@@ -16,39 +16,27 @@ var Store = Marty.createStore({
         return this.fetch({
             id: _.padLeft(caseNumber, 8, '0'),
             locally: function () {
+                console.debug(`Locally loading ${caseNumber}`);
                 return this.state[_.padLeft(caseNumber, 8, '0')];
             },
             remotely: function () {
+                console.debug(`Remotely loading ${caseNumber}`);
                 return CaseAPI.getCase(_.padLeft(caseNumber, 8, '0'));
             }
         });
     },
-    // refreshCase: function (caseNumber) {
-    //     return this.fetch({
-    //         id: caseNumber,
-    //         locally: function () {
-    //             console.debug(`Locally returning case ${this.state[caseNumber].resource.caseNumber}`);
-    //             return this.state[caseNumber];
-    //         },
-    //         remotely: function () {
-    //             console.debug(`Remotely fetching ${caseNumber}`);
-    //             return CaseAPI.getCase(caseNumber);
-    //         }
-    //     });
-    // },
-    // updateCase: function (id, prediction) {
-    //     var oldPrediction = _.findWhere(this.state[prediction.id], {id: id});
-
-    //     if (oldPrediction) {
-    //         _.extend(oldPrediction, prediction);
-    //         this.hasChanged();
-    //     }
-    // },
     receiveCase: function (c) {
         var caseNumber = _.padLeft(c.resource.caseNumber, 8, '0');
+        console.debug(`Received case ${caseNumber}`);
         this.state[caseNumber] = c;
         this.hasChanged();
     },
+    invalidateCase: function (cn) {
+        var caseNumber = _.padLeft(cn, 8, '0');
+        console.debug(`Invalidating ${caseNumber}`);
+        delete this.state[caseNumber];
+        this.hasChanged();
+    }
 
 });
 module.exports = Store;

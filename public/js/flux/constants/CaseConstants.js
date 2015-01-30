@@ -1,5 +1,6 @@
 var Marty = require('marty');
 
 module.exports = Marty.createConstants([
-    'RECEIVE_CASE'
+    'RECEIVE_CASE',
+    'INVALIDATE_CASE'
 ]);

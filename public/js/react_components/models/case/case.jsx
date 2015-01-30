@@ -22,6 +22,7 @@ var Grid                = require('react-bootstrap/Grid');
 // var State               = require("react-router").State;
 var State               = require('react-router/dist/react-router').State;
 
+var CaseActions         = require('../../../flux/actions/CaseActions');
 var CaseStore           = require('../../../flux/stores/CaseStore');
 
 var CaseStateMixin = Marty.createStateMixin({
@@ -55,6 +56,13 @@ var Component = React.createClass({
                 }
             ]
         };
+    },
+    componentWillUnmount: function() {
+        if (this.state.case.done) {
+            CaseActions.invalidateCase(this.state.case.result.resource.caseNumber);
+        } else {
+            console.warn("Case promise not done, could not invalidate cache.");
+        }
     },
     setComment: function(comment) {
         this.setState({ 'comment': comment });
@@ -91,7 +99,7 @@ var Component = React.createClass({
                               showDangerAlert={self.props.showDangerAlert}
                               setComment={self.setComment}
                               comment={self.state.comment}
-                              url={`/case/${caseNumber}/comments`}
+                              url={`/case/${+caseNumber}/comments`}
                               isUserAuthenticated={self.props.isUserAuthenticated}
                               authenticatedUser={self.props.authenticatedUser}></NewComment>
                         </div>
