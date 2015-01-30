@@ -16,24 +16,20 @@ var Store = Marty.createStore({
         return this.fetch({
             id: _.padLeft(caseNumber, 8, '0'),
             locally: function () {
-                console.debug(`Locally loading ${caseNumber}`);
                 return this.state[_.padLeft(caseNumber, 8, '0')];
             },
             remotely: function () {
-                console.debug(`Remotely loading ${caseNumber}`);
                 return CaseAPI.getCase(_.padLeft(caseNumber, 8, '0'));
             }
         });
     },
     receiveCase: function (c) {
         var caseNumber = _.padLeft(c.resource.caseNumber, 8, '0');
-        console.debug(`Received case ${caseNumber}`);
         this.state[caseNumber] = c;
         this.hasChanged();
     },
     invalidateCase: function (cn) {
         var caseNumber = _.padLeft(cn, 8, '0');
-        console.debug(`Invalidating ${caseNumber}`);
         delete this.state[caseNumber];
         this.hasChanged();
     }
