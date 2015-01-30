@@ -6,7 +6,6 @@ if (typeof window !== 'undefined') {
     window.React = React;
     window.Marty = Marty;
 }
-AppConstants.setUrlPrefix(window.redHatUrlPrefix != null ? window.redHatUrlPrefix  : '');
 
 //var Router                  = require('react-router/dist/react-router');
 var Router                  = require('./router.jsx');
@@ -30,6 +29,7 @@ if (ENVIRONMENT == 'development') {
 } else {
     window.redHatUrlPrefix = '/etc/os1/ascension';
 }
+AppConstants.setUrlPrefix(window.redHatUrlPrefix != null ? window.redHatUrlPrefix  : '');
 
 //var routes = (
 //    <Route
