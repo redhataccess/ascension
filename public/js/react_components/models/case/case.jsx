@@ -61,15 +61,12 @@ var Component = React.createClass({
         if (this.state.case.done) {
             CaseActions.invalidateCase(this.state.case.result.resource.caseNumber);
         } else {
-            console.warn("Case promise not done, could not invalidate cache.");
+            console.warn("Case promise not done, could not invalidate local cache.");
         }
     },
     setComment: function(comment) {
         this.setState({ 'comment': comment });
     },
-    // componentDidMount: function() {
-    //     this.setState({'case': this.props.case, 'loading': false});
-    // },
     renderCase: function () {
         var self = this;
         return this.state.case.when({

@@ -9,6 +9,7 @@ var SlaAttainment   = require('react-redhat/comment/SlaAttainment');
 var Alert           = require('react-bootstrap/Alert').State;
 
 var State           = require('react-router/dist/react-router').State;
+var CommentActions  = require('../../../flux/actions/CommentActions');
 var CommentStore    = require('../../../flux/stores/CommentStore');
 
 var CommentStateMixin = Marty.createStateMixin({
@@ -16,7 +17,7 @@ var CommentStateMixin = Marty.createStateMixin({
     listenTo: CommentStore,
     getState: function () {
         return {
-            comments: CommentStore.getComments(this.getParams().taskId)
+            comments: CommentStore.getComments(this.props.caseNumber)
         }
     }
 });
@@ -34,6 +35,13 @@ var Component = React.createClass({
             return _.map(comments, (c) => <Comment id={c['externalModelId']} key={c['externalModelId']} comment={c}></Comment>);
         }
         return null;
+    },
+    componentWillUnmount: function() {
+        if (this.state.comments.done) {
+            CommentActions.invalidateComments(this.props.caseNumber);
+        } else {
+            console.warn("Comments promise not done, could not invalidate local cache.");
+        }
     },
     renderComments: function () {
         var self = this;

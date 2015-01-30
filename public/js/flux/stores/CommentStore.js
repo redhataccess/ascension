@@ -7,8 +7,8 @@ var CommentAPI              = require('../sources/CommentAPI');
 var Store = Marty.createStore({
     name: 'Comment Store',
     handlers: {
-        receiveComments: CommentConstants.RECEIVE_COMMENTS
-        // refreshCase: CaseConstants.REFRESH_CASE
+        receiveComments: CommentConstants.RECEIVE_COMMENTS,
+        invalidateComments: CommentConstants.INVALIDATE_COMMENTS
     },
     getInitialState: function () {
         return {};
@@ -30,6 +30,11 @@ var Store = Marty.createStore({
         this.state[caseNumber] = comments;
         this.hasChanged();
     },
+    invalidateComments: function (cn) {
+        var caseNumber = _.padLeft(cn, 8, '0');
+        delete this.state[caseNumber];
+        this.hasChanged();
+    }
 
 });
 module.exports = Store;
