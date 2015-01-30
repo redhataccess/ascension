@@ -6,22 +6,36 @@ var CaseAPI                 = require('../sources/CaseAPI');
 var Store = Marty.createStore({
     name: 'Case Store',
     handlers: {
-        addCase: CaseConstants.ADD_CASE
+        receiveCase: CaseConstants.RECEIVE_CASE
+        // refreshCase: CaseConstants.REFRESH_CASE
     },
     getInitialState: function () {
         return {};
     },
     getCase: function (caseNumber) {
         return this.fetch({
-            id: caseNumber,
+            id: _.padLeft(caseNumber, 8, '0'),
             locally: function () {
-                return this.state[caseNumber];
+                return this.state[_.padLeft(caseNumber, 8, '0')];
             },
             remotely: function () {
-                return CaseAPI.getCase(caseNumber);
+                return CaseAPI.getCase(_.padLeft(caseNumber, 8, '0'));
             }
         });
     },
+    // refreshCase: function (caseNumber) {
+    //     return this.fetch({
+    //         id: caseNumber,
+    //         locally: function () {
+    //             console.debug(`Locally returning case ${this.state[caseNumber].resource.caseNumber}`);
+    //             return this.state[caseNumber];
+    //         },
+    //         remotely: function () {
+    //             console.debug(`Remotely fetching ${caseNumber}`);
+    //             return CaseAPI.getCase(caseNumber);
+    //         }
+    //     });
+    // },
     // updateCase: function (id, prediction) {
     //     var oldPrediction = _.findWhere(this.state[prediction.id], {id: id});
 
@@ -30,11 +44,11 @@ var Store = Marty.createStore({
     //         this.hasChanged();
     //     }
     // },
-    addCase: function (c) {
-        this.state[c.resource.caseNumber] = c;
+    receiveCase: function (c) {
+        var caseNumber = _.padLeft(c.resource.caseNumber, 8, '0');
+        this.state[caseNumber] = c;
         this.hasChanged();
     },
 
 });
 module.exports = Store;
-

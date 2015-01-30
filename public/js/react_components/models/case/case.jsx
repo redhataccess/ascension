@@ -13,7 +13,8 @@ var CaseAssociates      = require('./caseAssociates.jsx');
 var CaseIssueLinks      = require('./caseIssueLinks.jsx');
 var CaseResourceLinks   = require('./caseResourceLinks.jsx');
 var NewComment          = require('./newComment.jsx');
-var Comments            = require('react-redhat/comment/Comments');
+// var Comments            = require('react-redhat/comment/Comments');
+var Comments            = require('./comments.jsx');
 
 var Alert               = require('react-bootstrap/Alert');
 var Grid                = require('react-bootstrap/Grid');
@@ -28,20 +29,17 @@ var CaseStateMixin = Marty.createStateMixin({
     listenTo: CaseStore,
     getState: function () {
         return {
-            // TODO -- Add Router.State mixin and this.getParams['id']
-            case: CaseStore.getCase(this.getParams().id)
+            case: CaseStore.getCase(this.getParams().taskId)
         }
     }
 });
 
-
 var Component = React.createClass({
     displayName: 'Case',
-    mixins: [AjaxMixin],
+    mixins: [AjaxMixin, CaseStateMixin],
     getInitialState: function() {
         return {
-            'case': void 0,
-            'loading': true,
+            // 'loading': true,
             comment: [
                 {
                   'name': 'status',
@@ -61,8 +59,48 @@ var Component = React.createClass({
     setComment: function(comment) {
         this.setState({ 'comment': comment });
     },
-    componentDidMount: function() {
-        this.setState({'case': this.props.case, 'loading': false});
+    // componentDidMount: function() {
+    //     this.setState({'case': this.props.case, 'loading': false});
+    // },
+    renderCase: function () {
+        var self = this;
+        return this.state.case.when({
+            pending: function () {
+                return <i className='fa fa-spinner fa-spin'></i>;
+            },
+            failed: function (err) {
+                console.error(err.stack || err);
+                return <Alert bsStyle="danger">Failed to load case: {err.stack || err}</Alert>;
+            },
+            done: function (c) {
+                var caseNumber = padLeft(c.resource.caseNumber, 8, '0');
+                return (
+                    <div>
+                        <CaseHeader case={c} key='caseHeader'></CaseHeader>
+                        <div key='caseMetaData'>
+                            <CaseDescription description={c.resource.description}></CaseDescription>
+                            <CaseSummary summary={c.resource.summary}></CaseSummary>
+                            <CaseAssociates owner={c.resource.owner} associates={c.resource.caseAssociates}></CaseAssociates>
+                            <CaseResourceLinks resourceLinks={c.resource.resourceLinks}></CaseResourceLinks>
+                            <NewComment caseNumber={caseNumber}
+                              caseStatus={c.resource.status}
+                              caseInternalStatus={c.resource.internalStatus}
+                              onRequestHide={self.toggle}
+                              refreshParentComponent={self.props.refreshParentComponent}
+                              showSuccessAlert={self.props.showSuccessAlert}
+                              showDangerAlert={self.props.showDangerAlert}
+                              setComment={self.setComment}
+                              comment={self.state.comment}
+                              url={`/case/${caseNumber}/comments`}
+                              isUserAuthenticated={self.props.isUserAuthenticated}
+                              authenticatedUser={self.props.authenticatedUser}></NewComment>
+                        </div>
+                        <hr />
+                        <Comments caseNumber={caseNumber}></Comments>
+                    </div>
+                );
+          }
+      });
     },
     render: function() {
         if (this.state.loading == true) {
@@ -73,32 +111,8 @@ var Component = React.createClass({
             {`No case found with case number: ${this.props.case.resource.caseNumber}`}
             </Alert>;
         }
-        var caseNumber = padLeft(this.props.case.resource.caseNumber, 8, '0');
-        return (
-            <div>
-                <CaseHeader case={this.props.case} key='caseHeader'></CaseHeader>
-                <div key='caseMetaData'>
-                    <CaseDescription description={this.props.case.resource.description}></CaseDescription>
-                    <CaseSummary summary={this.props.case.resource.summary}></CaseSummary>
-                    <CaseAssociates owner={this.props.case.resource.owner} associates={this.state.case.resource.caseAssociates}></CaseAssociates>
-                    <CaseResourceLinks resourceLinks={this.props.case.resource.resourceLinks}></CaseResourceLinks>
-                    <NewComment caseNumber={caseNumber}
-                      caseStatus={this.state.case.resource.status}
-                      caseInternalStatus={this.state.case.resource.internalStatus}
-                      onRequestHide={this.toggle}
-                      refreshParentComponent={this.props.refreshParentComponent}
-                      showSuccessAlert={this.props.showSuccessAlert}
-                      showDangerAlert={this.props.showDangerAlert}
-                      setComment={this.setComment}
-                      comment={this.state.comment}
-                      url={`/case/${caseNumber}/comments`}
-                      isUserAuthenticated={this.props.isUserAuthenticated}
-                      authenticatedUser={this.props.authenticatedUser}></NewComment>
-                </div>
-                <hr />
-                <Comments caseNumber={caseNumber}></Comments>
-            </div>
-        )
+        // var caseNumber = padLeft(this.props.case.resource.caseNumber, 8, '0');
+        return this.renderCase();
     }
 });
 

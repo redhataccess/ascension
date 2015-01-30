@@ -1,9 +1,12 @@
 var React                   = require('react/addons');
 var Marty                   = require('marty');
+// TODO -- App Constants  should be moved to react-redhat and used for constants to be set from any end user application
+var AppConstants			= require('../flux/constants/AppConstants');
 if (typeof window !== 'undefined') {
     window.React = React;
     window.Marty = Marty;
 }
+AppConstants.setUrlPrefix(window.redHatUrlPrefix != null ? window.redHatUrlPrefix  : '');
 
 //var Router                  = require('react-router/dist/react-router');
 var Router                  = require('./router.jsx');
