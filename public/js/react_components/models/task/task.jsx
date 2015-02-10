@@ -6,11 +6,10 @@ var WebUtilsMixin               = require('../../mixins/webUtilsMixin.coffee');
 var TaskState                   = require('./taskState.jsx');
 var TaskMetaData                = require('./taskMetaData.jsx');
 var Spacer                      = require('react-redhat/Spacer');
-var Case                        = require('../case/case.jsx');
+// var Case                        = require('../case/case.jsx');
+var Case                        = require('react-redhat/case/Case');
 var User                        = require('react-redhat/user/User');
 var Auth                        = require('../../auth/auth.coffee');
-var DeclinedUsers               = require('./declinedUsers.jsx');
-var PotentialOwners             = require('./potentialOwners.jsx');
 var TaskActionsEnum             = require('../../../../../src/com/redhat/ascension/rest/enums/taskActionsEnum.coffee');
 var TaskTypeEnum                = require('../../../../../src/com/redhat/ascension/rules/enums/TaskTypeEnum.coffee');
 
