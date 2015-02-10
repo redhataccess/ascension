@@ -286,7 +286,7 @@ var Component = React.createClass({
                                 urlRoles={this.state.urlRoles}></RoutingRoles>
                         </div>
                         <div className='pull-right'>
-                            {/*<Button bsSize="small" onClick={this.handleIgnoredTask.bind(this)} bsStyle='danger'>Ignore for now</Button>*/}
+                            <Button bsSize="small" onClick={this.handleIgnoredTask.bind(this)} bsStyle='danger'>Ignore for now</Button>
                         </div>
                     </div>
                     <Task caseNumber={taskId} queryTasks={this.queryCases.bind(this, this.props)}></Task>
