@@ -25,7 +25,8 @@ var RoutingRoles            = require('../models/task/routingRoles.jsx');
 // TaskCase represents the virtual mapping of case -> task for sprint 1
 var TaskCase                = require('../models/task/taskCase.jsx');
 var Alert                   = require('react-bootstrap/Alert');
-var Button          = require('react-bootstrap/Button');
+var Button                  = require('react-bootstrap/Button');
+var AppConstants            = require('react-redhat/flux/constants/AppConstants');
 
 // var DeclinedTasksStore      = require('../../flux/stores/DeclinedTasksStore');
 // var DeclinedTasksActions    = require('../../flux/actions/DeclinedTasksActions');
@@ -115,7 +116,7 @@ var Component = React.createClass({
         }
         ssoUsername = S(ssoUsername).replaceAll('"', '').s;
         opts = {
-            path: '/cases',
+            path: AppConstants.getUrlPrefix() + '/cases',
             queryParams: [
                 { name: 'ssoUsername', value: ssoUsername },
                 { name: 'roles', value: args.roles },
