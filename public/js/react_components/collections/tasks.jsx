@@ -136,8 +136,8 @@ var Component = React.createClass({
 
                 cases.sort((a, b) => b.resource.collaborationScore - a.resource.collaborationScore);
                 // Remove all the Closed cases and append them to the end of the array
-                closedCases = _.filter(cases, (c) => c.resource.status == "Closed");
-                cases = _.filter(cases, (c) => c.resource.status != "Closed");
+                //closedCases = _.filter(cases, (c) => c.resource.status == "Closed");
+                //cases = _.filter(cases, (c) => c.resource.status != "Closed");
 
                 //remove recently updated cases from local storage
                 this.removeRecentlyModifiedCasesFromLS(cases);
@@ -145,7 +145,7 @@ var Component = React.createClass({
                 //Remove all the locally ignored cases
                 var restCases = _.pluck(JSON.parse(localStorage.getItem(this.state.ssoUsername)), 'taskID');
                 cases = _.filter(cases, (c) => !_.contains(restCases, c.resource.caseNumber));
-                cases = _.chain([cases, closedCases]).flatten().value();
+                //cases = _.chain([cases, closedCases]).flatten().value();
 
                 topSevenCases = cases.slice(0, 7);
                 min = _.chain(topSevenCases).pluck('resource').pluck('collaborationScore').without(null).min().value();
@@ -286,7 +286,7 @@ var Component = React.createClass({
                                 urlRoles={this.state.urlRoles}></RoutingRoles>
                         </div>
                         <div className='pull-right'>
-                            <Button bsSize="small" onClick={this.handleIgnoredTask.bind(this)} bsStyle='danger'>Ignore for now</Button>
+                            {/*<Button bsSize="small" onClick={this.handleIgnoredTask.bind(this)} bsStyle='danger'>Ignore for now</Button>*/}
                         </div>
                     </div>
                     <Task caseNumber={taskId} queryTasks={this.queryCases.bind(this, this.props)}></Task>

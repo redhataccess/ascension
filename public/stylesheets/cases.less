@@ -1,3 +1,6 @@
+@publicColor: #f0f0f0;
+@privateColor: rgb(255, 212, 212);
+
 pre.case.description.paneled {
   color: green;
   background: #303030;
@@ -16,13 +19,35 @@ pre.case.description.paneled {
   // background: #303030;
   // color: white;
   font-weight: bold;
+  background-color: @publicColor;
+  .panel-body {
+    background-color: @publicColor !important;
+  }
+  pre {
+    background-color: @publicColor;
+    border: none !important;
+  }
 }
+
+// .panel {
+//   .public {
+//     background-color: #fff !important;
+//   }
+// }
+
 .private {
   // background-color: #FD6F60;
-  background-color: rgb(255, 212, 212);
+  background-color: @privateColor;
   // background-color: rgba(255, 122, 108, 0.42);
   font-weight: bold;
   color: black;
+  .panel-body {
+    background-color: @privateColor !important;
+  }
+  pre {
+    background-color: @privateColor !important;
+    border: none !important;
+  }
 }
 
 .role-container {
