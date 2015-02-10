@@ -25,6 +25,7 @@ var RoutingRoles            = require('../models/task/routingRoles.jsx');
 // TaskCase represents the virtual mapping of case -> task for sprint 1
 var TaskCase                = require('../models/task/taskCase.jsx');
 var Alert                   = require('react-bootstrap/Alert');
+var Button          = require('react-bootstrap/Button');
 
 // var DeclinedTasksStore      = require('../../flux/stores/DeclinedTasksStore');
 // var DeclinedTasksActions    = require('../../flux/actions/DeclinedTasksActions');
@@ -137,6 +138,13 @@ var Component = React.createClass({
                 // Remove all the Closed cases and append them to the end of the array
                 closedCases = _.filter(cases, (c) => c.resource.status == "Closed");
                 cases = _.filter(cases, (c) => c.resource.status != "Closed");
+
+                //remove recently updated cases from local storage
+                this.removeRecentlyModifiedCasesFromLS(cases);
+
+                //Remove all the locally ignored cases
+                var restCases = _.pluck(JSON.parse(localStorage.getItem(this.state.ssoUsername)), 'taskID');
+                cases = _.filter(cases, (c) => !_.contains(restCases, c.resource.caseNumber));
                 cases = _.chain([cases, closedCases]).flatten().value();
 
                 topSevenCases = cases.slice(0, 7);
@@ -156,7 +164,7 @@ var Component = React.createClass({
                 self.setState(stateHash);
 
                 // INFO -- Remember taskId is the caseNumber here
-                if ((taskId == '' || (taskId == null) || (taskId == 'list')) && cases.length > 0) {
+                if ((taskId == '' || (taskId == null) || (taskId == 'list')) && cases.length > 0 || taskId != this.state.taskId) {
                     params = {
                         //taskId: cases[0]['resource']['externalModelId']
                         taskId: cases[0]['resource']['caseNumber']
@@ -166,6 +174,28 @@ var Component = React.createClass({
             })
             .catch((err) => console.error(`Could not load cases: ${err.stack}`))
             .done(() => self.setState({loading: false}));
+    },
+
+    removeRecentlyModifiedCasesFromLS: function(cases)
+    {
+        var locallyIgnoredTasks = [];
+        if(localStorage.getItem(this.state.ssoUsername)) {
+            locallyIgnoredTasks = JSON.parse(localStorage.getItem(this.state.ssoUsername));
+        }
+        var updatedLocalTasks = [];
+        updatedLocalTasks =
+            _.reject(locallyIgnoredTasks,function(t) {
+                var flag = false
+                for(i = 0; i<cases.length && !flag; i++){
+                    if (t.taskID == cases[i].resource.caseNumber && t.lastModified != cases[i].resource.lastModified){
+                        flag = true;
+                    }
+                };
+                if(flag) {
+                    return t;
+                }
+            });
+        localStorage.setItem(this.state.ssoUsername, JSON.stringify(updatedLocalTasks, 'taskID'));
     },
     // http://javascript.tutorialhorizon.com/2014/09/13/execution-sequence-of-a-react-components-lifecycle-methods/
     componentDidMount: function() {
@@ -206,6 +236,31 @@ var Component = React.createClass({
         }
         return false
     },
+    handleIgnoredTask: function(event) {
+        console.log("clicked.."+this.props.case);
+        var locallyIgnoredTasks = [];
+        var currentLocalTask;
+        if(localStorage.getItem(this.state.ssoUsername)) {
+            locallyIgnoredTasks = JSON.parse(localStorage.getItem(this.state.ssoUsername));
+        }
+        var currentCase = _.filter(this.state.tasks, (c) => c.resource.caseNumber == this.state.taskId);
+        if(currentCase != undefined && currentCase.length > 0) {
+            currentLocalTask = {taskID:this.state.taskId, lastModified:currentCase[0].resource.lastModified};
+            if (currentLocalTask != undefined) {
+                locallyIgnoredTasks.push(currentLocalTask);
+                localStorage.setItem(this.state.ssoUsername, JSON.stringify(_.uniq(locallyIgnoredTasks, 'taskID')));
+            }
+        }
+        var stateHash;
+        stateHash = {
+            ssoUsername: this.getQuery()['ssoUsername'],
+            roles: this.getQuery()['roles'],
+            taskId: 'list'
+        };
+        this.setState(stateHash);
+        this.queryCases(stateHash);
+    },
+
     render: function() {
         //this.state.declinedTasks.when({
         //   pending: function() {
@@ -223,11 +278,17 @@ var Component = React.createClass({
             <div className='row'>
                 <div className='col-md-3'>{this.genTaskElements()}</div>
                 <div className='col-md-9'>
-                    <RoutingRoles
-                        roles={this.state.userRoles}
-                        defaultRoles={this.state.defaultRoles}
-                        urlRoles={this.state.urlRoles}></RoutingRoles>
-                    <Spacer />
+                    <div>
+                        <div className='pull-left'>
+                            <RoutingRoles
+                                roles={this.state.userRoles}
+                                defaultRoles={this.state.defaultRoles}
+                                urlRoles={this.state.urlRoles}></RoutingRoles>
+                        </div>
+                        <div className='pull-right'>
+                            <Button bsSize="small" onClick={this.handleIgnoredTask.bind(this)} bsStyle='danger'>Ignore for now</Button>
+                        </div>
+                    </div>
                     <Task caseNumber={taskId} queryTasks={this.queryCases.bind(this, this.props)}></Task>
                 </div>
             </div>
