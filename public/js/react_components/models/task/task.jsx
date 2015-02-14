@@ -56,7 +56,7 @@ var Component = React.createClass({
     _isCaseNumberList: function (caseNumber) {
         if (caseNumber == 'list') {
             console.warn('/tasks/list received, not fetching task.');
-            this.setState({caseLoading: false});
+            this.setState({caseLoading: false, case:null});
             return true;
         }
         return false;
