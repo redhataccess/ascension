@@ -61,3 +61,4 @@ Add to the 443 configuration:
     }
 
 One way to know if your dev environment is properly configured is if you can access https://foo.redhat.com/assets/main.js which is the nginx proxy to the webpack-dev-server main.js asset.  This is the primary file required for development.
+
