@@ -28,16 +28,35 @@ var Alert                   = require('react-bootstrap/Alert');
 var Button                  = require('react-bootstrap/Button');
 var AppConstants            = require('react-redhat/flux/constants/AppConstants');
 
-// var DeclinedTasksStore      = require('../../flux/stores/DeclinedTasksStore');
-// var DeclinedTasksActions    = require('../../flux/actions/DeclinedTasksActions');
+var DeclinedTasksActions    = require('../../flux/actions/DeclinedTasksActions');
+var TasksActions    = require('../../flux/actions/TasksActions');
+var TasksStore      = require('../../flux/stores/TasksStore');
+var State           = require('react-router/dist/react-router').State;
 
-// var DeclinedTasksState = Marty.createStateMixin({
-//     declinedTasks: DeclinedTasksStore
-// });
+var TasksStateMixin = Marty.createStateMixin({
+    mixins: [State],
+    listenTo: TasksStore,
+    getState: function () {
+        var ssoUsername, _ref2;
+        ssoUsername = this.getQuery()['ssoUsername'];
+        if ((ssoUsername == null || ssoUsername == undefined) && ((_ref2 = Auth.getAuthedUser()) != null ? _ref2.resource : null) != null) {
+            ssoUsername = Auth.getAuthedUser().resource.sso[0];
+        }
+        ssoUsername = S(ssoUsername).replaceAll('"', '').s;
+        var opts = {
+            ssoUsername: ssoUsername,
+            roles: this.getQuery()['roles'],
+            taskId: this.getParams()['taskId']
+        };
+        return {
+            res:TasksStore.getTasks(opts)
+        }
+    }
+});
 
 var Component = React.createClass({
     displayName: 'Tasks',
-    mixins: [AjaxMixin, Router.State, Router.Navigation],
+    mixins: [AjaxMixin, TasksStateMixin, Router.Navigation],
     getInitialState: function() {
         return {
             // This will allow the cases pulled to be overridden from the Auth.getAuthedUser()
@@ -45,7 +64,6 @@ var Component = React.createClass({
             // This will allow roles to be overridden from what is in the UDS user
             'roles': null,
             'loading': false,
-            'tasks': [],
             'minScore': 0,
             'maxScore': 0,
             'layoutMode': this.props.layoutMode || 'masonry',
@@ -60,156 +78,25 @@ var Component = React.createClass({
             'urlRoles': false
         };
     },
-    genTaskElements: function() {
-        var taskCases,
-            stateHash,
-            self = this;
-        if (this.state.loading == true) {
-            return <i className='fa fa-spinner fa-spin'></i>;
-        } else if (this.state.loading == false && (this.state.tasks == null || this.state.tasks.length == 0)) {
-            return (
-                <Alert bsStyle="warning">
-                    <strong>No cases found!</strong>
-                </Alert>
-            );
-        } else {
-            taskCases = _.map(this.state.tasks, (c) => {
-                return <TaskCase case={c} scoreOpacityScale={self.scoreOpacityScale} />
-            });
-            stateHash = {
-                ssoUsername: this.state.ssoUsername,
-                roles: this.state.roles
-            };
-            return (
-                <div>
-                    {taskCases}
-                    <Spacer />
-                    <i className="fa fa-refresh cursor" style={{marginLeft: "6px"}} onClick={this.queryCases.bind(this, stateHash)}></i>
-                </div>
-            )
-        }
-    },
-    genBtnGroupClass: function(opts) {
-        var classSet = {
-            'btn': true,
-            'btn-default': true,
-            'active': this.state[opts['stateVarName']] === opts['var']
-        };
-        return cx(classSet);
-    },
-    setScoreScale: function(min, max) {
-        //this.scoreScale = d3.scale.quantize().domain([min, max]).range([100, 200, 300]);
-        //this.scoreOpacityScale = d3.scale.quantize().domain([min, max]).range([.25, 1]);
-        this.scoreOpacityScale = d3.scale.linear().domain([min, max]).range([.25, 1]);
-    },
-    queryCases: function(args) {
-        var opts, ssoUsername, _ref2;
-        var self = this;
-        // For loading cases and simulating tasks, taskId is really just the caseNumber for now
-        var {taskId} = self.getParams();
-        ssoUsername = args.ssoUsername;
-        if ((ssoUsername == null) && ((_ref2 = Auth.getAuthedUser()) != null ? _ref2.resource : null) != null) {
-            ssoUsername = Auth.getAuthedUser().resource.sso[0];
-        }
-        if (ssoUsername == null) {
-            return;
-        }
-        ssoUsername = S(ssoUsername).replaceAll('"', '').s;
-        opts = {
-            path: AppConstants.getUrlPrefix() + '/cases',
-            queryParams: [
-                { name: 'ssoUsername', value: ssoUsername },
-                { name: 'roles', value: args.roles },
-                { name: 'admin', value: this.getQuery()['admin'] },
-                { name: 'resourceProjection', value: "Minimal" }
-            ]
-        };
-        this.setState({loading: true});
-        this.get(opts)
-            .then((results) => {
-                var max, min, params, stateHash, topSevenCases, cases = results.cases, closedCases;
-                _.each(cases, (c) => {
-                    if(c.resource == null) {
-                        console.error(JSON.stringify(c, null, ' '));
-                    }
-                });
-                //self.casesById = _.zipObject(_.map(cases, (c) => [c['resource']['resourceId'], c]));
 
-                cases.sort((a, b) => b.resource.collaborationScore - a.resource.collaborationScore);
-                // Remove all the Closed cases and append them to the end of the array
-                //closedCases = _.filter(cases, (c) => c.resource.status == "Closed");
-                //cases = _.filter(cases, (c) => c.resource.status != "Closed");
-
-                //remove recently updated cases from local storage
-                this.removeRecentlyModifiedCasesFromLS(cases);
-
-                //Remove all the locally ignored cases
-                var restCases = _.pluck(JSON.parse(localStorage.getItem(this.state.ssoUsername)), 'taskID');
-                cases = _.filter(cases, (c) => !_.contains(restCases, c.resource.caseNumber));
-                //cases = _.chain([cases, closedCases]).flatten().value();
-
-                topSevenCases = cases.slice(0, 7);
-                min = _.chain(topSevenCases).pluck('resource').pluck('collaborationScore').without(null).min().value();
-                max = _.chain(topSevenCases).pluck('resource').pluck('collaborationScore').without(null).max().value();
-                self.setScoreScale(min, max);
-                stateHash = {
-                    //'tasks': _.object(_.map(cases, (c) => [c['resource']['externalModelId'], c] )),
-                    'tasks': cases.slice(0, 7),
-                    'userRoles': results.userRoles,
-                    'defaultRoles': results.defaultRoles,
-                    'urlRoles': results.urlRoles,
-                    'uql': results.uql,
-                    'minScore': min,
-                    'maxScore': max
-                };
-                self.setState(stateHash);
-
-                // INFO -- Remember taskId is the caseNumber here
-                if ((taskId == '' || (taskId == null) || (taskId == 'list')) && cases.length > 0 || taskId != this.state.taskId) {
-                    params = {
-                        //taskId: cases[0]['resource']['externalModelId']
-                        taskId: cases[0]['resource']['caseNumber']
-                    };
-                    this.transitionTo("tasks", params, self.getQuery());
-                }
-            })
-            .catch((err) => console.error(`Could not load cases: ${err.stack}`))
-            .done(() => self.setState({loading: false}));
-    },
-
-    removeRecentlyModifiedCasesFromLS: function(cases)
-    {
-        var locallyIgnoredTasks = [];
-        if(localStorage.getItem(this.state.ssoUsername)) {
-            locallyIgnoredTasks = JSON.parse(localStorage.getItem(this.state.ssoUsername));
-        }
-        var updatedLocalTasks = [];
-        updatedLocalTasks =
-            _.reject(locallyIgnoredTasks,function(t) {
-                var flag = false
-                for(i = 0; i<cases.length && !flag; i++){
-                    if (t.taskID == cases[i].resource.caseNumber && t.lastModified != cases[i].resource.lastModified){
-                        flag = true;
-                    }
-                };
-                if(flag) {
-                    return t;
-                }
-            });
-        localStorage.setItem(this.state.ssoUsername, JSON.stringify(updatedLocalTasks, 'taskID'));
-    },
     // http://javascript.tutorialhorizon.com/2014/09/13/execution-sequence-of-a-react-components-lifecycle-methods/
     componentDidMount: function() {
+        console.log("componentDidMount");
         var stateHash;
+        var roles="";
+        if(this.getQuery()['roles'] != undefined && this.getQuery()['roles'] != null) {
+            roles = S(this.getQuery()['roles']).replaceAll('"', '').s;
+        }
         stateHash = {
             ssoUsername: this.getQuery()['ssoUsername'],
-            roles: this.getQuery()['roles'],
+            roles: roles,
             taskId: this.getParams()['taskId']
         };
         this.setState(stateHash);
-        this.queryCases(stateHash);
+        TasksActions.invalidateTasks();
     },
     componentWillReceiveProps: function(nextProps) {
+        console.log("componentWillReceiveProps");
         var stateHash;
         if (this.getQuery()['ssoUsername'] != this.state.ssoUsername
             || this.getQuery()['roles'] != this.state.roles ) {
@@ -217,10 +104,11 @@ var Component = React.createClass({
             stateHash = {
                 ssoUsername: this.getQuery()['ssoUsername'],
                 roles: this.getQuery()['roles'],
-                taskId: this.getParams()['taskId']
+                taskId: this.getParams()['taskId'],
+                res: null
             };
             this.setState(stateHash);
-            this.queryCases(stateHash);
+            TasksActions.invalidateTasks();
         }
         // Since tasks.jsx doesn't directly render the case, let's handle this separately and only update the state
         // so the child components can render it accordingly
@@ -237,20 +125,19 @@ var Component = React.createClass({
         }
         return false
     },
+
+    getScoreScale: function(min, max) {
+        return d3.scale.linear().domain([min, max]).range([.25, 1]);
+    },
+    receiveTasks: function(opts){
+        TasksActions.invalidateTasks();
+    },
     handleIgnoredTask: function(event) {
-        console.log("clicked.."+this.props.case);
-        var locallyIgnoredTasks = [];
         var currentLocalTask;
-        if(localStorage.getItem(this.state.ssoUsername)) {
-            locallyIgnoredTasks = JSON.parse(localStorage.getItem(this.state.ssoUsername));
-        }
-        var currentCase = _.filter(this.state.tasks, (c) => c.resource.caseNumber == this.state.taskId);
+        var currentCase = _.filter(this.state.res.result.tasks, (c) => c.resource.caseNumber == this.state.taskId);
         if(currentCase != undefined && currentCase.length > 0) {
             currentLocalTask = {taskID:this.state.taskId, lastModified:currentCase[0].resource.lastModified};
-            if (currentLocalTask != undefined) {
-                locallyIgnoredTasks.push(currentLocalTask);
-                localStorage.setItem(this.state.ssoUsername, JSON.stringify(_.uniq(locallyIgnoredTasks, 'taskID')));
-            }
+            DeclinedTasksActions.declineTask(currentLocalTask,this.state.ssoUsername);
         }
         var stateHash;
         stateHash = {
@@ -259,40 +146,75 @@ var Component = React.createClass({
             taskId: 'list'
         };
         this.setState(stateHash);
-        this.queryCases(stateHash);
+        TasksActions.invalidateTasks();
+    },
+    renderTasks: function () {
+        var taskCases,
+            stateHash,
+            self = this;
+        return this.state.res.when({
+            pending: function () {
+                return <i className='fa fa-spinner fa-spin'></i>;
+            },
+            failed: function (err) {
+                console.error(err.stack || err);
+                return  <Alert bsStyle="warning"><strong>No cases found!</strong></Alert>
+            },
+            done: function (res) {
+                var tasks = res.tasks;
+                var scoreOpacityScale = self.getScoreScale(res.minScore, res.maxScore);
+                if((tasks == undefined || tasks == null || tasks.length == 0)){
+                    return (
+                        <Alert bsStyle="warning"><strong>No cases found!</strong></Alert>
+                    );
+                }else{
+                    var taskId = self.getParams()['taskId'];
+                    if ((taskId == '' || (taskId == null) || (taskId == 'list')) && tasks.length > 0 || taskId != self.state.taskId) {
+                        var params = {
+                            taskId: tasks[0]['resource']['caseNumber']
+                        };
+                        self.transitionTo("tasks", params, self.getQuery());
+                    }
+                    taskCases = _.map(tasks, (c) => {
+                        return <TaskCase case={c} scoreOpacityScale={scoreOpacityScale} />
+                    });
+                    stateHash = {
+                        ssoUsername: self.state.ssoUsername,
+                        roles: self.state.roles
+                    };
+                    return (
+                        <div className='row'>
+                            <div className='col-md-3'>
+                            {taskCases}
+                                <Spacer />
+                                <i className="fa fa-refresh cursor" style={{marginLeft: "6px"}}  onClick={self.receiveTasks.bind(self, stateHash)}></i>
+                            </div>
+                            <div className='col-md-9'>
+                                <div>
+                                    <div className='pull-left'>
+                                        <RoutingRoles
+                                            roles={res.userRoles}
+                                            defaultRoles={res.defaultRoles}
+                                            urlRoles={res.urlRoles}></RoutingRoles>
+                                    </div>
+                                    <div className='pull-right'>
+                                        <Button bsSize="small" onClick={self.handleIgnoredTask.bind(self)} bsStyle='danger'>Defer for now</Button>
+                                    </div>
+                                </div>
+                                <Task caseNumber={taskId}></Task>
+                            </div>
+                        </div>
+                    )
+                }
+            }
+        });
     },
 
     render: function() {
-        //this.state.declinedTasks.when({
-        //   pending: function() {
-        //       console.debug("pending");
-        //   },
-        //   failed: function(error) {
-        //       console.debug("error");
-        //   },
-        //   done: function(results) {
-        //       console.debug("declinedTasks: " + JSON.stringify(results));
-        //   }
-        //});
         var { taskId } = this.getParams();
         return (
-            <div className='row'>
-                <div className='col-md-3'>{this.genTaskElements()}</div>
-                <div className='col-md-9'>
-                    <div>
-                        <div className='pull-left'>
-                            <RoutingRoles
-                                roles={this.state.userRoles}
-                                defaultRoles={this.state.defaultRoles}
-                                urlRoles={this.state.urlRoles}></RoutingRoles>
-                        </div>
-                        <div className='pull-right'>
-                            <Button bsSize="small" onClick={this.handleIgnoredTask.bind(this)} bsStyle='danger'>Defer for now</Button>
-                        </div>
-                    </div>
-                    <Task caseNumber={taskId} queryTasks={this.queryCases.bind(this, this.props)}></Task>
-                </div>
-            </div>
+            this.renderTasks()
+
         )
     }
 });

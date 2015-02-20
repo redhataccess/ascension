@@ -9,7 +9,7 @@ var Actions = Marty.createActionCreators({
     addDeclinedTasks: DeclinedTaskConstants['ADD_DECLINED_TASKS'](function (task) {
         this.dispatch(task)
     }),
-    removeDeclinedTask: DeclinedTaskConstants['REMOVE_DECLINED_TASK'](function (task) {
+    removeDeclinedTask: DeclinedTaskConstants['REMOVE_DECLINED_TASKS'](function (task) {
         this.dispatch(task)
     })
 });

@@ -25,21 +25,34 @@ var API = Marty.createStateSource({
         item[task.resource.caseNumber] = task.resource.lastModified;
         return item;
     },
-    declineTask: function (task) {
-        var declinedTasks = (this._isDefined(NAMESPACE) && this._get(NAMESPACE)) || {};
-        // Extend/overwrite what is currently in local storage
-        _.extend(declinedTasks, this._constructItem(task));
-        // now update the local storage
-        this._set(NAMESPACE, declinedTasks);
+    declineTask: function (task, key) {
+        var locallyIgnoredTasks = (this._get(key) == null) ? [] : this._get(key);
+        if (task != undefined) {
+            locallyIgnoredTasks.push(task);
+            this._set(key,_.uniq(locallyIgnoredTasks, 'taskID'));
+        }
     },
-    getAllDeclinedTasks: function () {
-        var declinedTasks = this._get(NAMESPACE);
-        DeclinedTasksSourceActions.addDeclinedTasks(declinedTasks)
+    getAllDeclinedTasks: function (key) {
+        //var declinedTasks = this._get(NAMESPACE);
+        //DeclinedTasksSourceActions.addDeclinedTasks(declinedTasks)
+        //return _.pluck(this._get(key), 'taskID');
     },
-    removeDeclinedTask: function (task) {
-        var declinedTasks = this.get(NAMESPACE) || {};
-        delete declinedTasks[task.resource.caseNumber];
-        this._set(NAMESPACE, declinedTasks);
+    removeDeclinedTasks: function (tasks,key) {
+        var locallyIgnoredTasks = (this._get(key) == null) ? [] : this._get(key);
+        var updatedLocalTasks =
+            _.reject(locallyIgnoredTasks,function(t) {
+                var flag = false;
+                var i;
+                for(i = 0; i<tasks.length && !flag; i++){
+                    if (t.taskID == tasks[i].resource.caseNumber && t.lastModified != tasks[i].resource.lastModified){
+                        flag = true;
+                    }
+                }
+                if(flag) {
+                    return t;
+                }
+            });
+        this._set(key,updatedLocalTasks);
     }
 });
 
