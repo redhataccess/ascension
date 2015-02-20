@@ -8,7 +8,7 @@ var Store = Marty.createStore({
     handlers: {
         declineTask: DeclinedTasksConstants.DECLINE_TASK_CLICK,
         addDeclinedTasks: DeclinedTasksConstants.ADD_DECLINED_TASKS,
-        removeDeclinedTask: DeclinedTasksConstants.REMOVE_DECLINED_TASK,
+        removeDeclinedTask: DeclinedTasksConstants.REMOVE_DECLINED_TASKS,
         invalidateTasks: DeclinedTasksConstants.INVALIDATE_TASKS
     },
     getInitialState: function () {
