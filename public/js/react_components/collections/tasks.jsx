@@ -81,7 +81,6 @@ var Component = React.createClass({
 
     // http://javascript.tutorialhorizon.com/2014/09/13/execution-sequence-of-a-react-components-lifecycle-methods/
     componentDidMount: function() {
-        console.log("componentDidMount");
         var stateHash;
         var roles="";
         if(this.getQuery()['roles'] != undefined && this.getQuery()['roles'] != null) {
@@ -96,7 +95,6 @@ var Component = React.createClass({
         TasksActions.invalidateTasks();
     },
     componentWillReceiveProps: function(nextProps) {
-        console.log("componentWillReceiveProps");
         var stateHash;
         if (this.getQuery()['ssoUsername'] != this.state.ssoUsername
             || this.getQuery()['roles'] != this.state.roles ) {
@@ -176,7 +174,7 @@ var Component = React.createClass({
                         self.transitionTo("tasks", params, self.getQuery());
                     }
                     taskCases = _.map(tasks, (c) => {
-                        return <TaskCase case={c} scoreOpacityScale={scoreOpacityScale} />
+                        return <TaskCase case={c} ssoUsername= {self.state.ssoUsername} scoreOpacityScale={scoreOpacityScale} />
                     });
                     stateHash = {
                         ssoUsername: self.state.ssoUsername,

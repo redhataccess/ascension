@@ -25,6 +25,9 @@ var Spacer                      = require('react-redhat/Spacer');
 var Well                        = require('react-bootstrap/Well');
 var Alert                       = require('react-bootstrap/Alert');
 
+var DeclinedTasksActions    = require('../../../flux/actions/DeclinedTasksActions');
+var TasksActions    = require('../../../flux/actions/TasksActions');
+
 // The TaskCase represents a UDS case resource as a virtual task.
 var Component = React.createClass({
     displayName: 'TaskCase',
@@ -63,6 +66,14 @@ var Component = React.createClass({
             taskId: c.resource.caseNumber
         };
         this.transitionTo("tasks", params, this.getQuery());
+    },
+    banTaskClick: function(c,ssoUsername, event){
+        event.stopPropagation();
+        var currentLocalTask = {taskID:c.resource.caseNumber, lastModified:c.resource.lastModified};
+        DeclinedTasksActions.declineTask(currentLocalTask,ssoUsername);
+        TasksActions.invalidateTasks();
+        this.transitionTo("tasks", {taskId: 'list'}, this.getQuery());
+
     },
     genTaskIconClass: function(t) {
         var tmp, _ref1;
@@ -113,6 +124,7 @@ var Component = React.createClass({
                 {/*<span className='task-entity-state-icon'></span>*/}
                 <span className='task-entity-description'>{this.genEntityDescription(this.props.case)}</span>
                 <span className='task-bid'>{this.genTaskBid(this.props.case)}</span>
+                <span className="task-ban"><i className="fa fa-ban" onClick={this.banTaskClick.bind(this, this.props.case, this.props.ssoUsername)}></i></span>
                 {/*
                 <span className='task-state-icon'>
                     <IconWithTooltip
