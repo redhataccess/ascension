@@ -98,7 +98,7 @@ var App = React.createClass({
         return (
             <div>
                 <div className='navbar navbar-default' role='navigation' key='navigation'>
-                    <div className='navbar-header' key='navHeader'>
+                {/*<div className='navbar-header' key='navHeader'>
                         <button
                             type='button'
                             className='navbar-toggle collapsed'
@@ -111,12 +111,15 @@ var App = React.createClass({
                             <span className='icon-bar' key='srNavIcon3'></span>
                         </button>
                         <a className='navbar-brand' href='#' key='navBar'>Ascension</a>
-                    </div>
+                    </div>*/}
                     <div
                         className='collapse navbar-collapse'
                         id='bs-example-navbar-collapse-1'
                         key='navCollapse'>
                         <ul className='nav navbar-nav' key='navbarNav'>
+                            <li key='Ascension'>
+                                <a className='navbar-brand' href='#' key='navBar'>Ascension</a>
+                            </li>
                             <li key='task'>
                                 <Link
                                     to='tasks'
