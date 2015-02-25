@@ -128,7 +128,7 @@ var Component = React.createClass({
                     <IconWithTooltip
                         iconName="fa fa-ban"
                         tooltipPrefix="Defer for now"
-                        tooltipText=""></IconWithToogiltip>
+                        tooltipText=""></IconWithTooltip>
                 </span>
                 {/*
                 <span className='task-state-icon'>
