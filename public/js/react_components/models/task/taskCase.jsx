@@ -124,7 +124,12 @@ var Component = React.createClass({
                 {/*<span className='task-entity-state-icon'></span>*/}
                 <span className='task-entity-description'>{this.genEntityDescription(this.props.case)}</span>
                 <span className='task-bid'>{this.genTaskBid(this.props.case)}</span>
-                <span className="task-ban"><i className="fa fa-ban" onClick={this.banTaskClick.bind(this, this.props.case, this.props.ssoUsername)}></i></span>
+                <span className='task-ban' onClick={this.banTaskClick.bind(this, this.props.case, this.props.ssoUsername)}>
+                    <IconWithTooltip
+                        iconName="fa fa-ban"
+                        tooltipPrefix="Defer for now"
+                        tooltipText=""></IconWithToogiltip>
+                </span>
                 {/*
                 <span className='task-state-icon'>
                     <IconWithTooltip
