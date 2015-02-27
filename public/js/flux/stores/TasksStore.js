@@ -39,9 +39,6 @@ var Store = Marty.createStore({
             });
             cases.sort((a, b) => b.resource.collaborationScore - a.resource.collaborationScore);
 
-            //filtering 'Needs New Owner(NNO)' cases
-            cases = _.filter(cases, (c) => !c.resource.escalateToGeo);
-
             //remove recently updated cases from local storage
             DeclinedTasksAPI.removeDeclinedTasks(cases,opts.ssoUsername);
 
