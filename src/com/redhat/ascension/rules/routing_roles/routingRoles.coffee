@@ -16,9 +16,10 @@ RoutingRoles._makeSbrConds = (user) ->
 RoutingRoles.COLLABORATION = (user) ->
   wocCond = UQL.cond('internalStatus', 'is', '"Waiting on Collaboration"')
   notClosedCond = UQL.cond('status', 'ne', '"Closed"')
+  nnoSuperRegionCond = UQL.cond('nnoSuperRegion', 'is', 'null')
 
   #"""(#{wocCond} and #{notClosedCond} and #{RoutingRoles._makeSbrConds(user)})"""
-  UQL.and(wocCond, UQL.and(notClosedCond, RoutingRoles._makeSbrConds(user)))
+  UQL.and(UQL.and(wocCond, UQL.and(notClosedCond, RoutingRoles._makeSbrConds(user))),nnoSuperRegionCond)
 
 # This is a supplemental role to the owned cases role, since we can't roll it into one UQL query, have to split it apart
 # Contributor example
