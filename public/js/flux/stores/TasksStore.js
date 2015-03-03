@@ -47,6 +47,18 @@ var Store = Marty.createStore({
             cases = _.filter(cases, (c) => !_.contains(restCases, c.resource.caseNumber));
 
             topSevenCases = cases.slice(0, 7);
+            var ssoUser=results.user;
+            var ownedCases = _.filter(topSevenCases, function(slicedCase)  {
+                if(ssoUser != null
+                    && slicedCase['resource'] && slicedCase['resource']['owner'] && slicedCase['resource']['owner']['externalModelId']
+                    && slicedCase['resource']['owner']['externalModelId'] == ssoUser['id']){
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            });
+            var numberOfOtherCases=topSevenCases.length-ownedCases.length;
             min = _.chain(topSevenCases).pluck('resource').pluck('collaborationScore').without(null).min().value();
             max = _.chain(topSevenCases).pluck('resource').pluck('collaborationScore').without(null).max().value();
 
@@ -57,7 +69,10 @@ var Store = Marty.createStore({
                 'urlRoles': results.urlRoles,
                 'uql': results.uql,
                 'minScore': min,
-                'maxScore': max
+                'maxScore': max,
+                'numberOfTotalCases':cases.length,
+                'numberOfOwnerCases':ownedCases.length,
+                'numberOfOtherCases':numberOfOtherCases
             };
             this.state['res'] = stateHash;
             this.hasChanged();

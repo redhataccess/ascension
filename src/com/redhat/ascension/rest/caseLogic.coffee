@@ -106,6 +106,7 @@ CaseLogic.fetchContributorCasesUql = (opts) ->
 CaseLogic.fetchCases = (opts) ->
   # Actual roles on the user object
   userRoles = null
+  ssoUser=null
   # flag to indicate no user roles and roles were assumed
   defaultRoles = false
   # flag to indicate that url roles were used instead of user or default
@@ -123,7 +124,7 @@ CaseLogic.fetchCases = (opts) ->
 
       if (not user?) or (not user?.externalModelId?)
         new Error("Was not able to fetch user given UQL: #{userUql.where}")
-
+      ssoUser=user
       # Attempt to extract the routing role specific roles from the UDS user
       userRoles = RoutingRoles.extractRoutingRoles(user)
       
@@ -185,6 +186,7 @@ CaseLogic.fetchCases = (opts) ->
         defaultRoles: defaultRoles
         urlRoles: urlRoles
         uql: finalUql.where
+        user:ssoUser
       }
     )
 #    .then((cases) ->
