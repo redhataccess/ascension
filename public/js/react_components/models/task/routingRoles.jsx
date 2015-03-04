@@ -19,7 +19,9 @@ var Component = React.createClass({
         if (defaultRoles == true) {
             return (
                 <span>
-                    <Label bsStyle="warning">No user Roles, assuming defaults</Label>
+                    <a target='_blank' href= "https://unified.gsslab.rdu2.redhat.com/cli#Roles">
+                    <Label bsStyle="warning">No user Roles, assign them</Label>
+                    </a>
                     &nbsp;
                 </span>
             )
@@ -38,7 +40,7 @@ var Component = React.createClass({
         return null;
     },
     genUserRoles: function (roles) {
-      return roles.map((r) => <span><Label bsStyle="primary">{r}</Label>&nbsp;</span>)
+      return roles.map((r) => <span><a target='_blank' href= {"https://unified.gsslab.rdu2.redhat.com/cli#Roles/" + r}><Label bsStyle="primary">{r}</Label></a>&nbsp;</span>)
     },
     render: function() {
         if (this.props.roles == null) {
