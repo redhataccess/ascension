@@ -23,8 +23,9 @@ CaseLogic = {}
 
 CaseLogic.fetchCasesUql = (opts) ->
   deferred = Q.defer()
-
-  uri = new Uri(settings.UDS_URL).setPath('/case').addQueryParam('where', opts.where)
+  secureHandlingUQL=UQL.cond('requiresSecureHandling','is',false)
+  finalUQL=UQL.and(opts.where,secureHandlingUQL)
+  uri = new Uri(settings.UDS_URL).setPath('/case').addQueryParam('where', finalUQL)
   if opts.limit?
     uri.addQueryParam('limit', opts.limit)
   # coffeescript refuses to not translate is or == to ===, and void 0 != null, and isEqual does ===.  Therefore, the
@@ -51,7 +52,7 @@ CaseLogic.fetchCasesUql = (opts) ->
 
 CaseLogic.fetchContributorCasesUql = (opts) ->
   deferred = Q.defer()
-
+  
   uri = new Uri(settings.UDS_URL).setPath('/case/associates').addQueryParam('where', opts.where)
   if opts.limit?
     uri.addQueryParam('limit', opts.limit)
@@ -105,6 +106,7 @@ CaseLogic.fetchContributorCasesUql = (opts) ->
 CaseLogic.fetchCases = (opts) ->
   # Actual roles on the user object
   userRoles = null
+  ssoUser=null
   # flag to indicate no user roles and roles were assumed
   defaultRoles = false
   # flag to indicate that url roles were used instead of user or default
@@ -122,10 +124,10 @@ CaseLogic.fetchCases = (opts) ->
 
       if (not user?) or (not user?.externalModelId?)
         new Error("Was not able to fetch user given UQL: #{userUql.where}")
-
+      ssoUser=user
       # Attempt to extract the routing role specific roles from the UDS user
       userRoles = RoutingRoles.extractRoutingRoles(user)
-
+      
       # Holds the individual uqlParts to be OR'd together
       uqlParts = []
 
@@ -184,6 +186,7 @@ CaseLogic.fetchCases = (opts) ->
         defaultRoles: defaultRoles
         urlRoles: urlRoles
         uql: finalUql.where
+        user:ssoUser
       }
     )
 #    .then((cases) ->

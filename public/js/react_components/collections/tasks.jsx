@@ -21,6 +21,7 @@ var Auth                    = require('../auth/auth.coffee');
 var TaskAction              = require('../models/task/taskAction.jsx');
 //var TaskMetaData            = require('../models/task/taskMetaData.jsx');
 var TaskState               = require('../models/task/taskState.jsx');
+var TasksStats              = require('../models/task/tasksStats.jsx');
 var RoutingRoles            = require('../models/task/routingRoles.jsx');
 // TaskCase represents the virtual mapping of case -> task for sprint 1
 var TaskCase                = require('../models/task/taskCase.jsx');
@@ -186,6 +187,7 @@ var Component = React.createClass({
                             {taskCases}
                                 <Spacer />
                                 <i className="fa fa-refresh cursor" style={{marginLeft: "6px"}}  onClick={self.receiveTasks.bind(self, stateHash)}></i>
+                                <TasksStats tasks={tasks} totalCases={res.numberOfTotalCases} numberofOwnerCases={res.numberOfOwnerCases} numberOfOtherCases={res.numberOfOtherCases} />
                             </div>
                             <div className='col-md-9'>
                                 <div>
