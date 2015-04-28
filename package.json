@@ -1,0 +1,15 @@
+{
+  "name": "kcs-search-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Samuel Mendenhall <Samuel.Mendenhall@gmail.com> (https://github.com/engineersamuel)",
+  "license": "MIT",
+  "dependencies": {
+    "restify": "~3.0.2",
+    "stratajs": "~1.1.19"
+  }
+}
